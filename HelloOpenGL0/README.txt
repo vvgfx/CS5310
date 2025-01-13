@@ -1,0 +1,1 @@
+This basic program shows how to draw a square on screen using glfw and OpenGL using one color
