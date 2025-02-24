@@ -214,6 +214,11 @@
       "cwd": "e:\\Coursework\\CG 5310\\HelloOpenGL0",
       "binaryPath": "e:\\Coursework\\CG 5310\\HelloOpenGL0\\simple.exe",
       "binaryArgs": []
+    },
+    {
+      "cwd": "e:\\Coursework\\CG 5310\\assignment1",
+      "binaryPath": "e:\\Coursework\\CG 5310\\assignment1\\HelloOpenGLMVC.exe",
+      "binaryArgs": []
     }
   ],
   "C_Cpp.default.compilerPath": "D:\\soft\\MSY2\\ucrt64\\bin\\g++.exe",

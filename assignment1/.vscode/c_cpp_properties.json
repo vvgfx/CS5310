@@ -3,12 +3,8 @@
       {
         "name": "windows-gcc-x64",
         "includePath": [
-          "${workspaceFolder}/**"
-        ],
-        "includePath": [
                   "${workspaceFolder}/**",
-                  "E:\\Coursework\\CG 5310\\include",
-                  "E:\\Coursework\\CG 5310\\include\\**",
+                  "${workspaceFolder}/../**"
         ],
         "compilerPath": "D:/soft/MSY2/ucrt64/bin/gcc.exe",
         "cStandard": "${default}",

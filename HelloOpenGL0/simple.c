@@ -101,7 +101,7 @@ int main(void)
     glfwSwapInterval(1);
 
     // NOTE: OpenGL error checks have been omitted for brevity
-	
+
 	vertex_shader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertex_shader, 1, &vertex_shader_text, NULL);
     glCompileShader(vertex_shader);
@@ -114,7 +114,7 @@ int main(void)
     glAttachShader(program, vertex_shader);
     glAttachShader(program, fragment_shader);
     glLinkProgram(program);
-	
+
 	glUseProgram(program);
     glGenVertexArrays(1,&vertex_array);
     glBindVertexArray(vertex_array);
@@ -122,7 +122,7 @@ int main(void)
     glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
     glBufferData(GL_ARRAY_BUFFER, 12 * sizeof(float), vertexDataAsFloats, GL_STATIC_DRAW);
 
-    
+
 
     projection_location = glGetUniformLocation(program, "projection");
 	printf("projection: %d\n",projection_location);
@@ -130,7 +130,7 @@ int main(void)
 	printf("vPosition: %d\n",vpos_location);
 	color_location = glGetUniformLocation(program,"vColor");
 	printf("vColor: %d\n",color_location);
-    
+
 	float ratio;
 	int width, height;
 	glm::mat4 p;
@@ -138,20 +138,20 @@ int main(void)
 	glfwGetFramebufferSize(window, &width, &height);
 
 	glViewport(0, 0, width, height);
-	
+
 
 	p = glm::ortho(-150.0f, 150.0f, -150.0f, 150.0f);
-        
-		
 
 
-        
+
+
+
 	glUniformMatrix4fv(projection_location, 1, GL_FALSE, glm::value_ptr(p));
 
     glEnableVertexAttribArray(vpos_location);
     glVertexAttribPointer(vpos_location, 2, GL_FLOAT, GL_FALSE,
                           0, (void*) 0);
-    
+
 	glm::vec4 color = glm::vec4(1.0f,0.0f,0.0f,1.0f);
 	glUniform4fv( //the color is a uniform variable in the shader
 				 //4f indicates this will be specified as 3 float values
@@ -160,15 +160,12 @@ int main(void)
 			1, //only one value should be read from the array below
 			glm::value_ptr(color)); //convenience function to convert
 									//glm::vec4 to float array
-	
-	
-
 
 
     while (!glfwWindowShouldClose(window))
     {
-		
-        
+		glClear(GL_COLOR_BUFFER_BIT);
+
         glDrawArrays(GL_TRIANGLES, 0, 6);
 
         glfwSwapBuffers(window);
