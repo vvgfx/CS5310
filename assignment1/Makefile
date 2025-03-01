@@ -1,9 +1,9 @@
-OBJS = HelloOpenGLMVC.o View.o Controller.o Model.o
+OBJS = RotatingSquares.o View.o Controller.o Model.o
 INCLUDES = -I../include
 LIBS = -L../lib
-LDFLAGS = -lglad -lglfw3 
+LDFLAGS = -lglad -lglfw3
 CFLAGS = -g -std=c++11
-PROGRAM = HelloOpenGLMVC
+PROGRAM = RotatingSquares
 
 
 ifeq ($(OS),Windows_NT)     # is Windows_NT on XP, 2000, 7, Vista, 10...
@@ -15,26 +15,25 @@ else ifeq ($(shell uname -s),Darwin)     # is MACOSX
 	COMPILER = clang++
 endif
 
-HelloOpenGLMVC: clean $(OBJS)
+RotatingSquares: clean $(OBJS)
 	$(COMPILER) -o $(PROGRAM) $(OBJS) $(LIBS) $(LDFLAGS)
 
-HelloOpenGLMVC.o: HelloOpenGLMVC.cpp
-	$(COMPILER) $(INCLUDES) $(CFLAGS) -c HelloOpenGLMVC.cpp
+RotatingSquares.o: RotatingSquares.cpp
+	$(COMPILER) $(INCLUDES) $(CFLAGS) -c RotatingSquares.cpp
 
 View.o: View.cpp View.h
-	$(COMPILER) $(INCLUDES) $(CFLAGS) -c View.cpp	
+	$(COMPILER) $(INCLUDES) $(CFLAGS) -c View.cpp
 
 Controller.o: Controller.cpp Controller.h
-	$(COMPILER) $(INCLUDES) $(CFLAGS) -c Controller.cpp	
+	$(COMPILER) $(INCLUDES) $(CFLAGS) -c Controller.cpp
 
 Model.o: Model.cpp Model.h
-	$(COMPILER) $(INCLUDES) $(CFLAGS) -c Model.cpp		
-	
+	$(COMPILER) $(INCLUDES) $(CFLAGS) -c Model.cpp
+
 RM = rm	-f
 ifeq ($(OS),Windows_NT)     # is Windows_NT on XP, 2000, 7, Vista, 10...
     RM := del
 endif
 
-clean: 
+clean:
 	$(RM) $(OBJS) $(PROGRAM)
-    

@@ -219,8 +219,14 @@
       "cwd": "e:\\Coursework\\CG 5310\\assignment1",
       "binaryPath": "e:\\Coursework\\CG 5310\\assignment1\\HelloOpenGLMVC.exe",
       "binaryArgs": []
+    },
+    {
+      "cwd": "e:\\Coursework\\CG 5310\\assignment1",
+      "binaryPath": "e:\\Coursework\\CG 5310\\assignment1\\RotatingSquares.exe",
+      "binaryArgs": []
     }
   ],
-  "C_Cpp.default.compilerPath": "D:\\soft\\MSY2\\ucrt64\\bin\\g++.exe",
-  "C_Cpp.errorSquiggles": "enabled"
+  "C_Cpp.default.compilerPath": "cl.exe",
+  "C_Cpp.errorSquiggles": "enabled",
+  "makefile.configureOnOpen": true
 }

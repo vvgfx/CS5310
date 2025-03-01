@@ -18,7 +18,7 @@ View::~View(){
 
 }
 
-void View::init(Callbacks *callbacks,vector<util::PolygonMesh<VertexAttrib> >& meshes) 
+void View::init(Callbacks *callbacks,vector<util::PolygonMesh<VertexAttrib> >& meshes)
 {
     if (!glfwInit())
         exit(EXIT_FAILURE);
@@ -38,13 +38,13 @@ void View::init(Callbacks *callbacks,vector<util::PolygonMesh<VertexAttrib> >& m
      glfwSetWindowUserPointer(window, (void *)callbacks);
 
     //using C++ functions as callbacks to a C-style library
-    glfwSetKeyCallback(window, 
+    glfwSetKeyCallback(window,
     [](GLFWwindow* window, int key, int scancode, int action, int mods)
     {
         reinterpret_cast<Callbacks*>(glfwGetWindowUserPointer(window))->onkey(key,scancode,action,mods);
     });
 
-    glfwSetWindowSizeCallback(window, 
+    glfwSetWindowSizeCallback(window,
     [](GLFWwindow* window, int width,int height)
     {
         reinterpret_cast<Callbacks*>(glfwGetWindowUserPointer(window))->reshape(width,height);
@@ -63,7 +63,7 @@ void View::init(Callbacks *callbacks,vector<util::PolygonMesh<VertexAttrib> >& m
     program.enable();
     shaderLocations = program.getAllShaderVariables();
 
-    
+
     //now we create an object that will be used to render this mesh in opengl
     /*
      * now we create an ObjectInstance for it.
@@ -99,7 +99,7 @@ void View::init(Callbacks *callbacks,vector<util::PolygonMesh<VertexAttrib> >& m
 
     }
 
-    
+
 	int width,height;
     glfwGetFramebufferSize(window,&width,&height);
 
@@ -109,7 +109,7 @@ void View::init(Callbacks *callbacks,vector<util::PolygonMesh<VertexAttrib> >& m
 
     frames = 0;
     time = glfwGetTime();
-    
+
 }
 
 
@@ -120,12 +120,13 @@ void View::display()
     program.enable();
     glClearColor(1,1,1,1);
     glClear(GL_COLOR_BUFFER_BIT);
-    
 
-    modelview = glm::rotate(glm::mat4(1.0),(float)glfwGetTime(),glm::vec3(0,0,1));
-    //send modelview matrix to GPU  
+
+    // modelview = glm::rotate(glm::mat4(1.0),(float)glfwGetTime(),glm::vec3(0,0,1));
+    modelview = glm::mat4(1.0);
+    //send modelview matrix to GPU
     glUniformMatrix4fv(shaderLocations.getLocation("modelview"), 1, GL_FALSE, glm::value_ptr(modelview));
-    //send projection matrix to GPU    
+    //send projection matrix to GPU
     glUniformMatrix4fv(shaderLocations.getLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
     glUniform4fv(shaderLocations.getLocation("vColor"),1,glm::value_ptr(color));
@@ -134,7 +135,7 @@ void View::display()
     }
     glFlush();
     program.disable();
-    
+
     glfwSwapBuffers(window);
     glfwPollEvents();
     frames++;
@@ -144,7 +145,7 @@ void View::display()
         frames = 0;
         time = currenttime;
     }
-    
+
 
 }
 
@@ -164,8 +165,3 @@ void View::closeWindow() {
 
     glfwTerminate();
 }
-
-
-
-
-
