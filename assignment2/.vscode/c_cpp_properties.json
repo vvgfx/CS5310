@@ -6,7 +6,7 @@
                 "${workspaceFolder}/**",
                 "${workspaceFolder}/../**"
             ],
-            "compilerPath": "D:\\soft\\MSY2\\ucrt64\\bin\\g++.exe",
+            "compilerPath": "cl.exe",
             "cStandard": "${default}",
             "cppStandard": "${default}",
             "intelliSenseMode": "windows-gcc-x64",

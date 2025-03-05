@@ -8,7 +8,7 @@ using namespace std;
 #include <glm/gtc/type_ptr.hpp>
 
 #include "VertexAttribWithColor.h"
-
+#include <stack>
 
 View::View() {
 
@@ -28,7 +28,7 @@ void View::init(Callbacks *callbacks,vector<util::PolygonMesh<VertexAttrib> >& m
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
-    window = glfwCreateWindow(800, 800, "Spirograph!", NULL, NULL);
+    window = glfwCreateWindow(1000 , 1000, "Spirograph!", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
@@ -116,30 +116,45 @@ void View::init(Callbacks *callbacks,vector<util::PolygonMesh<VertexAttrib> >& m
 
 void View::display()
 {
-    glm::vec4 color = glm::vec4(0, 48/255.0f, 73/255.0f,1);
-    glm::vec4 color2 = glm::vec4(102/255.0f, 155/255.0f, 188/255.0f,1);
+    glm::vec4 outerColor = glm::vec4(1,0,0,1);
+    glm::vec4 innerColor = glm::vec4(0,0,1,1);
+    glm::vec4 seedColor = glm::vec4(0,1,0,1);
+    float ROTATION_SPEED = 20.0f;
+    float revolution = glfwGetTime() * ROTATION_SPEED;
+    float rotation  = glm::radians(revolution) * 400.0f / 200.0f;
+    float radRotation = glm::radians(revolution);
     program.enable();
-    glClearColor(1,1,1,1);
+    glClearColor(0,0,0,0);
     glClear(GL_COLOR_BUFFER_BIT);
     //send projection matrix to GPU
     glUniformMatrix4fv(shaderLocations.getLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
+    modelview = glm::mat4(1.0);
+    //send modelview matrix to GPU
 
+    // draw outer circle
+    glUniformMatrix4fv(shaderLocations.getLocation("modelview"), 1, GL_FALSE, glm::value_ptr(modelview));
+    glUniform4fv(shaderLocations.getLocation("vColor"),1,glm::value_ptr(outerColor));
+    for (int i=0;i<objects.size();i++) {
+        objects[i]->draw();
+    }
 
-    // modelview = glm::rotate(glm::mat4(1.0),(float)glfwGetTime(),glm::vec3(0,0,1));
+    // draw inner circle
+    modelview = glm::translate(modelview, glm::vec3(200 * cos(radRotation), 200 * sin(radRotation), 0));
+    modelview = glm::rotate(modelview, rotation, glm::vec3(0, 0, 1));
+    modelview = glm::scale(modelview, glm::vec3(0.5, 0.5, 1.0));
+    glUniformMatrix4fv(shaderLocations.getLocation("modelview"), 1, GL_FALSE, glm::value_ptr(modelview));
+    glUniform4fv(shaderLocations.getLocation("vColor"),1,glm::value_ptr(innerColor));
+    for (int i=0;i<objects.size();i++) {
+        objects[i]->draw();
+    }
 
-    for(int i = 10; i > 0; i--)
-    {
-        modelview = glm::mat4(1.0);
-        modelview = glm::rotate(glm::mat4(1.0),(float)glfwGetTime(),glm::vec3(0,0,1));
-        modelview = glm::scale(modelview, glm::vec3(i/10.0f, i/10.0f, 1.0));
-        //send modelview matrix to GPU
-        glUniformMatrix4fv(shaderLocations.getLocation("modelview"), 1, GL_FALSE, glm::value_ptr(modelview));
-        glm::vec4 currentColor = (i % 2 == 0) ? color : color2;
-        glUniform4fv(shaderLocations.getLocation("vColor"),1,glm::value_ptr(currentColor));
-        for (int i=0;i<objects.size();i++) {
-            objects[i]->draw();
-        }
-
+    // draw seed
+    modelview = glm::translate(modelview, glm::vec3(200, 0 , 0));
+    modelview = glm::scale(modelview, glm::vec3(0.01, 0.01, 1.0));
+    glUniformMatrix4fv(shaderLocations.getLocation("modelview"), 1, GL_FALSE, glm::value_ptr(modelview));
+    glUniform4fv(shaderLocations.getLocation("vColor"),1,glm::value_ptr(seedColor));
+    for (int i=0;i<objects.size();i++) {
+        objects[i]->draw();
     }
 
     glFlush();

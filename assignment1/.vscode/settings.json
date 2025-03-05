@@ -33,7 +33,9 @@
     "mat3x4.hpp": "c",
     "mat2x4.hpp": "c",
     "vec3.hpp": "c",
-    "vec2.hpp": "c"
+    "vec2.hpp": "c",
+    "format": "cpp",
+    "sstream": "cpp"
   },
   "files.insertFinalNewline": true,
   "files.trimFinalNewlines": true,
