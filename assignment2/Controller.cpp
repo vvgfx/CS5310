@@ -26,6 +26,16 @@ void Controller::run()
 void Controller::onkey(int key, int scancode, int action, int mods)
 {
     cout << (char)key << " pressed" << endl;
+    if((char)key == 'I')
+    {
+        view.INNER_RADIUS  = view.INNER_RADIUS > 15 ? view.INNER_RADIUS - 10 : view.INNER_RADIUS;
+        view.seedPath.clear();
+    }
+    else if((char)key == 'L')
+    {
+        view.INNER_RADIUS = view.INNER_RADIUS < 390 ? view.INNER_RADIUS + 10 : view.INNER_RADIUS;
+        view.seedPath.clear();
+    }
 }
 
 void Controller::reshape(int width, int height)

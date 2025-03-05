@@ -23,7 +23,9 @@ public:
     void display();
     bool shouldWindowClose();
     void closeWindow();
-
+    vector<glm::vec2> seedPath;
+    float INNER_RADIUS = 250.0f;
+    float OUTER_RADIUS = 400.0f;
 private:
 
     GLFWwindow* window;
@@ -34,7 +36,7 @@ private:
     int frames;
     double time;
 
-    vector<glm::vec2> seedPath;
+
     GLuint pathVAO, pathVBO;
 
 };

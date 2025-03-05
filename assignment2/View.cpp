@@ -135,9 +135,8 @@ void View::display()
     glm::vec4 innerColor = glm::vec4(0,0,1,1);
     glm::vec4 seedColor = glm::vec4(0,1,0,1);
     glm::vec4 pathColor = glm::vec4(0,1,0,1);
-    float ROTATION_SPEED = 100.0f;
-    float INNER_RADIUS = 250.0f;
-    float OUTER_RADIUS = 400.0f;
+    float ROTATION_SPEED = 400.0f;
+
     float revolution = glfwGetTime() * ROTATION_SPEED;
     float rotation  = glm::radians(revolution) * OUTER_RADIUS / INNER_RADIUS;
     float radRotation = glm::radians(revolution);
