@@ -99,6 +99,21 @@ void View::init(Callbacks *callbacks,vector<util::PolygonMesh<VertexAttrib> >& m
 
     }
 
+    // Adding path stuff
+    // Create VAO and VBO for the path
+    glGenVertexArrays(1, &pathVAO);
+    glGenBuffers(1, &pathVBO);
+
+    glBindVertexArray(pathVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, pathVBO);
+    glBufferData(GL_ARRAY_BUFFER, 0, nullptr, GL_STATIC_DRAW);
+
+    // Somehow, the position location seems to be 0 (looking at the shader program)
+    glEnableVertexAttribArray(shaderLocations.getLocation("vPosition"));
+    glVertexAttribPointer(shaderLocations.getLocation("vPosition"), 2, GL_FLOAT, GL_FALSE,
+        sizeof(glm::vec2), (void*) 0);
+
+    glBindVertexArray(0); // Seems to be good OpenGL practice?
 
 	int width,height;
     glfwGetFramebufferSize(window,&width,&height);
@@ -119,9 +134,12 @@ void View::display()
     glm::vec4 outerColor = glm::vec4(1,0,0,1);
     glm::vec4 innerColor = glm::vec4(0,0,1,1);
     glm::vec4 seedColor = glm::vec4(0,1,0,1);
-    float ROTATION_SPEED = 20.0f;
+    glm::vec4 pathColor = glm::vec4(0,1,0,1);
+    float ROTATION_SPEED = 100.0f;
+    float INNER_RADIUS = 250.0f;
+    float OUTER_RADIUS = 400.0f;
     float revolution = glfwGetTime() * ROTATION_SPEED;
-    float rotation  = glm::radians(revolution) * 400.0f / 200.0f;
+    float rotation  = glm::radians(revolution) * OUTER_RADIUS / INNER_RADIUS;
     float radRotation = glm::radians(revolution);
     program.enable();
     glClearColor(0,0,0,0);
@@ -139,9 +157,9 @@ void View::display()
     }
 
     // draw inner circle
-    modelview = glm::translate(modelview, glm::vec3(200 * cos(radRotation), 200 * sin(radRotation), 0));
+    modelview = glm::translate(modelview, glm::vec3((OUTER_RADIUS - INNER_RADIUS) * cos(radRotation), (OUTER_RADIUS - INNER_RADIUS) * sin(radRotation), 0));
     modelview = glm::rotate(modelview, rotation, glm::vec3(0, 0, 1));
-    modelview = glm::scale(modelview, glm::vec3(0.5, 0.5, 1.0));
+    modelview = glm::scale(modelview, glm::vec3(INNER_RADIUS / OUTER_RADIUS, INNER_RADIUS / OUTER_RADIUS, 1.0));
     glUniformMatrix4fv(shaderLocations.getLocation("modelview"), 1, GL_FALSE, glm::value_ptr(modelview));
     glUniform4fv(shaderLocations.getLocation("vColor"),1,glm::value_ptr(innerColor));
     for (int i=0;i<objects.size();i++) {
@@ -149,12 +167,32 @@ void View::display()
     }
 
     // draw seed
-    modelview = glm::translate(modelview, glm::vec3(200, 0 , 0));
+    modelview = glm::translate(modelview, glm::vec3(200.0f, 0 , 0));
     modelview = glm::scale(modelview, glm::vec3(0.01, 0.01, 1.0));
     glUniformMatrix4fv(shaderLocations.getLocation("modelview"), 1, GL_FALSE, glm::value_ptr(modelview));
     glUniform4fv(shaderLocations.getLocation("vColor"),1,glm::value_ptr(seedColor));
     for (int i=0;i<objects.size();i++) {
         objects[i]->draw();
+    }
+
+    if(seedPath.empty() || glm::distance(seedPath.back() , glm::vec2(modelview[3][0], modelview[3][1])) > 2.0f)
+        seedPath.push_back(glm::vec2(modelview[3][0], modelview[3][1]));
+
+    //now draw the seedPath
+    if(seedPath.size() > 1)
+    {
+        // need to reset modelview as I already have all the plot positions directly
+        modelview = glm::mat4(1.0);
+
+        glBindVertexArray(pathVAO);
+        glBindBuffer(GL_ARRAY_BUFFER, pathVBO);
+        glBufferData(GL_ARRAY_BUFFER, seedPath.size() * sizeof(glm::vec2), seedPath.data(), GL_STATIC_DRAW);
+
+        glUniformMatrix4fv(shaderLocations.getLocation("modelview"), 1, GL_FALSE, glm::value_ptr(modelview));
+        glUniform4fv(shaderLocations.getLocation("vColor"),1,glm::value_ptr(seedColor));
+        glDrawArrays(GL_LINE_STRIP, 0, seedPath.size());
+        // glDrawElements(GL_LINE_STRIP, seedPath.size(), GL_UNSIGNED_INT, (GLvoid *)0);
+        glBindVertexArray(0);
     }
 
     glFlush();
@@ -169,8 +207,6 @@ void View::display()
         frames = 0;
         time = currenttime;
     }
-
-
 }
 
 bool View::shouldWindowClose() {

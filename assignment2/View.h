@@ -24,7 +24,7 @@ public:
     bool shouldWindowClose();
     void closeWindow();
 
-private:   
+private:
 
     GLFWwindow* window;
     util::ShaderProgram program;
@@ -33,6 +33,10 @@ private:
     glm::mat4 modelview,projection;
     int frames;
     double time;
+
+    vector<glm::vec2> seedPath;
+    GLuint pathVAO, pathVBO;
+
 };
 
 #endif

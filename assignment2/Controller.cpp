@@ -28,7 +28,7 @@ void Controller::onkey(int key, int scancode, int action, int mods)
     cout << (char)key << " pressed" << endl;
 }
 
-void Controller::reshape(int width, int height) 
+void Controller::reshape(int width, int height)
 {
     cout <<"Window reshaped to width=" << width << " and height=" << height << endl;
     glViewport(0, 0, width, height);
