@@ -1,0 +1,9 @@
+{
+    "makefile.launchConfigurations": [
+        {
+            "cwd": "e:\\Coursework\\CG 5310\\Scenegraphs",
+            "binaryPath": "e:\\Coursework\\CG 5310\\Scenegraphs\\Scenegraphs.exe",
+            "binaryArgs": []
+        }
+    ]
+}
