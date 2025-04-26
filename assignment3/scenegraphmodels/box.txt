@@ -12,7 +12,7 @@ end-material
 
 #the root
 group node-1-0 root
-scale node-2-0 scale 10 10 10
+scale node-2-0 scale 100 100 100
 leaf node-3-0 one-box instanceof box #comment here?
 assign-material node-3-0 mat-node-3-0
 

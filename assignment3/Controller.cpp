@@ -11,6 +11,7 @@ using namespace std;
 
 #include "sgraph/ScenegraphExporter.h"
 #include "sgraph/ScenegraphImporter.h"
+#include "sgraph/ScenegraphDrawer.h"
 
 Controller::Controller(Model& m,View& v) {
     model = m;
@@ -24,7 +25,7 @@ void Controller::initScenegraph() {
      
     
     //read in the file of commands
-    ifstream inFile("scenegraphmodels/two-humans-commands.txt");
+    ifstream inFile("scenegraphmodels/stack-of-boxes.txt");
     //ifstream inFile("tryout.txt");
     sgraph::ScenegraphImporter importer;
     
@@ -33,7 +34,8 @@ void Controller::initScenegraph() {
     //scenegraph->setMeshes(meshes);
     model.setScenegraph(scenegraph);
     cout <<"Scenegraph made" << endl;   
-
+    sgraph::ScenegraphDrawer* drawer = new sgraph::ScenegraphDrawer();
+    scenegraph->getRoot()->accept(drawer);
 }
 
 Controller::~Controller()

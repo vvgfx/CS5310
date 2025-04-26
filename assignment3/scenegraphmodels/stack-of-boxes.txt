@@ -1,0 +1,39 @@
+#instances
+instance box models/box.obj
+
+#material
+material mat-node-4
+ambient 1 0 0
+end-material
+
+#material
+material mat-node-7
+ambient 0 1 0
+end-material
+
+#material
+material mat-node-8
+ambient 0 0 1
+end-material
+
+#declaring all the nodes
+group node-1 root
+scale node-2 overall-scale 50 50 50
+group node-3 group-1
+leaf node-4 upper-box instanceof box
+assign-material node-4 mat-node-4
+translate node-5 lower-left 0 -50 -25
+leaf node-6 lower-left-box instanceof box
+translate node-7 lower-right 0 -50 25
+leaf node-8 lower-right-box instanceof box
+
+
+#building the tree
+assign-root node-1
+add-child node-2 node-1
+add-child node-3 node-2
+add-child node-4 node-3
+add-child node-5 node-3
+add-child node-6 node-5
+add-child node-7 node-3
+add-child node-8 node-7

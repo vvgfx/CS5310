@@ -35,7 +35,8 @@
     "vec3.hpp": "c",
     "vec2.hpp": "c",
     "xstring": "cpp",
-    "vector": "cpp"
+    "vector": "cpp",
+    "ios": "cpp"
   },
   "files.insertFinalNewline": true,
   "files.trimFinalNewlines": true,
