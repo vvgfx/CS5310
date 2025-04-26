@@ -1,0 +1,37 @@
+#all the instances
+instance box models/box.obj
+instance cylinder models/cylinder.obj
+instance cone models/cone.obj
+
+#material
+material mat-wall
+ambient 1 1 0
+end-material
+
+#material
+material mat-clock
+ambient 1 0 0
+end-material
+
+
+group wall-root wall-root
+group wall-one wall-one
+scale wall-scale-1 wall-scale-1 50 200 5
+translate wall-translate-1 wall-translate-1 0 100 0
+scale wall-clock-scale-1 wall-clock-scale-1 50 50 10
+translate wall-clock-translate-1 wall-clock-translate-1 0 150 0
+leaf wall-leaf-1 wall-leaf-1 instanceof box
+leaf wall-clock-leaf-1 wall-clock-leaf-1 instanceof box
+assign-material wall-leaf-1 mat-wall
+assign-material wall-clock-leaf-1 mat-clock
+
+#add-child wall-one-translate wall-root
+add-child wall-one wall-root
+add-child wall-translate-1 wall-one
+add-child wall-scale-1 wall-translate-1
+add-child wall-leaf-1 wall-scale-1
+add-child wall-clock-translate-1 wall-one
+add-child wall-clock-scale-1 wall-clock-translate-1
+add-child wall-clock-leaf-1 wall-clock-scale-1
+
+assign-root wall-root

@@ -25,7 +25,7 @@ void Controller::initScenegraph() {
      
     
     //read in the file of commands
-    ifstream inFile("scenegraphmodels/stack-of-boxes.txt");
+    ifstream inFile("scenegraphmodels/big-ben.txt");
     //ifstream inFile("tryout.txt");
     sgraph::ScenegraphImporter importer;
     

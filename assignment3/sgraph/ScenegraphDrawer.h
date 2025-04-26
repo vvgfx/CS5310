@@ -61,17 +61,24 @@ namespace sgraph {
 
         void visitScaleTransform(ScaleTransform *node)
         {
-            transformNodeHelper(node, "Scale");
+            glm::vec3 scale = node->getScale();
+            string s = "Scale: " + to_string(scale.x) + " , " + to_string(scale.y) + " , " + to_string(scale.z) + " ";
+            transformNodeHelper(node, s);
         }
-
+        
         void visitTranslateTransform(TranslateTransform *node)
         {
-            transformNodeHelper(node, "Translate");
+            glm::vec3 translate = node->getTranslate();
+            string s = "Translate: " + to_string(translate.x) + " , " + to_string(translate.y) + " , " + to_string(translate.z) + " ";
+            transformNodeHelper(node, s);
         }
 
         void visitRotateTransform(RotateTransform *node)
         {
-            transformNodeHelper(node, "Rotate");
+            glm::vec3 rotate = node->getRotationAxis();
+            string s = "Rotate: " + to_string(rotate.x) + " , " + to_string(rotate.y) + " , " + to_string(rotate.z) + " ";
+            s += to_string(node->getAngleInRadians());
+            transformNodeHelper(node, s);
         }
 
         private:
