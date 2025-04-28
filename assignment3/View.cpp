@@ -49,6 +49,18 @@ void View::init(Callbacks *callbacks,map<string,util::PolygonMesh<VertexAttrib>>
         reinterpret_cast<Callbacks*>(glfwGetWindowUserPointer(window))->reshape(width,height);
     });
 
+    glfwSetMouseButtonCallback(window, 
+    [](GLFWwindow* window, int button, int action, int mods)
+    {
+        reinterpret_cast<Callbacks*>(glfwGetWindowUserPointer(window))->onMouseInput(button, action, mods);
+    });
+
+    glfwSetCursorPosCallback(window, 
+    [](GLFWwindow* window, double xpos, double ypos)
+    {
+        reinterpret_cast<Callbacks*>(glfwGetWindowUserPointer(window))->onCursorMove(xpos, ypos);
+    });
+
     glfwMakeContextCurrent(window);
     gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
     glfwSwapInterval(1);
@@ -98,6 +110,9 @@ void View::init(Callbacks *callbacks,map<string,util::PolygonMesh<VertexAttrib>>
     time = glfwGetTime();
 
     renderer = new sgraph::GLScenegraphRenderer(modelview,objects,shaderLocations);
+    xDelta = 0.0f;
+    yDelta = 0.0f;
+    zDelta = 0.0f;
 
 }
 
@@ -117,7 +132,14 @@ void View::display(sgraph::IScenegraph *scenegraph) {
     
     
     modelview.push(glm::mat4(1.0));
-    modelview.top() = modelview.top() * glm::lookAt(glm::vec3(200.0f,250.0f,250.0f),glm::vec3(0.0f,0.0f,0.0f),glm::vec3(0.0f,1.0f,0.0f));
+    modelview.top() = modelview.top() * glm::lookAt(glm::vec3(0.0f,250.0f,250.0f),glm::vec3(0.0f,0.0f,0.0f),glm::vec3(0.0f,1.0f,0.0f));
+    
+
+    glm::vec3 rightAxis = glm::vec3(modelview.top()[0][0], modelview.top()[0][1], modelview.top()[0][2]);
+    glm::vec3 upAxis = glm::vec3(modelview.top()[1][0], modelview.top()[1][1], modelview.top()[1][2]);
+
+    modelview.top() = modelview.top() * glm::rotate(glm::mat4(1.0f), glm::radians(yDelta * rotationSpeed), glm::vec3(1.0f, 0.0f, 0.0f));
+    modelview.top() = modelview.top() * glm::rotate(glm::mat4(1.0f), glm::radians(xDelta * rotationSpeed), glm::vec3(0.0f, 1.0f, 0.0f));
     //send projection matrix to GPU    
     glUniformMatrix4fv(shaderLocations.getLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
     

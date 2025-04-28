@@ -16,7 +16,11 @@ using namespace std;
 Controller::Controller(Model& m,View& v) {
     model = m;
     view = v;
-
+    mousePressed = false;
+    oldXPos = 0;
+    oldYPos = 0;
+    newXPos = 0;
+    newYPos = 0;
     initScenegraph();
 }
 
@@ -58,6 +62,31 @@ void Controller::run()
 void Controller::onkey(int key, int scancode, int action, int mods)
 {
     cout << (char)key << " pressed" << endl;
+}
+
+void Controller::onMouseInput(int button, int action, int mods)
+{
+    if(button != GLFW_MOUSE_BUTTON_LEFT)
+        return;
+    mousePressed = action == GLFW_PRESS;
+    string mouseStatus = mousePressed ? "mouse pressed!" : "mouse released!";
+    double xPos, yPos;
+    cout<<mouseStatus<<endl;
+}
+
+void Controller::onCursorMove(double newXPos, double newYPos)
+{
+    oldXPos = this->newXPos;
+    oldYPos = this->newYPos;
+    this->newXPos = newXPos;
+    this->newYPos = newYPos;
+    float deltaX = newXPos - oldXPos;
+    float deltaY = newYPos - oldYPos;
+    if(!(mousePressed && ( deltaX != 0 || deltaY != 0)))
+    return;
+    view.xDelta += deltaX;
+    view.yDelta += deltaY;
+    cout<<"Direction: "<<newXPos - oldXPos<<" , "<<newYPos - oldYPos<<endl;
 }
 
 void Controller::reshape(int width, int height) 

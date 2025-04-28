@@ -7,6 +7,8 @@ class Callbacks {
     virtual void dispose()=0;
     virtual void onkey(int key, int scancode, int action, int mods)=0;
     virtual void error_callback(int error, const char* description)=0;
+    virtual void onMouseInput(int button, int action, int mods)=0;
+    virtual void onCursorMove(double newXPos, double newYPos)=0;
 };
 
 #endif

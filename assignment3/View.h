@@ -28,6 +28,7 @@ public:
     void display(sgraph::IScenegraph *scenegraph);
     bool shouldWindowClose();
     void closeWindow();
+    float xDelta, yDelta, zDelta;
 
 private: 
 
@@ -40,6 +41,9 @@ private:
     sgraph::SGNodeVisitor *renderer;
     int frames;
     double time;
+    glm::mat4 sceneRotation;
+    float rotationSpeed = 0.5f;
+    glm::mat4 cumulativeRotation = glm::mat4(1.0f);
 };
 
 #endif

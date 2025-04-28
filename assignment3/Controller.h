@@ -16,11 +16,15 @@ public:
     virtual void dispose();
     virtual void onkey(int key, int scancode, int action, int mods);
     virtual void error_callback(int error, const char* description);
+    virtual void onMouseInput(int button, int action, int mods);
+    virtual void onCursorMove(double newXPos, double newYPos);
 private:
     void initScenegraph();
 
     View view;
     Model model;
+    bool mousePressed = false;
+    double oldXPos, oldYPos, newXPos, newYPos;
 };
 
 #endif
