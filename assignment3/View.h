@@ -25,6 +25,7 @@ public:
     View();
     ~View();
     void init(Callbacks* callbacks,map<string,util::PolygonMesh<VertexAttrib>>& meshes);
+    void Resize();
     void display(sgraph::IScenegraph *scenegraph);
     bool shouldWindowClose();
     void closeWindow();

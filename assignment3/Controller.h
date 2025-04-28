@@ -8,7 +8,7 @@
 class Controller: public Callbacks
 {
 public:
-    Controller(Model& m,View& v);
+    Controller(Model& m,View& v, string textFile);
     ~Controller();
     void run();
 
@@ -25,6 +25,7 @@ private:
     Model model;
     bool mousePressed = false;
     double oldXPos, oldYPos, newXPos, newYPos;
+    string textfile;
 };
 
 #endif

@@ -13,7 +13,7 @@ using namespace std;
 #include "sgraph/ScenegraphImporter.h"
 #include "sgraph/ScenegraphDrawer.h"
 
-Controller::Controller(Model& m,View& v) {
+Controller::Controller(Model& m,View& v, string textfile) {
     model = m;
     view = v;
     mousePressed = false;
@@ -21,6 +21,7 @@ Controller::Controller(Model& m,View& v) {
     oldYPos = 0;
     newXPos = 0;
     newYPos = 0;
+    this->textfile = textfile;
     initScenegraph();
 }
 
@@ -29,7 +30,11 @@ void Controller::initScenegraph() {
      
     
     //read in the file of commands
-    ifstream inFile("scenegraphmodels/big-ben.txt");
+    ifstream inFile;
+    if(textfile == "")
+        inFile = ifstream("scenegraphmodels/big-ben.txt");
+    else
+        inFile = ifstream(textfile);
     //ifstream inFile("tryout.txt");
     sgraph::ScenegraphImporter importer;
     
@@ -62,6 +67,13 @@ void Controller::run()
 void Controller::onkey(int key, int scancode, int action, int mods)
 {
     cout << (char)key << " pressed" << endl;
+    if (key == 82) //r
+    {
+        this->newXPos = newXPos;
+        this->newYPos = newYPos;
+        view.xDelta = 0.0f;
+        view.yDelta = 0.0f;
+    }
 }
 
 void Controller::onMouseInput(int button, int action, int mods)
@@ -93,6 +105,7 @@ void Controller::reshape(int width, int height)
 {
     cout <<"Window reshaped to width=" << width << " and height=" << height << endl;
     glViewport(0, 0, width, height);
+    view.Resize();
 }
 
 void Controller::dispose()
