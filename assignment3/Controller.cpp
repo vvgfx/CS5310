@@ -76,10 +76,12 @@ void Controller::onkey(int key, int scancode, int action, int mods)
     cout << (char)key << " pressed" << endl;
     if (key == 82) //r
     {
-        this->newXPos = newXPos;
-        this->newYPos = newYPos;
-        view.xDelta = 0.0f;
-        view.yDelta = 0.0f;
+        this->oldXPos = this->newXPos;
+        this->oldYPos = this->newYPos;
+        this->cameraPos = initialCameraPos;
+        this->theta = initialTheta;
+        this->phi = initialPhi;
+        this->up = glm::vec3(0.0f, 1.0f, 0.0f);
     }
 }
 
@@ -89,7 +91,6 @@ void Controller::onMouseInput(int button, int action, int mods)
         return;
     mousePressed = action == GLFW_PRESS;
     string mouseStatus = mousePressed ? "mouse pressed!" : "mouse released!";
-    double xPos, yPos;
     cout<<mouseStatus<<endl;
 }
 
@@ -141,11 +142,9 @@ void Controller::updateCameraPosition() {
     // Initial z
     glm::vec4 initialPos(0.0f, 0.0f, radius, 1.0f);
 
-    // Apply rotation and update camera
     glm::vec4 transformedPos = rotation * initialPos;
     cameraPos = target + glm::vec3(transformedPos);
 
-    // Compute up vector
     glm::vec3 newUp = glm::vec3(rotation * glm::vec4(0.0f, 1.0f, 0.0f, 0.0f));
     up = newUp;
 }
