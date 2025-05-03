@@ -29,10 +29,11 @@ public:
     void display(sgraph::IScenegraph *scenegraph);
     bool shouldWindowClose();
     void closeWindow();
+    void setLookAt(glm::mat4 lookAt);
     float xDelta, yDelta, zDelta;
 
 private: 
-
+    glm::mat4 lookAtMatrix;
     GLFWwindow* window;
     util::ShaderProgram program;
     util::ShaderLocationsVault shaderLocations;

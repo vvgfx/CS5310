@@ -13,14 +13,20 @@ using namespace std;
 #include "sgraph/ScenegraphImporter.h"
 #include "sgraph/ScenegraphDrawer.h"
 
-Controller::Controller(Model& m,View& v, string textfile) {
+Controller::Controller(Model& m,View& v, string textfile) :cameraPos(200.0f, 250.0f, 250.0f),
+    target(0.0f, 0.0f, 0.0f),
+    up(0.0f, 1.0f, 0.0f),
+    mousePressed(false) {
     model = m;
     view = v;
-    mousePressed = false;
-    oldXPos = 0;
-    oldYPos = 0;
-    newXPos = 0;
-    newYPos = 0;
+    radius = glm::length(cameraPos - target);
+    theta = atan2(cameraPos.z, cameraPos.x);
+    phi = asin(cameraPos.y / radius);
+
+    // store init values for reset  
+    initialCameraPos = cameraPos;
+    initialTheta = theta;
+    initialPhi = phi;
     this->textfile = textfile;
     initScenegraph();
 }
@@ -58,6 +64,7 @@ void Controller::run()
     map<string,util::PolygonMesh<VertexAttrib> > meshes = scenegraph->getMeshes();
     view.init(this,meshes);
     while (!view.shouldWindowClose()) {
+        view.setLookAt(glm::lookAt(cameraPos, target, up));
         view.display(scenegraph);
     }
     view.closeWindow();
@@ -96,9 +103,11 @@ void Controller::onCursorMove(double newXPos, double newYPos)
     float deltaY = newYPos - oldYPos;
     if(!(mousePressed && ( deltaX != 0 || deltaY != 0)))
     return;
-    view.xDelta += deltaX;
-    view.yDelta += deltaY;
+    float sensitivity = 0.005f;
+    theta -= (deltaX * sensitivity);
+    phi -= (deltaY * sensitivity);
     cout<<"Direction: "<<newXPos - oldXPos<<" , "<<newYPos - oldYPos<<endl;
+    updateCameraPosition();
 }
 
 void Controller::reshape(int width, int height) 
@@ -116,4 +125,27 @@ void Controller::dispose()
 void Controller::error_callback(int error, const char* description)
 {
     fprintf(stderr, "Error: %s\n", description);
+}
+
+void Controller::updateCameraPosition() {
+    
+    // manually apply rotations to avoid gimbal lock
+    glm::mat4 rotation = glm::mat4(1.0f);
+
+    // Rotate around the Y
+    rotation = glm::rotate(rotation, theta, glm::vec3(0.0f, 1.0f, 0.0f));
+
+    // Rotate around the X
+    rotation = glm::rotate(rotation, phi, glm::vec3(1.0f, 0.0f, 0.0f));
+
+    // Initial z
+    glm::vec4 initialPos(0.0f, 0.0f, radius, 1.0f);
+
+    // Apply rotation and update camera
+    glm::vec4 transformedPos = rotation * initialPos;
+    cameraPos = target + glm::vec3(transformedPos);
+
+    // Compute up vector
+    glm::vec3 newUp = glm::vec3(rotation * glm::vec4(0.0f, 1.0f, 0.0f, 0.0f));
+    up = newUp;
 }

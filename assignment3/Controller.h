@@ -20,7 +20,16 @@ public:
     virtual void onCursorMove(double newXPos, double newYPos);
 private:
     void initScenegraph();
+    void updateCameraPosition();
+    float radius, theta, phi;
 
+    glm::vec3 cameraPos;
+    glm::vec3 initialCameraPos;
+    float initialTheta;
+    float initialPhi;
+    glm::vec3 target;
+    glm::vec3 up;
+    
     View view;
     Model model;
     bool mousePressed = false;

@@ -124,7 +124,9 @@ void View::Resize()
 }
 
 
-
+void View::setLookAt(glm::mat4 lookAt){
+    lookAtMatrix = lookAt;
+}
 
 void View::display(sgraph::IScenegraph *scenegraph) {
     
@@ -139,14 +141,8 @@ void View::display(sgraph::IScenegraph *scenegraph) {
     
     
     modelview.push(glm::mat4(1.0));
-    modelview.top() = modelview.top() * glm::lookAt(glm::vec3(0.0f,250.0f,250.0f),glm::vec3(0.0f,0.0f,0.0f),glm::vec3(0.0f,1.0f,0.0f));
+    modelview.top() = modelview.top() * lookAtMatrix;
     
-
-    glm::vec3 rightAxis = glm::vec3(modelview.top()[0][0], modelview.top()[0][1], modelview.top()[0][2]);
-    glm::vec3 upAxis = glm::vec3(modelview.top()[1][0], modelview.top()[1][1], modelview.top()[1][2]);
-
-    modelview.top() = modelview.top() * glm::rotate(glm::mat4(1.0f), glm::radians(yDelta * rotationSpeed), glm::vec3(1.0f, 0.0f, 0.0f));
-    modelview.top() = modelview.top() * glm::rotate(glm::mat4(1.0f), glm::radians(xDelta * rotationSpeed), glm::vec3(0.0f, 1.0f, 0.0f));
     //send projection matrix to GPU    
     glUniformMatrix4fv(shaderLocations.getLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
     
