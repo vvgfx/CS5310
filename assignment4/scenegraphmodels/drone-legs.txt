@@ -1,0 +1,37 @@
+#all the instances
+instance box models/box.obj
+instance cylinder models/cylinder.obj
+instance cone models/cone.obj
+
+#material
+material drone-leg-mat
+ambient 0.355 0.484 0.668
+end-material
+
+leaf drone-leg-1 drone-leg-1 instanceof box
+assign-material drone-leg-1 drone-leg-mat
+leaf drone-leg-2 drone-leg-2 instanceof box
+assign-material drone-leg-2 drone-leg-mat
+leaf drone-leg-3 drone-leg-3 instanceof box
+assign-material drone-leg-3 drone-leg-mat
+
+scale drone-leg-1-scale drone-leg-1-scale 2 10 2
+scale drone-leg-2-scale drone-leg-2-scale 2 2 20
+scale drone-leg-3-scale drone-leg-3-scale 2 10 2
+
+translate drone-leg-1-translate drone-leg-1-translate 0 -5 10
+translate drone-leg-2-translate drone-leg-2-translate 0 -10 0
+translate drone-leg-3-translate drone-leg-3-translate 0 -5 -10
+
+group drone-legs drone-legs
+add-child drone-leg-1 drone-leg-1-scale
+add-child drone-leg-1-scale drone-leg-1-translate
+add-child drone-leg-1-translate drone-legs
+add-child drone-leg-2 drone-leg-2-scale
+add-child drone-leg-2-scale drone-leg-2-translate
+add-child drone-leg-2-translate drone-legs
+add-child drone-leg-3 drone-leg-3-scale
+add-child drone-leg-3-scale drone-leg-3-translate
+add-child drone-leg-3-translate drone-legs
+
+assign-root drone-legs

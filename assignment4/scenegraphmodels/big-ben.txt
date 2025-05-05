@@ -75,7 +75,7 @@ scale cone-1-scale cone-1-scale 28 40 28
 translate cone-1-translate cone-1-translate 0 200 0
 add-child cone-1 cone-1-scale
 add-child cone-1-scale cone-1-translate
-add-child cone-1-translate root
+add-child cone-1-translate walls
 
 
 import human-1 scenegraphmodels/humanoid-commands.txt

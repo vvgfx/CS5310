@@ -38,7 +38,7 @@ void Controller::initScenegraph() {
     //read in the file of commands
     ifstream inFile;
     if(textfile == "")
-        inFile = ifstream("scenegraphmodels/big-ben.txt");
+        inFile = ifstream("scenegraphmodels/drone.txt");
     else
         inFile = ifstream(textfile);
     //ifstream inFile("tryout.txt");
@@ -106,7 +106,7 @@ void Controller::onCursorMove(double newXPos, double newYPos)
     float sensitivity = 0.005f;
     theta -= (deltaX * sensitivity);
     phi -= (deltaY * sensitivity);
-    cout<<"Direction: "<<newXPos - oldXPos<<" , "<<newYPos - oldYPos<<endl;
+    // cout<<"Direction: "<<newXPos - oldXPos<<" , "<<newYPos - oldYPos<<endl;
     updateCameraPosition();
 }
 

@@ -9,7 +9,7 @@
 
 int main(int argc,char *argv[]) {
     std::vector<std::string> args(argv, argv + argc);
-    cout<<"reached here: "<<argc<<endl;
+    // cout<<"reached here: "<<argc<<endl;
     Model model;
     View view;
     if(argc == 1)

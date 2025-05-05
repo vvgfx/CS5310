@@ -9,6 +9,11 @@
             "cwd": "e:\\Coursework\\CG 5310\\assignment3",
             "binaryPath": "e:\\Coursework\\CG 5310\\assignment3\\Scenegraphs.exe",
             "binaryArgs": []
+        },
+        {
+            "cwd": "e:\\Coursework\\CG 5310\\assignment4",
+            "binaryPath": "e:\\Coursework\\CG 5310\\assignment4\\Scenegraphs.exe",
+            "binaryArgs": []
         }
     ],
     "files.associations": {
