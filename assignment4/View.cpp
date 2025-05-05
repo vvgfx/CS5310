@@ -139,6 +139,13 @@ void View::display(sgraph::IScenegraph *scenegraph) {
     //glCullFace(GL_FRONT_FACE);
 
     
+    //rotate the propellers!
+    rotatePropeller("propeller-1-rotate", glfwGetTime());
+    rotatePropeller("propeller-2-rotate", glfwGetTime());
+    rotatePropeller("propeller-3-rotate", glfwGetTime());
+    rotatePropeller("propeller-4-rotate", glfwGetTime());
+
+    rotate();
     
     modelview.push(glm::mat4(1.0));
     modelview.top() = modelview.top() * lookAtMatrix;
@@ -187,7 +194,74 @@ void View::closeWindow() {
     glfwTerminate();
 }
 
+// This saves all the nodes required for dynamic transformation
+void View::initScenegraphNodes(sgraph::IScenegraph *scenegraph)
+{
+    auto nodes = scenegraph->getNodes();
+    // for(auto names : nodes)
+    // {
+    //     cout<<"Key: "<<names.first<<endl;
+    // }
+    std::vector<string> savedNodes = {"propeller-1-rotate", "propeller-2-rotate", "propeller-3-rotate", "propeller-4-rotate", "drone-rotate"};
+
+    for(const auto& nodeName: savedNodes)
+    {
+        if(nodes.find(nodeName) != nodes.end())
+        {
+            // The node is present, save it!
+            cout<<"Found : "<<nodeName<<endl; //It's finding the nodes now.
+            cachedNodes[nodeName] = dynamic_cast<sgraph::TransformNode*>(nodes[nodeName]); // Can't cast to abstract class, so need to cast to pointer 
+        }
+    }
+}
 
 
+void View::rotatePropeller(string nodeName, float time)
+{
+    float rotationSpeed = speed * 200.0f;
+
+    float rotationAngle = glm::radians(rotationSpeed * time);
+
+    sgraph::RotateTransform *propellerNode = dynamic_cast<sgraph::RotateTransform*>(cachedNodes[nodeName]);
+    if(propellerNode)
+    {
+        propellerNode->updateRotation(rotationAngle);
+    }
+}
 
 
+void View::changePropellerSpeed(int num)
+{
+    //positive number = increments speed; negative number = decrements speed
+
+    float speedSensitivity = 0.25f;
+    speed += num > 0 ? speedSensitivity : -speedSensitivity;
+
+    speed = speed <= 0 ? 0.1f : speed >= 3 ? 3.0f : speed;
+}
+
+void View::startRotation()
+{
+
+    cout<<"starting rotation!"<<endl;
+    isRotating = true;
+}
+
+void View::rotate()
+{
+    if(!isRotating)
+        return;
+    
+    if(rotationAngle > 360.0f)
+    {
+        rotationAngle = 0.0f;
+        isRotating = false;
+    }
+    float rollSpeed = 1.0f;
+    rotationAngle += rollSpeed;
+
+    float newAngle = glm::radians(rotationAngle);
+    sgraph::RotateTransform *droneRotateNode = dynamic_cast<sgraph::RotateTransform*>(cachedNodes["drone-rotate"]);
+    droneRotateNode->updateRotation(newAngle);
+    
+}

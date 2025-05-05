@@ -5,12 +5,12 @@ instance cone models/cone.obj
 
 #material
 material mat-wall
-ambient 1 1 0
+ambient 0.906 0.543 0.035
 end-material
 
 #material
 material mat-clock
-ambient 1 0 0
+ambient 0.5 0.882 0.117
 end-material
 
 

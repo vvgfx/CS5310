@@ -26,19 +26,34 @@ import propeller-3 scenegraphmodels/propeller.txt
 import propeller-4 scenegraphmodels/propeller.txt
 
 
-#translate the propellers
+#need to rotate the propellers by 0 so that the time function in view can use these fake rotations to rotate with time
+rotate propeller-1-rotate propeller-1-rotate 0 0 1 0
+rotate propeller-2-rotate propeller-2-rotate 0 0 1 0
+rotate propeller-3-rotate propeller-3-rotate 0 0 1 0
+rotate propeller-4-rotate propeller-4-rotate 0 0 1 0
+
+
+
+
+#add the propellers to their rotates, then add the rotates to their translates!
+
+add-child propeller-1 propeller-1-rotate
+add-child propeller-2 propeller-2-rotate
+add-child propeller-3 propeller-3-rotate
+add-child propeller-4 propeller-4-rotate
+
+#translate nodes for the propellers
 translate propeller-1-translate propeller-1-translate -7 0 10
 translate propeller-2-translate propeller-2-translate 7 0 10
 translate propeller-3-translate propeller-3-translate 7 0 -10
 translate propeller-4-translate propeller-4-translate -7 0 -10
 
 
-#add the propellers to their translates
+add-child propeller-1-rotate propeller-1-translate
+add-child propeller-2-rotate propeller-2-translate
+add-child propeller-3-rotate propeller-3-translate
+add-child propeller-4-rotate propeller-4-translate
 
-add-child propeller-1 propeller-1-translate
-add-child propeller-2 propeller-2-translate
-add-child propeller-3 propeller-3-translate
-add-child propeller-4 propeller-4-translate
 
 #add translates to a parent group
 

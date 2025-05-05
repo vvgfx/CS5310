@@ -38,7 +38,7 @@ void Controller::initScenegraph() {
     //read in the file of commands
     ifstream inFile;
     if(textfile == "")
-        inFile = ifstream("scenegraphmodels/drone.txt");
+        inFile = ifstream("scenegraphmodels/big-ben.txt");
     else
         inFile = ifstream(textfile);
     //ifstream inFile("tryout.txt");
@@ -63,6 +63,8 @@ void Controller::run()
     sgraph::IScenegraph * scenegraph = model.getScenegraph();
     map<string,util::PolygonMesh<VertexAttrib> > meshes = scenegraph->getMeshes();
     view.init(this,meshes);
+    //Save the nodes required for transformation when running!
+    view.initScenegraphNodes(scenegraph);
     while (!view.shouldWindowClose()) {
         view.setLookAt(glm::lookAt(cameraPos, target, up));
         view.display(scenegraph);
@@ -74,12 +76,31 @@ void Controller::run()
 void Controller::onkey(int key, int scancode, int action, int mods)
 {
     cout << (char)key << " pressed" << endl;
-    if (key == 82) //r
+
+    if(action != GLFW_PRESS && action != GLFW_REPEAT)
+        return;
+    switch(key)
     {
-        this->newXPos = newXPos;
-        this->newYPos = newYPos;
-        view.xDelta = 0.0f;
-        view.yDelta = 0.0f;
+        case GLFW_KEY_R:
+            this->newXPos = newXPos;
+            this->newYPos = newYPos;
+            view.xDelta = 0.0f;
+            view.yDelta = 0.0f;
+        
+            cameraPos = initialCameraPos;
+            theta = initialTheta;
+            phi = initialPhi;
+            this->up = glm::vec3(0.0f, 1.0f, 0.0f);
+            break;
+        case GLFW_KEY_S:
+            view.changePropellerSpeed(-1);
+            break;
+        case GLFW_KEY_F:
+            view.changePropellerSpeed(1);
+            break;
+        case GLFW_KEY_Z:
+            view.startRotation();
+            break;
     }
 }
 

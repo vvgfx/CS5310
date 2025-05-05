@@ -30,9 +30,14 @@ public:
     bool shouldWindowClose();
     void closeWindow();
     void setLookAt(glm::mat4 lookAt);
+    void initScenegraphNodes(sgraph::IScenegraph *scenegraph);
+    void changePropellerSpeed(int num);
+    void rotatePropeller(string nodename, float time);
+    void startRotation();
     float xDelta, yDelta, zDelta;
 
 private: 
+    void rotate();
     glm::mat4 lookAtMatrix;
     GLFWwindow* window;
     util::ShaderProgram program;
@@ -46,6 +51,13 @@ private:
     glm::mat4 sceneRotation;
     float rotationSpeed = 0.5f;
     glm::mat4 cumulativeRotation = glm::mat4(1.0f);
+    float speed = 1.0f;
+
+    bool isRotating = false;
+    float rotationAngle = 0.0f;
+
+    //Saving all the required nodes for dynamic transformation!
+    std::map<string, sgraph::TransformNode*> cachedNodes; // Need to save this as a pointer because TransformNode is abstract :(
 };
 
 #endif

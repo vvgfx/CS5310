@@ -5,7 +5,7 @@ instance cone models/cone.obj
 
 #material
 material mat-ground
-ambient 1 1 1
+ambient 0.121 0.559 0.340
 end-material
 
 
@@ -94,7 +94,23 @@ add-child human-2-translate root
 #remove these lines and uncomment the last line later!
 translate base-translate base-translate 0 -100 0
 add-child root base-translate
-assign-root base-translate
 
+
+#Adding the drone to the world
+import drone scenegraphmodels/drone.txt
+
+#add a rotate before the translate so that the drone rotation behavior can be accesses in realtime
+rotate drone-rotate drone-rotate 0 0 0 1
+
+translate drone-translate drone-translate -100 100 150
+add-child drone drone-rotate
+add-child drone-rotate drone-translate
+
+
+group root-2 root-2
+add-child base-translate root-2
+add-child drone-translate root-2
+#assign-root base-translate
+assign-root root-2
 #assign-root root
 
