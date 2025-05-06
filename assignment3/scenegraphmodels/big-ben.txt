@@ -94,7 +94,11 @@ add-child human-2-translate root
 #remove these lines and uncomment the last line later!
 translate base-translate base-translate 0 -100 0
 add-child root base-translate
-assign-root base-translate
+
+dynamic trackball trackball
+add-child base-translate trackball
+assign-root trackball
+#assign-root base-translate
 
 #assign-root root
 

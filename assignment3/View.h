@@ -27,10 +27,11 @@ public:
     void init(Callbacks* callbacks,map<string,util::PolygonMesh<VertexAttrib>>& meshes);
     void Resize();
     void display(sgraph::IScenegraph *scenegraph);
+    void initScenegraphNodes(sgraph::IScenegraph *scenegraph);
     bool shouldWindowClose();
     void closeWindow();
-    void setLookAt(glm::mat4 lookAt);
-    float xDelta, yDelta, zDelta;
+    void updateTrackball(glm::mat4 updateMatrix);
+    void resetTrackball();
 
 private: 
     glm::mat4 lookAtMatrix;
@@ -43,9 +44,7 @@ private:
     sgraph::SGNodeVisitor *renderer;
     int frames;
     double time;
-    glm::mat4 sceneRotation;
-    float rotationSpeed = 0.5f;
-    glm::mat4 cumulativeRotation = glm::mat4(1.0f);
+    std::map<string, sgraph::TransformNode*> cachedNodes; // Need to save this as a pointer because TransformNode is abstract :(
 };
 
 #endif

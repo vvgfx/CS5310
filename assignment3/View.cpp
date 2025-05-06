@@ -110,9 +110,6 @@ void View::init(Callbacks *callbacks,map<string,util::PolygonMesh<VertexAttrib>>
     time = glfwGetTime();
 
     renderer = new sgraph::GLScenegraphRenderer(modelview,objects,shaderLocations);
-    xDelta = 0.0f;
-    yDelta = 0.0f;
-    zDelta = 0.0f;
 
 }
 
@@ -124,8 +121,14 @@ void View::Resize()
 }
 
 
-void View::setLookAt(glm::mat4 lookAt){
-    lookAtMatrix = lookAt;
+void View::updateTrackball(glm::mat4 updateMatrix)
+{
+    dynamic_cast<sgraph::DynamicTransform*>(cachedNodes["trackball"])->updateTransformMatrix(updateMatrix);
+}
+
+void View::resetTrackball()
+{
+    dynamic_cast<sgraph::DynamicTransform*>(cachedNodes["trackball"])->setTransformMatrix(glm::mat4(1.0f));
 }
 
 void View::display(sgraph::IScenegraph *scenegraph) {
@@ -141,7 +144,7 @@ void View::display(sgraph::IScenegraph *scenegraph) {
     
     
     modelview.push(glm::mat4(1.0));
-    modelview.top() = modelview.top() * lookAtMatrix;
+    modelview.top() = modelview.top() * glm::lookAt(glm::vec3(0.0f, 300.0f, 300.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     
     //send projection matrix to GPU    
     glUniformMatrix4fv(shaderLocations.getLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
@@ -187,7 +190,21 @@ void View::closeWindow() {
     glfwTerminate();
 }
 
+void View::initScenegraphNodes(sgraph::IScenegraph *scenegraph)
+{
+    auto nodes = scenegraph->getNodes();
+    std::vector<string> savedNodes = {"trackball"};
 
+    for(const auto& nodeName: savedNodes)
+    {
+        if(nodes.find(nodeName) != nodes.end())
+        {
+            // The node is present, save it!
+            cout<<"Found : "<<nodeName<<endl; //It's finding the nodes now.
+            cachedNodes[nodeName] = dynamic_cast<sgraph::TransformNode*>(nodes[nodeName]); // Can't cast to abstract class, so need to cast to pointer 
+        }
+    }
+}
 
 
 

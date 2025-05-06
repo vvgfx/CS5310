@@ -8,6 +8,7 @@
 #include "RotateTransform.h"
 #include "ScaleTransform.h"
 #include "TranslateTransform.h"
+#include "DynamicTransform.h"
 #include <ShaderProgram.h>
 #include <ShaderLocationsVault.h>
 #include "ObjectInstance.h"
@@ -100,6 +101,11 @@ namespace sgraph {
 
         void visitRotateTransform(RotateTransform *rotateNode) {
             visitTransformNode(rotateNode);
+        }
+
+        void visitDynamicTransform(DynamicTransform *dynamicTransformNode)
+        {
+            visitTransformNode(dynamicTransformNode);
         }
 
         private:
