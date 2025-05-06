@@ -101,6 +101,26 @@ void Controller::onkey(int key, int scancode, int action, int mods)
         case GLFW_KEY_Z:
             view.startRotation();
             break;
+        case GLFW_KEY_LEFT:
+            view.updateRotation(5.0f, 0.0f);
+            break;
+        case GLFW_KEY_RIGHT:
+            view.updateRotation(-5.0f, 0.0f);
+            break;
+        case GLFW_KEY_UP:
+            view.updateRotation(0.0f, 5.0f);
+            break;
+        case GLFW_KEY_DOWN:
+            view.updateRotation(0.0f, -5.0f);
+            break;
+        case GLFW_KEY_EQUAL:
+            view.translateDrone(1);
+            break;
+        case GLFW_KEY_MINUS:
+            view.translateDrone(-1);
+            break;
+
+        
     }
 }
 

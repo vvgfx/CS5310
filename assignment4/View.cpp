@@ -202,7 +202,8 @@ void View::initScenegraphNodes(sgraph::IScenegraph *scenegraph)
     // {
     //     cout<<"Key: "<<names.first<<endl;
     // }
-    std::vector<string> savedNodes = {"propeller-1-rotate", "propeller-2-rotate", "propeller-3-rotate", "propeller-4-rotate", "drone-rotate"};
+    std::vector<string> savedNodes = {"propeller-1-rotate", "propeller-2-rotate", "propeller-3-rotate", "propeller-4-rotate", "drone-roll",
+                                        "drone-rotate-pitch", "drone-rotate-yaw", "drone-translate"};
 
     for(const auto& nodeName: savedNodes)
     {
@@ -257,11 +258,45 @@ void View::rotate()
         rotationAngle = 0.0f;
         isRotating = false;
     }
-    float rollSpeed = 1.0f;
+    float rollSpeed = 2.0f;
     rotationAngle += rollSpeed;
 
     float newAngle = glm::radians(rotationAngle);
-    sgraph::RotateTransform *droneRotateNode = dynamic_cast<sgraph::RotateTransform*>(cachedNodes["drone-rotate"]);
+    sgraph::RotateTransform *droneRotateNode = dynamic_cast<sgraph::RotateTransform*>(cachedNodes["drone-roll"]);
     droneRotateNode->updateRotation(newAngle);
     
+}
+
+//Note to self: I have been doing this using traditional math only so far. Is there a way to do this with change in co-ordinate systems?
+void View::updateRotation(float yawRot, float pitchRot)
+{
+    droneYaw += yawRot;
+    dronePitch += pitchRot;
+    // cout<<"New drone yaw: "<<droneYaw;
+    //update the rotations
+    sgraph::RotateTransform* yawRotationNode = dynamic_cast<sgraph::RotateTransform*>(cachedNodes["drone-rotate-yaw"]);
+    yawRotationNode->updateRotation(glm::radians(droneYaw));
+
+    sgraph::RotateTransform* pitchRotationNode = dynamic_cast<sgraph::RotateTransform*>(cachedNodes["drone-rotate-pitch"]);
+    pitchRotationNode->updateRotation(glm::radians(dronePitch));
+
+}
+
+void View::translateDrone(int direction)
+{
+    //positive is forward, negative is backward
+
+
+    //find the required movement
+    float forwardX = sin(glm::radians(droneYaw)) * cos(glm::radians(dronePitch)) * speed * direction;
+    float forwardY = sin(glm::radians(dronePitch)) * speed * direction * -1;
+    float forwardZ = cos(glm::radians(droneYaw)) * cos(glm::radians(dronePitch)) * speed * direction;
+
+
+    sgraph::TranslateTransform* droneTranslateNode = dynamic_cast<sgraph::TranslateTransform*>(cachedNodes["drone-translate"]);
+    if(droneTranslateNode)
+    {
+        // cout<<"Translating!! : "<<forwardX<<" , "<<forwardY<<" , "<<forwardZ<<endl;
+        droneTranslateNode->updateTransform(forwardX, forwardY, forwardZ);
+    }
 }

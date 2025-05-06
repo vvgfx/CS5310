@@ -4,6 +4,7 @@
 
 #include "TransformNode.h"
 #include <glm/gtc/matrix_transform.hpp>
+#include <iostream>
 
 namespace sgraph {
     /**
@@ -39,7 +40,17 @@ namespace sgraph {
 
             glm::vec3 getTranslate() {
             return glm::vec3(tx,ty,tz);
-        }
+            }
+            
+            void updateTransform(float x, float y, float z)
+            {
+                this->tx += x;
+                this->ty += y;
+                this->tz += z;
+                cout<<"New translate: "<<tx<<" , "<<ty<<" , "<<tz<<endl;
+                glm::mat4 transform = glm::translate(glm::mat4(1.0),glm::vec3(tx,ty,tz));
+                setTransform(transform);
+            }
 
     };
 }
