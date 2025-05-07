@@ -29,7 +29,8 @@ public:
     void display(sgraph::IScenegraph *scenegraph);
     bool shouldWindowClose();
     void closeWindow();
-    void setLookAt(glm::mat4 lookAt);
+    void updateTrackball(glm::mat4 updateMatrix);
+    void resetTrackball();
     void initScenegraphNodes(sgraph::IScenegraph *scenegraph);
     void changePropellerSpeed(int num);
     void rotatePropeller(string nodename, float time);

@@ -5,6 +5,7 @@
 #include "RotateTransform.h"
 #include "ScaleTransform.h"
 #include "TranslateTransform.h"
+#include "DynamicTransform.h"
 #include <ShaderProgram.h>
 #include <ShaderLocationsVault.h>
 #include "ObjectInstance.h"
@@ -78,6 +79,12 @@ namespace sgraph {
             glm::vec3 rotate = node->getRotationAxis();
             string s = "Rotate: " + to_string(rotate.x) + " , " + to_string(rotate.y) + " , " + to_string(rotate.z) + " ";
             s += to_string(node->getAngleInRadians());
+            transformNodeHelper(node, s);
+        }
+
+        void visitDynamicTransform(DynamicTransform *node)
+        {
+            string s = "Dynamic transform";
             transformNodeHelper(node, s);
         }
 

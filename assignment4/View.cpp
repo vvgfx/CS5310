@@ -110,10 +110,6 @@ void View::init(Callbacks *callbacks,map<string,util::PolygonMesh<VertexAttrib>>
     time = glfwGetTime();
 
     renderer = new sgraph::GLScenegraphRenderer(modelview,objects,shaderLocations);
-    xDelta = 0.0f;
-    yDelta = 0.0f;
-    zDelta = 0.0f;
-
 }
 
 void View::Resize()
@@ -123,10 +119,16 @@ void View::Resize()
     projection = glm::perspective(glm::radians(60.0f),(float)window_width/window_height,0.1f,10000.0f);
 }
 
-
-void View::setLookAt(glm::mat4 lookAt){
-    lookAtMatrix = lookAt;
+void View::updateTrackball(glm::mat4 updateMatrix)
+{
+    dynamic_cast<sgraph::DynamicTransform*>(cachedNodes["trackball"])->updateTransformMatrix(updateMatrix);
 }
+
+void View::resetTrackball()
+{
+    dynamic_cast<sgraph::DynamicTransform*>(cachedNodes["trackball"])->setTransformMatrix(glm::mat4(1.0f));
+}
+
 
 void View::display(sgraph::IScenegraph *scenegraph) {
     
@@ -148,7 +150,7 @@ void View::display(sgraph::IScenegraph *scenegraph) {
     rotate();
     
     modelview.push(glm::mat4(1.0));
-    modelview.top() = modelview.top() * lookAtMatrix;
+    modelview.top() = modelview.top() * glm::lookAt(glm::vec3(0.0f, 300.0f, 300.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     
     //send projection matrix to GPU    
     glUniformMatrix4fv(shaderLocations.getLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
@@ -203,7 +205,7 @@ void View::initScenegraphNodes(sgraph::IScenegraph *scenegraph)
     //     cout<<"Key: "<<names.first<<endl;
     // }
     std::vector<string> savedNodes = {"propeller-1-rotate", "propeller-2-rotate", "propeller-3-rotate", "propeller-4-rotate", "drone-roll",
-                                        "drone-rotate-pitch", "drone-rotate-yaw", "drone-translate"};
+                                        "drone-rotate-pitch", "drone-rotate-yaw", "drone-translate", "trackball"};
 
     for(const auto& nodeName: savedNodes)
     {

@@ -117,6 +117,12 @@ group root-2 root-2
 add-child base-translate root-2
 add-child drone-translate root-2
 #assign-root base-translate
-assign-root root-2
+#assign-root root-2
+
+dynamic trackball trackball
+add-child root-2 trackball
+assign-root trackball
+
+
 #assign-root root
 

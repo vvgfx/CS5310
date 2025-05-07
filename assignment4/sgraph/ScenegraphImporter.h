@@ -9,6 +9,7 @@
 #include "RotateTransform.h"
 #include "ScaleTransform.h"
 #include "TranslateTransform.h"
+#include "DynamicTransform.h"
 #include "PolygonMesh.h"
 #include "Material.h"
 #include <istream>
@@ -40,6 +41,10 @@ namespace sgraph {
                         util::PolygonMesh<VertexAttrib> mesh = util::ObjImporter<VertexAttrib>::importFile(in,false);
                         meshes[name] = mesh;         
                        } 
+                    }
+                    else if (command == "dynamic")
+                    {
+                        parseDynamic(inputWithOutComments);
                     }
                     else if (command == "group") {
                         parseGroup(inputWithOutComments);
@@ -91,6 +96,15 @@ namespace sgraph {
                 }
             }
             protected:
+
+                virtual void parseDynamic(istream& input)
+                {
+                    string varname, name;
+                    input >> varname >> name;
+                    cout << "Read " << varname << " " << name << endl;
+                    SGNode *dynamic = new DynamicTransform(glm::mat4(1.0), name, NULL);
+                    nodes[varname] = dynamic;
+                }
                 virtual void parseGroup(istream& input) {
                     string varname,name;
                     input >> varname >> name;
