@@ -44,11 +44,21 @@ namespace sgraph
             }
 
             /**
-             * When you want to update the transform, pass the matrix that you need to premultiply.
+             * When you want to update the transform wrt the parent's co-ordinate system, pass the matrix that you need to premultiply.
              */
-            void updateTransformMatrix(glm::mat4 matToPremultiply)
+            void premulTransformMatrix(glm::mat4 matToPremultiply)
             {
                 this->transformMatrix = matToPremultiply * this->transformMatrix;
+                setTransform(this->transformMatrix);
+            }
+            
+            /**
+             * When you want to update the transform wrt the local co-ordinate system, pass the matrix you need to post-multiply. This might be useful for composite transformations.
+             */
+            
+            void postmulTransformMatrix(glm::mat4 matToPostMultilply)
+            {
+                this->transformMatrix = this->transformMatrix * matToPostMultilply;
                 setTransform(this->transformMatrix);
             }
 

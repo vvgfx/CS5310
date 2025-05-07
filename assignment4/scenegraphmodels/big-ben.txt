@@ -99,23 +99,27 @@ add-child root base-translate
 #Adding the drone to the world
 import drone scenegraphmodels/drone.txt
 
+
+dynamic drone-movement drone-movement
+add-child drone drone-movement
+
 #add a rotate before the translate so that the drone roll behavior can be accesses in realtime
-rotate drone-roll drone-roll 0 0 0 1
+#rotate drone-roll drone-roll 0 0 0 1
 
 #putting the drone rotate below the drone roll because I want the drone's rotation to be affected by the drone's current orientation
-rotate drone-rotate-yaw drone-rotate-yaw 0 0 1 0
-rotate drone-rotate-pitch drone-rotate-pitch 0 1 0 0
+#rotate drone-rotate-yaw drone-rotate-yaw 0 0 1 0
+#rotate drone-rotate-pitch drone-rotate-pitch 0 1 0 0
 
-translate drone-translate drone-translate -100 100 150
-add-child drone drone-rotate-pitch
-add-child drone-rotate-pitch drone-rotate-yaw
-add-child drone-rotate-yaw drone-roll
-add-child drone-roll drone-translate
+#translate drone-translate drone-translate -100 100 150
+#add-child drone drone-rotate-pitch
+#add-child drone-rotate-pitch drone-rotate-yaw
+#add-child drone-rotate-yaw drone-roll
+#add-child drone-roll drone-translate
 
 
 group root-2 root-2
 add-child base-translate root-2
-add-child drone-translate root-2
+add-child drone-movement root-2 #Changed this to add drone-movement dynamic node!!!
 #assign-root base-translate
 #assign-root root-2
 

@@ -55,6 +55,9 @@ void Controller::run()
     view.init(this,meshes);
     //Save the nodes required for transformation when running!
     view.initScenegraphNodes(scenegraph);
+    //Set the initial orientation of the drone!
+    glm::mat4 droneOrientation  = glm::translate(glm::mat4(1.0f), glm::vec3(-100.0f, 100.0f, 150.0f));
+    view.setDroneOrientation(droneOrientation);
     while (!view.shouldWindowClose()) {
         view.display(scenegraph);
     }
@@ -83,25 +86,23 @@ void Controller::onkey(int key, int scancode, int action, int mods)
             view.startRotation();
             break;
         case GLFW_KEY_LEFT:
-            view.updateRotation(5.0f, 0.0f);
+            view.moveDrone(glm::rotate(glm::mat4(1.0f), glm::radians(5.0f) , glm::vec3(0.0f, 1.0f, 0.0f)));
             break;
         case GLFW_KEY_RIGHT:
-            view.updateRotation(-5.0f, 0.0f);
+            view.moveDrone(glm::rotate(glm::mat4(1.0f), glm::radians(-5.0f) , glm::vec3(0.0f, 1.0f, 0.0f)));
             break;
         case GLFW_KEY_UP:
-            view.updateRotation(0.0f, 5.0f);
+            view.moveDrone(glm::rotate(glm::mat4(1.0f), glm::radians(5.0f) , glm::vec3(1.0f, 0.0f, 0.0f)));
             break;
         case GLFW_KEY_DOWN:
-            view.updateRotation(0.0f, -5.0f);
+            view.moveDrone(glm::rotate(glm::mat4(1.0f), glm::radians(-5.0f) , glm::vec3(1.0f, 0.0f, 0.0f)));
             break;
         case GLFW_KEY_EQUAL:
-            view.translateDrone(1);
+            view.moveDrone(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 5.0f)));
             break;
         case GLFW_KEY_MINUS:
-            view.translateDrone(-1);
+            view.moveDrone(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -5.0f)));
             break;
-
-        
     }
 }
 

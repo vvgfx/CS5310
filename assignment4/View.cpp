@@ -121,7 +121,7 @@ void View::Resize()
 
 void View::updateTrackball(glm::mat4 updateMatrix)
 {
-    dynamic_cast<sgraph::DynamicTransform*>(cachedNodes["trackball"])->updateTransformMatrix(updateMatrix);
+    dynamic_cast<sgraph::DynamicTransform*>(cachedNodes["trackball"])->premulTransformMatrix(updateMatrix);
 }
 
 void View::resetTrackball()
@@ -200,12 +200,8 @@ void View::closeWindow() {
 void View::initScenegraphNodes(sgraph::IScenegraph *scenegraph)
 {
     auto nodes = scenegraph->getNodes();
-    // for(auto names : nodes)
-    // {
-    //     cout<<"Key: "<<names.first<<endl;
-    // }
     std::vector<string> savedNodes = {"propeller-1-rotate", "propeller-2-rotate", "propeller-3-rotate", "propeller-4-rotate", "drone-roll",
-                                        "drone-rotate-pitch", "drone-rotate-yaw", "drone-translate", "trackball"};
+                                        "drone-rotate-pitch", "drone-rotate-yaw", "drone-translate", "trackball", "drone-movement"};
 
     for(const auto& nodeName: savedNodes)
     {
@@ -269,36 +265,19 @@ void View::rotate()
     
 }
 
-//Note to self: I have been doing this using traditional math only so far. Is there a way to do this with change in co-ordinate systems?
-void View::updateRotation(float yawRot, float pitchRot)
+/**
+ * Move/Rotate the drone by passing the matrix to premultiply. This stacks on top of previous input.
+ */
+void View::moveDrone(glm::mat4 preMulMatrix)
 {
-    droneYaw += yawRot;
-    dronePitch += pitchRot;
-    // cout<<"New drone yaw: "<<droneYaw;
-    //update the rotations
-    sgraph::RotateTransform* yawRotationNode = dynamic_cast<sgraph::RotateTransform*>(cachedNodes["drone-rotate-yaw"]);
-    yawRotationNode->updateRotation(glm::radians(droneYaw));
-
-    sgraph::RotateTransform* pitchRotationNode = dynamic_cast<sgraph::RotateTransform*>(cachedNodes["drone-rotate-pitch"]);
-    pitchRotationNode->updateRotation(glm::radians(dronePitch));
-
+    dynamic_cast<sgraph::DynamicTransform*>(cachedNodes["drone-movement"])->postmulTransformMatrix(preMulMatrix);
 }
 
-void View::translateDrone(int direction)
+
+/**
+ * Set the drone's matrix to what is passed. A good idea would be to pass a rotation and a translation.
+ */
+void View::setDroneOrientation(glm::mat4 resetMatrix)
 {
-    //positive is forward, negative is backward
-
-
-    //find the required movement
-    float forwardX = sin(glm::radians(droneYaw)) * cos(glm::radians(dronePitch)) * speed * direction;
-    float forwardY = sin(glm::radians(dronePitch)) * speed * direction * -1;
-    float forwardZ = cos(glm::radians(droneYaw)) * cos(glm::radians(dronePitch)) * speed * direction;
-
-
-    sgraph::TranslateTransform* droneTranslateNode = dynamic_cast<sgraph::TranslateTransform*>(cachedNodes["drone-translate"]);
-    if(droneTranslateNode)
-    {
-        // cout<<"Translating!! : "<<forwardX<<" , "<<forwardY<<" , "<<forwardZ<<endl;
-        droneTranslateNode->updateTransform(forwardX, forwardY, forwardZ);
-    }
+    dynamic_cast<sgraph::DynamicTransform*>(cachedNodes["drone-movement"])->setTransformMatrix(resetMatrix);
 }

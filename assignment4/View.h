@@ -35,8 +35,8 @@ public:
     void changePropellerSpeed(int num);
     void rotatePropeller(string nodename, float time);
     void startRotation();
-    void updateRotation(float yawRot, float pitchRot);
-    void translateDrone(int direction);
+    void moveDrone(glm::mat4 preMulMatrix);
+    void setDroneOrientation(glm::mat4 resetMatrix);
     float xDelta, yDelta, zDelta;
 
 private: 
@@ -61,9 +61,6 @@ private:
 
     //Saving all the required nodes for dynamic transformation!
     std::map<string, sgraph::TransformNode*> cachedNodes; // Need to save this as a pointer because TransformNode is abstract :(
-
-    //rotations for the drone
-    float droneYaw = 0.0f, dronePitch = 0.0f;
 };
 
 #endif
