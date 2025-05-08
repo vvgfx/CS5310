@@ -260,17 +260,21 @@ void View::rotate()
     rotationAngle += rollSpeed;
 
     float newAngle = glm::radians(rotationAngle);
-    sgraph::RotateTransform *droneRotateNode = dynamic_cast<sgraph::RotateTransform*>(cachedNodes["drone-roll"]);
-    droneRotateNode->updateRotation(newAngle);
+    sgraph::DynamicTransform *droneRotateNode = dynamic_cast<sgraph::DynamicTransform*>(cachedNodes["drone-movement"]);
+    droneRotateNode->postmulTransformMatrix(glm::rotate(glm::mat4(1.0), glm::radians(rollSpeed), glm::vec3(0.0f, 0.0f, 1.0f)));
     
 }
 
 /**
  * Move/Rotate the drone by passing the matrix to premultiply. This stacks on top of previous input.
  */
-void View::moveDrone(glm::mat4 preMulMatrix)
+void View::moveDrone(int direction)
 {
-    dynamic_cast<sgraph::DynamicTransform*>(cachedNodes["drone-movement"])->postmulTransformMatrix(preMulMatrix);
+    glm::mat4 translateMatrix(1.0);
+    float directionalSpeed = (direction > 0 ? 1.0f : -1.0f) * speed * 5.0f;
+    translateMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, directionalSpeed));
+    sgraph::DynamicTransform *droneTranslateNode = dynamic_cast<sgraph::DynamicTransform*>(cachedNodes["drone-movement"]);
+    droneTranslateNode->postmulTransformMatrix(translateMatrix);
 }
 
 
@@ -280,4 +284,26 @@ void View::moveDrone(glm::mat4 preMulMatrix)
 void View::setDroneOrientation(glm::mat4 resetMatrix)
 {
     dynamic_cast<sgraph::DynamicTransform*>(cachedNodes["drone-movement"])->setTransformMatrix(resetMatrix);
+}
+
+/**
+ * Pass a positive yawDir to rotate left, negative to rotate right. Similarly, positive pitchDir to rotate upwards, negative to rotate downwards
+ */
+
+void View::rotateDrone(int yawDir, int pitchDir)
+{
+    //Check if yaw Rotation is present
+    glm::mat4 rotationMatrix(1.0f);
+    if(yawDir != 0)
+    {
+        float yawSpeed = (yawDir > 0.0f? 1.0f : -1.0f) * 5.0f;
+        rotationMatrix = glm::rotate(rotationMatrix, glm::radians(yawSpeed) , glm::vec3(0.0f, 1.0f, 0.0f));
+    }
+    if(pitchDir != 0)
+    {
+        float pitchSpeed = (pitchDir > 0.0f? 1.0f : -1.0f) * 5.0f;
+        rotationMatrix = glm::rotate(rotationMatrix, glm::radians(pitchSpeed) , glm::vec3(1.0f, 0.0f, 0.0f));
+    }
+
+    dynamic_cast<sgraph::DynamicTransform*>(cachedNodes["drone-movement"])->postmulTransformMatrix(rotationMatrix);
 }

@@ -86,22 +86,22 @@ void Controller::onkey(int key, int scancode, int action, int mods)
             view.startRotation();
             break;
         case GLFW_KEY_LEFT:
-            view.moveDrone(glm::rotate(glm::mat4(1.0f), glm::radians(5.0f) , glm::vec3(0.0f, 1.0f, 0.0f)));
+            view.rotateDrone(1.0f, 0.0f);
             break;
         case GLFW_KEY_RIGHT:
-            view.moveDrone(glm::rotate(glm::mat4(1.0f), glm::radians(-5.0f) , glm::vec3(0.0f, 1.0f, 0.0f)));
+            view.rotateDrone(-1.0f, 0.0f);
             break;
         case GLFW_KEY_UP:
-            view.moveDrone(glm::rotate(glm::mat4(1.0f), glm::radians(5.0f) , glm::vec3(1.0f, 0.0f, 0.0f)));
+            view.rotateDrone(0.0f, 1.0f);
             break;
         case GLFW_KEY_DOWN:
-            view.moveDrone(glm::rotate(glm::mat4(1.0f), glm::radians(-5.0f) , glm::vec3(1.0f, 0.0f, 0.0f)));
+            view.rotateDrone(0.0f, 1.0f);
             break;
         case GLFW_KEY_EQUAL:
-            view.moveDrone(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 5.0f)));
+            view.moveDrone(1);
             break;
         case GLFW_KEY_MINUS:
-            view.moveDrone(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -5.0f)));
+            view.moveDrone(-1);
             break;
     }
 }

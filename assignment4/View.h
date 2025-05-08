@@ -35,13 +35,13 @@ public:
     void changePropellerSpeed(int num);
     void rotatePropeller(string nodename, float time);
     void startRotation();
-    void moveDrone(glm::mat4 preMulMatrix);
+    void moveDrone(int direction);
     void setDroneOrientation(glm::mat4 resetMatrix);
+    void rotateDrone(int yawDir, int pitchDir);
     float xDelta, yDelta, zDelta;
 
 private: 
     void rotate();
-    glm::mat4 lookAtMatrix;
     GLFWwindow* window;
     util::ShaderProgram program;
     util::ShaderLocationsVault shaderLocations;
@@ -51,9 +51,7 @@ private:
     sgraph::SGNodeVisitor *renderer;
     int frames;
     double time;
-    glm::mat4 sceneRotation;
     float rotationSpeed = 0.5f;
-    glm::mat4 cumulativeRotation = glm::mat4(1.0f);
     float speed = 1.0f;
 
     bool isRotating = false;
