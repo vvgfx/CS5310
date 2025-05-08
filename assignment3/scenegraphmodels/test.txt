@@ -1,0 +1,21 @@
+#all the instances
+instance box models/thomas-lyons-object.obj
+instance cylinder models/cylinder.obj
+instance cone models/cone.obj
+
+#material
+material mat-ground
+wireframe 1
+ambient 0 1 0
+end-material
+
+
+
+leaf box-leaf box-leaf instanceof box
+scale box-scale box-scale 1 1 1
+rotate box-rotate box-rotate 45 0 1 0
+assign-material box-leaf mat-ground
+
+add-child box-leaf box-rotate
+add-child box-rotate box-scale
+assign-root box-scale

@@ -123,7 +123,8 @@ void View::updateTrackball(float deltaX, float deltaY)
 {
     float sensitivity = 0.005f;
     glm::mat4 rotMatrix = glm::rotate(glm::mat4(1.0), (deltaX * sensitivity), glm::vec3(0.0f, 1.0f, 0.0f));
-    rotMatrix = glm::rotate(rotMatrix, (deltaY * sensitivity), glm::vec3(1.0f, 0.0f, 0.0f));
+    if(cameraType != 2)
+        rotMatrix = glm::rotate(rotMatrix, (deltaY * sensitivity), glm::vec3(1.0f, 0.0f, 0.0f));
     dynamic_cast<sgraph::DynamicTransform*>(cachedNodes["trackball"])->premulTransformMatrix(rotMatrix);
 }
 
@@ -157,8 +158,8 @@ void View::display(sgraph::IScenegraph *scenegraph) {
         modelview.top() = modelview.top() * glm::lookAt(glm::vec3(0.0f, 300.0f, 300.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     else if(cameraType == 2)
         modelview.top() = modelview.top() * glm::lookAt(glm::vec3(0.0f, 150.0f, 300.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-        else if(cameraType == 3)
-        {
+    else if(cameraType == 3)
+    {
             //Drone camera. Need to find a point that is forward(for the lookAt), find the drone co-ordinates(for the eye) and the up-direction for the up-axis
             //drone co-ordinates seem simple enough. I can just use the transform matrix with a translation of 20 in the z-axis
             //target = same as eye, the translation must be higher, so 25?
@@ -180,6 +181,10 @@ void View::display(sgraph::IScenegraph *scenegraph) {
 
     //draw scene graph here
     scenegraph->getRoot()->accept(renderer);
+
+    // glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
+    // glEnable(GL_CULL_FACE);
+    // glCullFace(GL_FRONT_FACE);
 
     
     
