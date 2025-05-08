@@ -77,7 +77,7 @@ namespace sgraph {
             modelview.pop();
         }
 
-        /**
+            /**
          * @brief For this visitor, only the transformation matrix is required.
          * Thus there is nothing special to be done for each type of transformation.
          * We delegate to visitTransformNode above

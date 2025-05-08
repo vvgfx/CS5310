@@ -73,35 +73,47 @@ void Controller::onkey(int key, int scancode, int action, int mods)
         return;
     switch(key)
     {
-        case GLFW_KEY_R:
+        case GLFW_KEY_R://Rest the trackball orientation
             view.resetTrackball();
             break;
-        case GLFW_KEY_S:
+        case GLFW_KEY_S://Make the drone slower
             view.changePropellerSpeed(-1);
             break;
-        case GLFW_KEY_F:
+        case GLFW_KEY_F://Make the drone faster
             view.changePropellerSpeed(1);
             break;
-        case GLFW_KEY_Z:
+        case GLFW_KEY_Z://Make the drone do a barrel roll
             view.startRotation();
             break;
-        case GLFW_KEY_LEFT:
+        case GLFW_KEY_LEFT://rotate the drone left
             view.rotateDrone(1.0f, 0.0f);
             break;
-        case GLFW_KEY_RIGHT:
+        case GLFW_KEY_RIGHT://rotate the drone right
             view.rotateDrone(-1.0f, 0.0f);
             break;
-        case GLFW_KEY_UP:
+        case GLFW_KEY_UP://rotate the drone upwards
+            view.rotateDrone(0.0f, -1.0f);
+            break;
+        case GLFW_KEY_DOWN://rotate the drone downwards
             view.rotateDrone(0.0f, 1.0f);
             break;
-        case GLFW_KEY_DOWN:
-            view.rotateDrone(0.0f, 1.0f);
-            break;
-        case GLFW_KEY_EQUAL:
+        case GLFW_KEY_EQUAL://translate the drone forward
             view.moveDrone(1);
             break;
-        case GLFW_KEY_MINUS:
+        case GLFW_KEY_MINUS://translate the drone backward
             view.moveDrone(-1);
+            break;
+        case GLFW_KEY_D://reset the drone to it's original orientation
+            view.setDroneOrientation(glm::translate(glm::mat4(1.0f), glm::vec3(-100.0f, 100.0f, 150.0f)));
+            break;
+        case GLFW_KEY_1:
+            view.changeCameraType(1);//Default camera
+            break;
+        case GLFW_KEY_2:
+            view.changeCameraType(2);//Chopper camera
+            break;
+        case GLFW_KEY_3:
+            view.changeCameraType(3);//Drone camera
             break;
     }
 }
@@ -126,11 +138,7 @@ void Controller::onCursorMove(double newXPos, double newYPos)
     float deltaY = newYPos - oldYPos;
     if(!(mousePressed && ( deltaX != 0 || deltaY != 0)))
     return;
-    float sensitivity = 0.005f;
-    glm::mat4 rotMatrix = glm::rotate(glm::mat4(1.0), (deltaX * sensitivity), glm::vec3(0.0f, 1.0f, 0.0f));
-    rotMatrix = glm::rotate(rotMatrix, (deltaY * sensitivity), glm::vec3(1.0f, 0.0f, 0.0f));
-    cout<<"Direction: "<<newXPos - oldXPos<<" , "<<newYPos - oldYPos<<endl;
-    view.updateTrackball(rotMatrix);
+    view.updateTrackball(deltaX, deltaY);
 }
 
 void Controller::reshape(int width, int height) 

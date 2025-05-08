@@ -119,9 +119,12 @@ void View::Resize()
     projection = glm::perspective(glm::radians(60.0f),(float)window_width/window_height,0.1f,10000.0f);
 }
 
-void View::updateTrackball(glm::mat4 updateMatrix)
+void View::updateTrackball(float deltaX, float deltaY)
 {
-    dynamic_cast<sgraph::DynamicTransform*>(cachedNodes["trackball"])->premulTransformMatrix(updateMatrix);
+    float sensitivity = 0.005f;
+    glm::mat4 rotMatrix = glm::rotate(glm::mat4(1.0), (deltaX * sensitivity), glm::vec3(0.0f, 1.0f, 0.0f));
+    rotMatrix = glm::rotate(rotMatrix, (deltaY * sensitivity), glm::vec3(1.0f, 0.0f, 0.0f));
+    dynamic_cast<sgraph::DynamicTransform*>(cachedNodes["trackball"])->premulTransformMatrix(rotMatrix);
 }
 
 void View::resetTrackball()
@@ -150,8 +153,27 @@ void View::display(sgraph::IScenegraph *scenegraph) {
     rotate();
     
     modelview.push(glm::mat4(1.0));
-    modelview.top() = modelview.top() * glm::lookAt(glm::vec3(0.0f, 300.0f, 300.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-    
+    if(cameraType == 1)
+        modelview.top() = modelview.top() * glm::lookAt(glm::vec3(0.0f, 300.0f, 300.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    else if(cameraType == 2)
+        modelview.top() = modelview.top() * glm::lookAt(glm::vec3(0.0f, 150.0f, 300.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        else if(cameraType == 3)
+        {
+            //Drone camera. Need to find a point that is forward(for the lookAt), find the drone co-ordinates(for the eye) and the up-direction for the up-axis
+            //drone co-ordinates seem simple enough. I can just use the transform matrix with a translation of 20 in the z-axis
+            //target = same as eye, the translation must be higher, so 25?
+            //for the up-axis, I can convert the y axis to vec4, pre-multiply by the transformation matrix, then convert back to vec3.
+            //This seems super hacky though, is there an alternate way that's easier?
+            
+            glm::mat4 droneTransformMatrix = dynamic_cast<sgraph::DynamicTransform*>(cachedNodes["drone-movement"])->getTransformMatrix();
+            glm::vec3 droneEye = droneTransformMatrix * glm::vec4(0.0f, 0.0f, 20.0f, 1.0f); // setting 1 as the homogenous coordinate
+            // Implicit typecasts work!!!!
+            glm::vec3 droneLookAt = droneTransformMatrix * glm::vec4(0.0f, 0.0f, 25.0f, 1.0f);
+            glm::vec3 droneUp = droneTransformMatrix * glm::vec4(0.0f, 1.0f, 0.0f, 0.0f);//homogenous coordinate is 0.0f as the vector is an axis, not a point.
+            
+            modelview.top() = modelview.top() * glm::lookAt(droneEye, droneLookAt, droneUp);        
+    }
+        
     //send projection matrix to GPU    
     glUniformMatrix4fv(shaderLocations.getLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
     
@@ -200,8 +222,8 @@ void View::closeWindow() {
 void View::initScenegraphNodes(sgraph::IScenegraph *scenegraph)
 {
     auto nodes = scenegraph->getNodes();
-    std::vector<string> savedNodes = {"propeller-1-rotate", "propeller-2-rotate", "propeller-3-rotate", "propeller-4-rotate", "drone-roll",
-                                        "drone-rotate-pitch", "drone-rotate-yaw", "drone-translate", "trackball", "drone-movement"};
+    std::vector<string> savedNodes = {"propeller-1-rotate", "propeller-2-rotate", "propeller-3-rotate", "propeller-4-rotate",
+                                         "trackball", "drone-movement"};
 
     for(const auto& nodeName: savedNodes)
     {
@@ -306,4 +328,9 @@ void View::rotateDrone(int yawDir, int pitchDir)
     }
 
     dynamic_cast<sgraph::DynamicTransform*>(cachedNodes["drone-movement"])->postmulTransformMatrix(rotationMatrix);
+}
+
+void View::changeCameraType(int cameraType)
+{
+    this->cameraType = cameraType;
 }

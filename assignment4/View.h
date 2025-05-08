@@ -29,7 +29,7 @@ public:
     void display(sgraph::IScenegraph *scenegraph);
     bool shouldWindowClose();
     void closeWindow();
-    void updateTrackball(glm::mat4 updateMatrix);
+    void updateTrackball(float deltaX, float deltaY);
     void resetTrackball();
     void initScenegraphNodes(sgraph::IScenegraph *scenegraph);
     void changePropellerSpeed(int num);
@@ -38,6 +38,7 @@ public:
     void moveDrone(int direction);
     void setDroneOrientation(glm::mat4 resetMatrix);
     void rotateDrone(int yawDir, int pitchDir);
+    void changeCameraType(int type);
     float xDelta, yDelta, zDelta;
 
 private: 
@@ -56,6 +57,8 @@ private:
 
     bool isRotating = false;
     float rotationAngle = 0.0f;
+
+    int cameraType = 1;
 
     //Saving all the required nodes for dynamic transformation!
     std::map<string, sgraph::TransformNode*> cachedNodes; // Need to save this as a pointer because TransformNode is abstract :(
