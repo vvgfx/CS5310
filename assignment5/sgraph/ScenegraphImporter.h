@@ -236,6 +236,7 @@ namespace sgraph {
                             input >> x;
                             light.setSpotAngle(x);
                         }
+                        input >> command;
                     }
                 }
 

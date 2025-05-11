@@ -7,6 +7,7 @@ using namespace std;
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "sgraph/GLScenegraphRenderer.h"
+#include "sgraph/LightRetriever.h"
 #include "VertexAttrib.h"
 
 
@@ -111,6 +112,7 @@ void View::init(Callbacks *callbacks,map<string,util::PolygonMesh<VertexAttrib>>
     time = glfwGetTime();
 
     renderer = new sgraph::GLScenegraphRenderer(modelview,objects,shaderLocations);
+    lightRetriever = new sgraph::LightRetriever(modelview);
 }
 
 void View::Resize()
@@ -136,7 +138,7 @@ void View::resetTrackball()
 
 
 void View::display(sgraph::IScenegraph *scenegraph) {
-    
+    // cout<<"Entered here!"<<endl;
     program.enable();
     glClearColor(0,0,0,1);
     glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);
@@ -175,11 +177,34 @@ void View::display(sgraph::IScenegraph *scenegraph) {
             
             modelview.top() = modelview.top() * glm::lookAt(droneEye, droneLookAt, droneUp);        
     }
+
+    initShaderVars();
+    glUniform1i(shaderLocations.getLocation("numLights"), lights.size());
+
+    for (int i = 0; i < lights.size(); i++) {
+    
+        glm::vec4 pos = lights[i].getPosition();
+        // glm::vec4 direction = lights[i].getSpotDirection();
+        pos = modelview.top() * lightTransformations[i] * pos;
+        // direction = modelview.top() * collectedTransformations[i] * direction;
+        // position
+        glUniform4fv(lightLocations[i].position, 1, glm::value_ptr(pos));
+    
+        // Set light colors
+        glUniform3fv(lightLocations[i].ambient, 1, glm::value_ptr(lights[i].getAmbient()));
+        glUniform3fv(lightLocations[i].diffuse, 1, glm::value_ptr(lights[i].getDiffuse()));
+        glUniform3fv(lightLocations[i].specular, 1, glm::value_ptr(lights[i].getSpecular()));
+
+        // spot light
+        // glUniform3fv(lightLocations[i].spotDirection, 1, glm::value_ptr(direction));
+        // glUniform1f(lightLocations[i].spotAngle, lights[i].getSpotCutoff());
+}
         
     //send projection matrix to GPU    
     glUniformMatrix4fv(shaderLocations.getLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
-
+    //traverse through the scenegraph to get lights
+    scenegraph->getRoot()->accept(lightRetriever);
     //draw scene graph here
     scenegraph->getRoot()->accept(renderer);
 
@@ -204,6 +229,30 @@ void View::display(sgraph::IScenegraph *scenegraph) {
     }
     
 
+}
+
+void View::initLights(sgraph::IScenegraph *scenegraph)
+{
+    scenegraph->getRoot()->accept(lightRetriever);
+    sgraph::LightRetriever* lightsParser = reinterpret_cast<sgraph::LightRetriever*>(lightRetriever);
+    lights = lightsParser->getLights();
+    lightTransformations = lightsParser->getLightTransformations();
+}
+
+void View::initShaderVars()
+{
+    for (int i = 0; i < lights.size(); i++)
+    {
+      LightLocation ll;
+      stringstream name;
+
+      name << "light[" << i << "]";
+      ll.ambient = shaderLocations.getLocation(name.str() + "" +".ambient");
+      ll.diffuse = shaderLocations.getLocation(name.str() + ".diffuse");
+      ll.specular = shaderLocations.getLocation(name.str() + ".specular");
+      ll.position = shaderLocations.getLocation(name.str() + ".position");
+      lightLocations.push_back(ll);
+    }
 }
 
 bool View::shouldWindowClose() {
@@ -311,7 +360,9 @@ void View::moveDrone(int direction)
  */
 void View::setDroneOrientation(glm::mat4 resetMatrix)
 {
-    dynamic_cast<sgraph::DynamicTransform*>(cachedNodes["drone-movement"])->setTransformMatrix(resetMatrix);
+    sgraph::DynamicTransform* droneNode = dynamic_cast<sgraph::DynamicTransform*>(cachedNodes["drone-movement"]);
+    if(droneNode)
+        droneNode->setTransformMatrix(resetMatrix);
 }
 
 /**

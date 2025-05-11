@@ -12,6 +12,7 @@
 #include <ShaderProgram.h>
 #include <ShaderLocationsVault.h>
 #include "ObjectInstance.h"
+#include "Light.h"
 #include <stack>
 #include <iostream>
 using namespace std;
@@ -25,28 +26,27 @@ namespace sgraph
     class LightRetriever : public SGNodeVisitor
     {
     public:
-
-
-        struct LightProperties
-        {
-            glm::vec3 ambient;
-            glm::vec3 diffuse;
-            glm::vec3 specular;
-            glm::vec4 position;
-        };
-        
         /**
          * @brief Construct a new LightRetriever object
          *
          * @param mv a reference to modelview stack that will be used to convert light to the view co-ordinate system
          */
-        LightRetriever(stack<glm::mat4> &mv) : modelview(mv)  {}
+        LightRetriever(stack<glm::mat4> &mv) {
+            stack<glm::mat4> temp;
+            lightModelview = temp;
+            lightModelview.push(glm::mat4(1.0f));
+        }
 
-
-
-        void getLights(SGNode *node)
+        void saveLights(SGNode *node)
         {
-
+            vector<util::Light> nodeLights =  node->getLights();
+            if(nodeLights.empty())
+                return;
+            for(auto& light : nodeLights)
+            {
+                lights.push_back(light);
+                lightTransformations.push_back(lightModelview.top());
+            }
         }
 
         /**
@@ -56,6 +56,7 @@ namespace sgraph
          */
         void visitGroupNode(GroupNode *groupNode)
         {
+            saveLights(groupNode);
             for (int i = 0; i < groupNode->getChildren().size(); i = i + 1)
             {
                 groupNode->getChildren()[i]->accept(this);
@@ -63,14 +64,14 @@ namespace sgraph
         }
 
         /**
-         * @brief Draw the instance for the leaf, after passing the
-         * modelview and color to the shader
+         * @brief get lights attached to this leaf(if any)
+         * 
          *
          * @param leafNode
          */
         void visitLeafNode(LeafNode *leafNode)
         {
-
+            saveLights(leafNode);
         }
 
         /**
@@ -80,13 +81,14 @@ namespace sgraph
          */
         void visitTransformNode(TransformNode *transformNode)
         {
-            modelview.push(modelview.top());
-            modelview.top() = modelview.top() * transformNode->getTransform();
+            lightModelview.push(lightModelview.top());
+            lightModelview.top() = lightModelview.top() * transformNode->getTransform();
+            saveLights(transformNode);
             if (transformNode->getChildren().size() > 0)
             {
                 transformNode->getChildren()[0]->accept(this);
             }
-            modelview.pop();
+            lightModelview.pop();
         }
 
         /**
@@ -123,11 +125,24 @@ namespace sgraph
             visitTransformNode(dynamicTransformNode);
         }
 
+        vector<util::Light> getLights()
+        {
+            return lights;
+        }
+
+        vector<glm::mat4> getLightTransformations()
+        {
+            return lightTransformations;
+        }
+
     private:
-        stack<glm::mat4> &modelview;
-        map<string, glm::mat4> lightMap;
-        map<string, 
-        vector<glm::mat4> lights;
+        stack<glm::mat4> lightModelview;
+
+        // Each light has ambient, diffuse, specular, shininess and position. Now the first 4 are independent of the co-ordinate system, but the position isn't. 
+        // So I'm keeping a track of the lightTransformations such that for each light, there is a lightTransformation. This may duplicate transformations if there
+        // are multiple lights in the same node, but so be it! This way I can keep the index constant when I ultimately reference them.
+        vector<util::Light> lights;
+        vector<glm::mat4> lightTransformations;
     };
 }
 

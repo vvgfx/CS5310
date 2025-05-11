@@ -39,7 +39,22 @@ public:
     void setDroneOrientation(glm::mat4 resetMatrix);
     void rotateDrone(int yawDir, int pitchDir);
     void changeCameraType(int type);
+    void initShaderVars();
+    void initLights(sgraph::IScenegraph *scenegraph);
     float xDelta, yDelta, zDelta;
+
+    //This class saves the shader locations of all the light inputs.
+    class LightLocation 
+    {
+
+    public:
+        int ambient,diffuse,specular,position;
+        LightLocation()
+        {
+            ambient = diffuse = specular = position = -1;
+        }
+
+    };
 
 private: 
     void rotate();
@@ -50,6 +65,7 @@ private:
     glm::mat4 projection;
     stack<glm::mat4> modelview;
     sgraph::SGNodeVisitor *renderer;
+    sgraph::SGNodeVisitor *lightRetriever;
     int frames;
     double time;
     float rotationSpeed = 0.5f;
@@ -62,6 +78,9 @@ private:
 
     //Saving all the required nodes for dynamic transformation!
     std::map<string, sgraph::TransformNode*> cachedNodes; // Need to save this as a pointer because TransformNode is abstract :(
+    vector<LightLocation> lightLocations;
+    vector<util::Light> lights;
+    vector<glm::mat4> lightTransformations;
 };
 
 #endif

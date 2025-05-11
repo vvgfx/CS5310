@@ -28,7 +28,7 @@ void Controller::initScenegraph() {
     //read in the file of commands
     ifstream inFile;
     if(textfile == "")
-        inFile = ifstream("scenegraphmodels/big-ben.txt");
+        inFile = ifstream("scenegraphmodels/test.txt");
     else
         inFile = ifstream(textfile);
     //ifstream inFile("tryout.txt");
@@ -55,6 +55,7 @@ void Controller::run()
     view.init(this,meshes);
     //Save the nodes required for transformation when running!
     view.initScenegraphNodes(scenegraph);
+    view.initLights(scenegraph);
     //Set the initial orientation of the drone!
     glm::mat4 droneOrientation  = glm::translate(glm::mat4(1.0f), glm::vec3(-100.0f, 100.0f, 150.0f));
     view.setDroneOrientation(droneOrientation);

@@ -5,6 +5,7 @@
 #include <vector>
 #include <stack>
 #include <string>
+#include "Light.h"
 using namespace std;
 
 namespace sgraph {
