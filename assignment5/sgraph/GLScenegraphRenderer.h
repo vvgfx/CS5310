@@ -68,9 +68,9 @@ namespace sgraph {
 
             //fragment next
             util::Material leafMat = leafNode->getMaterial();
-            glUniformMatrix4fv(shaderLocations.getLocation("material.ambient"), 1, GL_FALSE, glm::value_ptr(leafMat.getAmbient()));
-            glUniformMatrix4fv(shaderLocations.getLocation("material.diffuse"), 1, GL_FALSE, glm::value_ptr(leafMat.getDiffuse()));
-            glUniformMatrix4fv(shaderLocations.getLocation("material.specular"), 1, GL_FALSE, glm::value_ptr(leafMat.getSpecular()));
+            glUniform3fv(shaderLocations.getLocation("material.ambient"), 1, glm::value_ptr(leafMat.getAmbient()));
+            glUniform3fv(shaderLocations.getLocation("material.diffuse"), 1, glm::value_ptr(leafMat.getDiffuse()));
+            glUniform3fv(shaderLocations.getLocation("material.specular"), 1, glm::value_ptr(leafMat.getSpecular()));
             glUniform1f(shaderLocations.getLocation("material.shininess"), leafMat.getShininess());
             objects[leafNode->getInstanceOf()]->draw();
         }

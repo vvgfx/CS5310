@@ -310,7 +310,11 @@ void View::moveDrone(int direction)
  */
 void View::setDroneOrientation(glm::mat4 resetMatrix)
 {
-    dynamic_cast<sgraph::DynamicTransform*>(cachedNodes["drone-movement"])->setTransformMatrix(resetMatrix);
+    sgraph::DynamicTransform* droneTransform = dynamic_cast<sgraph::DynamicTransform*>(cachedNodes["drone-movement"]);
+    if(droneTransform)
+    {
+        droneTransform->setTransformMatrix(resetMatrix);
+    }
 }
 
 /**

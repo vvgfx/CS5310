@@ -238,6 +238,7 @@ namespace sgraph {
                         }
                         input >> command;
                     }
+                    lights[name] = light;
                 }
 
                 virtual void parseAssignLight(istream& input)

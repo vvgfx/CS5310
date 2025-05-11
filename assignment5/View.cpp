@@ -158,7 +158,7 @@ void View::display(sgraph::IScenegraph *scenegraph) {
     
     modelview.push(glm::mat4(1.0));
     if(cameraType == 1)
-        modelview.top() = modelview.top() * glm::lookAt(glm::vec3(0.0f, 300.0f, 300.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        modelview.top() = modelview.top() * glm::lookAt(glm::vec3(0.0f, 100.0f, 100.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     else if(cameraType == 2)
         modelview.top() = modelview.top() * glm::lookAt(glm::vec3(0.0f, 150.0f, 300.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     else if(cameraType == 3)
@@ -184,27 +184,20 @@ void View::display(sgraph::IScenegraph *scenegraph) {
     for (int i = 0; i < lights.size(); i++) {
     
         glm::vec4 pos = lights[i].getPosition();
-        // glm::vec4 direction = lights[i].getSpotDirection();
         pos = modelview.top() * lightTransformations[i] * pos;
-        // direction = modelview.top() * collectedTransformations[i] * direction;
         // position
-        glUniform4fv(lightLocations[i].position, 1, glm::value_ptr(pos));
-    
+        // cout<<"Light position : "<<i<< " a : "<<lightLocations[i].ambient<<endl;
+        
         // Set light colors
         glUniform3fv(lightLocations[i].ambient, 1, glm::value_ptr(lights[i].getAmbient()));
         glUniform3fv(lightLocations[i].diffuse, 1, glm::value_ptr(lights[i].getDiffuse()));
         glUniform3fv(lightLocations[i].specular, 1, glm::value_ptr(lights[i].getSpecular()));
-
-        // spot light
-        // glUniform3fv(lightLocations[i].spotDirection, 1, glm::value_ptr(direction));
-        // glUniform1f(lightLocations[i].spotAngle, lights[i].getSpotCutoff());
-}
+        glUniform4fv(lightLocations[i].position, 1, glm::value_ptr(pos));
+    }
         
     //send projection matrix to GPU    
     glUniformMatrix4fv(shaderLocations.getLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
-    //traverse through the scenegraph to get lights
-    scenegraph->getRoot()->accept(lightRetriever);
     //draw scene graph here
     scenegraph->getRoot()->accept(renderer);
 
@@ -237,6 +230,8 @@ void View::initLights(sgraph::IScenegraph *scenegraph)
     sgraph::LightRetriever* lightsParser = reinterpret_cast<sgraph::LightRetriever*>(lightRetriever);
     lights = lightsParser->getLights();
     lightTransformations = lightsParser->getLightTransformations();
+
+    cout<<"Light count: "<<lights.size()<<endl;
 }
 
 void View::initShaderVars()
