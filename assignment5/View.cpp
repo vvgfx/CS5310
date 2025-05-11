@@ -66,8 +66,8 @@ void View::init(Callbacks *callbacks,map<string,util::PolygonMesh<VertexAttrib>>
     glfwSwapInterval(1);
 
     // create the shader program
-    program.createProgram(string("shaders/default.vert"),
-                          string("shaders/default.frag"));
+    program.createProgram(string("shaders/phong-multiple.vert"),
+                          string("shaders/phong-multiple.frag"));
     // assuming it got created, get all the shader variables that it uses
     // so we can initialize them at some point
     // enable the shader program
@@ -89,6 +89,7 @@ void View::init(Callbacks *callbacks,map<string,util::PolygonMesh<VertexAttrib>>
     map<string, string> shaderVarsToVertexAttribs;
 
     shaderVarsToVertexAttribs["vPosition"] = "position";
+    shaderVarsToVertexAttribs["vNormal"] = "normal";
     
     
     for (typename map<string,util::PolygonMesh<VertexAttrib> >::iterator it=meshes.begin();
@@ -177,7 +178,7 @@ void View::display(sgraph::IScenegraph *scenegraph) {
         
     //send projection matrix to GPU    
     glUniformMatrix4fv(shaderLocations.getLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
-    
+
 
     //draw scene graph here
     scenegraph->getRoot()->accept(renderer);

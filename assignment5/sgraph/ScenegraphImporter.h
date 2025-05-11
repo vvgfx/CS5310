@@ -12,6 +12,7 @@
 #include "DynamicTransform.h"
 #include "PolygonMesh.h"
 #include "Material.h"
+#include "Light.h"
 #include <istream>
 #include <map>
 #include <string>
@@ -42,6 +43,14 @@ namespace sgraph {
                         meshes[name] = mesh;         
                        } 
                     }
+                    else if (command == "light")
+                    {
+                        parseLight(inputWithOutComments);
+                    }
+                    else if (command == "assign-light")
+                    {
+                        parseAssignLight(inputWithOutComments);
+                    }
                     else if (command == "dynamic")
                     {
                         parseDynamic(inputWithOutComments);
@@ -51,7 +60,6 @@ namespace sgraph {
                     }
                     else if (command == "leaf") {
                         parseLeaf(inputWithOutComments);
-
                     }
                     else if (command == "material") {
                         parseMaterial(inputWithOutComments);
@@ -105,6 +113,7 @@ namespace sgraph {
                     SGNode *dynamic = new DynamicTransform(glm::mat4(1.0), name, NULL);
                     nodes[varname] = dynamic;
                 }
+
                 virtual void parseGroup(istream& input) {
                     string varname,name;
                     input >> varname >> name;
@@ -184,6 +193,63 @@ namespace sgraph {
                         input >> command;
                     }
                     materials[name] = mat;
+                }
+
+                virtual void parseLight(istream& input)
+                {
+                    util::Light light;
+                    float r, g, b;
+                    float x, y, z;
+                    string name;
+                    input >> name;
+                    string command;
+                    input >> command;
+                    while(command != "end-light")
+                    {
+                        if (command == "ambient")
+                        {
+                            input >> r >> g >> b;
+                            light.setAmbient(r, g, b);
+                        }
+                        else if (command == "diffuse")
+                        {
+                            input >> r >> g >> b;
+                            light.setDiffuse(r, g, b);
+                        }
+                        else if (command == "specular")
+                        {
+                            input >> r >> g >> b;
+                            light.setSpecular(r, g, b);
+                        }
+                        else if (command == "position")
+                        {
+                            input >> x >> y >> z;
+                            light.setPosition(x, y, z);
+                        }
+                        else if (command == "spot-direction")
+                        {
+                            input >> x >> y >> z;
+                            light.setSpotDirection(x, y, z);
+                        }
+                        else if (command == "spot-angle")
+                        {
+                            input >> x;
+                            light.setSpotAngle(x);
+                        }
+                    }
+                }
+
+                virtual void parseAssignLight(istream& input)
+                {
+                    string lightName, parentName;
+                    input >> lightName >> parentName;
+
+                    SGNode* node = nodes[parentName]; 
+                    if ((node != nullptr) && (lights.find(lightName) != lights.end())) 
+                    {
+                        node->addLight(lights[lightName]);
+                    }
+
                 }
 
                 virtual void parseCopy(istream& input) {
@@ -271,6 +337,7 @@ namespace sgraph {
                 map<string,util::PolygonMesh<VertexAttrib> > meshes;
                 map<string,string> meshPaths;
                 SGNode *root;
+                map<string, util::Light> lights;
 
         
     };

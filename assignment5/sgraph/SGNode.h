@@ -69,6 +69,25 @@ namespace sgraph {
      */
     
     virtual void accept(SGNodeVisitor *visitor)=0;
+
+
+    // Adding defenitions for light stuff here. Currently, they have been defined in AbstractSGNode
+
+    /**
+     * Add a light to this node.
+     */
+    virtual void addLight(util::Light& light)=0;
+
+    /**
+     * Set all the lights for this node.
+     */
+    virtual void setLight(vector<util::Light>& lights)=0;
+
+    /**
+     * Get all the lights attached to this node.
+     */
+    virtual vector<util::Light> getLights()=0;
+
 };
 }
 

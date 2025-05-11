@@ -58,8 +58,20 @@ namespace sgraph {
          */
         void visitLeafNode(LeafNode *leafNode) {
             //send modelview matrix to GPU  
+            // glUniform4fv(shaderLocations.getLocation("vColor"),1,glm::value_ptr(leafNode->getMaterial().getAmbient())); // Commenting this out beacuse I no longer have vColor
+            // adding lighting stuff here
+
+            //vertex first
+            glm::mat4 normalmatrix = glm::inverse(glm::transpose((modelview.top())));
             glUniformMatrix4fv(shaderLocations.getLocation("modelview"), 1, GL_FALSE, glm::value_ptr(modelview.top()));
-            glUniform4fv(shaderLocations.getLocation("vColor"),1,glm::value_ptr(leafNode->getMaterial().getAmbient()));
+            glUniformMatrix4fv(shaderLocations.getLocation("normalmatrix"), 1, GL_FALSE, glm::value_ptr(normalmatrix));
+
+            //fragment next
+            util::Material leafMat = leafNode->getMaterial();
+            glUniformMatrix4fv(shaderLocations.getLocation("material.ambient"), 1, GL_FALSE, glm::value_ptr(leafMat.getAmbient()));
+            glUniformMatrix4fv(shaderLocations.getLocation("material.diffuse"), 1, GL_FALSE, glm::value_ptr(leafMat.getDiffuse()));
+            glUniformMatrix4fv(shaderLocations.getLocation("material.specular"), 1, GL_FALSE, glm::value_ptr(leafMat.getSpecular()));
+            glUniform1f(shaderLocations.getLocation("material.shininess"), leafMat.getShininess());
             objects[leafNode->getInstanceOf()]->draw();
         }
 
