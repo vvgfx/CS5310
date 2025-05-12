@@ -80,7 +80,7 @@ void main()
             specular = vec3(0,0,0);
 
         if(isSpot && insideCone)
-            fColor = fColor + vec4(ambient+diffuse,1.0);
+            fColor = fColor + vec4(ambient+diffuse+specular,1.0);
         else if(!isSpot)
             fColor = fColor + vec4(ambient+diffuse+specular,1.0);
 
