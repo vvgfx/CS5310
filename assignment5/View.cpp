@@ -188,12 +188,18 @@ void View::display(sgraph::IScenegraph *scenegraph) {
         pos = lightTransformations[i] * pos;
         // position
         
+        //adding direction for spotlight
+        glm::vec4 spotDirection = lights[i].getSpotDirection();
+        spotDirection = lightTransformations[i] * spotDirection;
         // Set light colors
         // cout<<"Light position : "<<i<<pos.x<<" , "<<pos.y<<" , "<<pos.z<<endl;
         glUniform3fv(lightLocations[i].ambient, 1, glm::value_ptr(lights[i].getAmbient()));
         glUniform3fv(lightLocations[i].diffuse, 1, glm::value_ptr(lights[i].getDiffuse()));
         glUniform3fv(lightLocations[i].specular, 1, glm::value_ptr(lights[i].getSpecular()));
         glUniform4fv(lightLocations[i].position, 1, glm::value_ptr(pos));
+        //spotlight stuff here
+        glUniform1f(lightLocations[i].spotAngle, lights[i].getSpotCutoff());
+        glUniform3fv(lightLocations[i].spotDirection, 1, glm::value_ptr(spotDirection));
     }
         
     //send projection matrix to GPU    
@@ -249,6 +255,9 @@ void View::initShaderVars()
       ll.diffuse = shaderLocations.getLocation(name.str() + ".diffuse");
       ll.specular = shaderLocations.getLocation(name.str() + ".specular");
       ll.position = shaderLocations.getLocation(name.str() + ".position");
+      //adding spotDirection and spotAngle.
+      ll.spotDirection = shaderLocations.getLocation(name.str() + ".spotDirection");
+      ll.spotAngle = shaderLocations.getLocation(name.str() + ".spotAngle");
       lightLocations.push_back(ll);
     }
 }
