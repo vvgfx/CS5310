@@ -31,10 +31,8 @@ namespace sgraph
          *
          * @param mv a reference to modelview stack that will be used to convert light to the view co-ordinate system
          */
-        LightRetriever(stack<glm::mat4> &mv) {
-            stack<glm::mat4> temp;
-            lightModelview = temp;
-            lightModelview.push(glm::mat4(1.0f));
+        LightRetriever(stack<glm::mat4> &mv) :lightModelview(mv) {
+            // lightModelview = mv;
         }
 
         void saveLights(SGNode *node)
@@ -135,8 +133,14 @@ namespace sgraph
             return lightTransformations;
         }
 
+        void clearData()
+        {
+            lights.clear();
+            lightTransformations.clear(); 
+        }
+
     private:
-        stack<glm::mat4> lightModelview;
+        stack<glm::mat4>& lightModelview;
 
         // Each light has ambient, diffuse, specular, shininess and position. Now the first 4 are independent of the co-ordinate system, but the position isn't. 
         // So I'm keeping a track of the lightTransformations such that for each light, there is a lightTransformation. This may duplicate transformations if there

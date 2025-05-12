@@ -158,7 +158,7 @@ void View::display(sgraph::IScenegraph *scenegraph) {
     
     modelview.push(glm::mat4(1.0));
     if(cameraType == 1)
-        modelview.top() = modelview.top() * glm::lookAt(glm::vec3(0.0f, 100.0f, 100.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        modelview.top() = modelview.top() * glm::lookAt(glm::vec3(0.0f, 300.0f, 300.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     else if(cameraType == 2)
         modelview.top() = modelview.top() * glm::lookAt(glm::vec3(0.0f, 150.0f, 300.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     else if(cameraType == 3)
@@ -178,17 +178,18 @@ void View::display(sgraph::IScenegraph *scenegraph) {
             modelview.top() = modelview.top() * glm::lookAt(droneEye, droneLookAt, droneUp);        
     }
 
+    initLights(scenegraph);
     initShaderVars();
     glUniform1i(shaderLocations.getLocation("numLights"), lights.size());
 
     for (int i = 0; i < lights.size(); i++) {
     
         glm::vec4 pos = lights[i].getPosition();
-        pos = modelview.top() * lightTransformations[i] * pos;
+        pos = lightTransformations[i] * pos;
         // position
-        // cout<<"Light position : "<<i<< " a : "<<lightLocations[i].ambient<<endl;
         
         // Set light colors
+        // cout<<"Light position : "<<i<<pos.x<<" , "<<pos.y<<" , "<<pos.z<<endl;
         glUniform3fv(lightLocations[i].ambient, 1, glm::value_ptr(lights[i].getAmbient()));
         glUniform3fv(lightLocations[i].diffuse, 1, glm::value_ptr(lights[i].getDiffuse()));
         glUniform3fv(lightLocations[i].specular, 1, glm::value_ptr(lights[i].getSpecular()));
@@ -226,16 +227,18 @@ void View::display(sgraph::IScenegraph *scenegraph) {
 
 void View::initLights(sgraph::IScenegraph *scenegraph)
 {
-    scenegraph->getRoot()->accept(lightRetriever);
     sgraph::LightRetriever* lightsParser = reinterpret_cast<sgraph::LightRetriever*>(lightRetriever);
+    lightsParser->clearData();
+    scenegraph->getRoot()->accept(lightRetriever);
     lights = lightsParser->getLights();
     lightTransformations = lightsParser->getLightTransformations();
 
-    cout<<"Light count: "<<lights.size()<<endl;
+    // cout<<"Light count: "<<lights.size()<<endl;
 }
 
 void View::initShaderVars()
 {
+    lightLocations.clear();
     for (int i = 0; i < lights.size(); i++)
     {
       LightLocation ll;
