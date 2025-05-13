@@ -41,6 +41,7 @@ public:
     void changeCameraType(int type);
     void initShaderVars();
     void initLights(sgraph::IScenegraph *scenegraph);
+    void switchShaders();
     float xDelta, yDelta, zDelta;
 
     //This class saves the shader locations of all the light inputs.
@@ -83,6 +84,7 @@ private:
     vector<LightLocation> lightLocations;
     vector<util::Light> lights;
     vector<glm::mat4> lightTransformations;
+    bool isToonShaderUsed = false;
 };
 
 #endif

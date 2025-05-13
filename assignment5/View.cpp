@@ -266,6 +266,17 @@ bool View::shouldWindowClose() {
     return glfwWindowShouldClose(window);
 }
 
+void View::switchShaders()
+{
+    if(isToonShaderUsed)
+        program.createProgram(string("shaders/phong-multiple.vert"),string("shaders/phong-multiple.frag"));
+    else
+        program.createProgram(string("shaders/toon.vert"),string("shaders/toon.frag"));
+    program.enable();
+    shaderLocations = program.getAllShaderVariables();
+    isToonShaderUsed = !isToonShaderUsed;
+}
+
 
 
 void View::closeWindow() {

@@ -115,6 +115,9 @@ void Controller::onkey(int key, int scancode, int action, int mods)
         case GLFW_KEY_3:
             view.changeCameraType(3);//Drone camera
             break;
+        case GLFW_KEY_T:
+            view.switchShaders();
+            break;
     }
 }
 
