@@ -67,8 +67,8 @@ void View::init(Callbacks *callbacks,map<string,util::PolygonMesh<VertexAttrib>>
     glfwSwapInterval(1);
 
     // create the shader program
-    program.createProgram(string("shaders/phong-multiple.vert"),
-                          string("shaders/phong-multiple.frag"));
+    program.createProgram(string("shaders/toon.vert"),
+                          string("shaders/toon.frag"));
     // assuming it got created, get all the shader variables that it uses
     // so we can initialize them at some point
     // enable the shader program
@@ -185,6 +185,7 @@ void View::display(sgraph::IScenegraph *scenegraph) {
     for (int i = 0; i < lights.size(); i++) {
     
         glm::vec4 pos = lights[i].getPosition();
+        // cout<<"Light position : "<<i<<pos.x<<" , "<<pos.y<<" , "<<pos.z<<endl;
         pos = lightTransformations[i] * pos;
         // position
         
@@ -192,7 +193,6 @@ void View::display(sgraph::IScenegraph *scenegraph) {
         glm::vec4 spotDirection = lights[i].getSpotDirection();
         spotDirection = lightTransformations[i] * spotDirection;
         // Set light colors
-        // cout<<"Light position : "<<i<<pos.x<<" , "<<pos.y<<" , "<<pos.z<<endl;
         glUniform3fv(lightLocations[i].ambient, 1, glm::value_ptr(lights[i].getAmbient()));
         glUniform3fv(lightLocations[i].diffuse, 1, glm::value_ptr(lights[i].getDiffuse()));
         glUniform3fv(lightLocations[i].specular, 1, glm::value_ptr(lights[i].getSpecular()));

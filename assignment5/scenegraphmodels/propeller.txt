@@ -6,11 +6,17 @@ instance cone models/cone.obj
 #material
 material propeller-body-mat
 ambient 1 1 0
+diffuse 1 1 0
+specular 1 1 0
+shininess 1
 end-material
 
 #material
 material propeller-fin-mat
 ambient 1 0 0
+diffuse 1 0 0
+specular 1 0 0
+shininess 1
 end-material
 
 

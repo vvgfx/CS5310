@@ -6,16 +6,25 @@ instance cone models/cone.obj
 #material
 material drone-body-mat
 ambient 0.195 0.335 0.418
+diffuse 0.195 0.335 0.418
+specular 0.195 0.335 0.418
+shininess 1
 end-material
 
 #material
 material camera-holder-mat
 ambient 0.507 0.646 0.686
+diffuse 0.195 0.335 0.418
+specular 0.195 0.335 0.418
+shininess 1
 end-material
 
 #material
 material camera-mat
 ambient 1 1 1
+diffuse 0.195 0.335 0.418
+specular 0.195 0.335 0.418
+shininess 100
 end-material
 
 

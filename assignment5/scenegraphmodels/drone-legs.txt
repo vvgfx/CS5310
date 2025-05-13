@@ -6,6 +6,9 @@ instance cone models/cone.obj
 #material
 material drone-leg-mat
 ambient 0.355 0.484 0.668
+diffuse 0.355 0.484 0.668
+specular 0.355 0.484 0.668
+shininess 1
 end-material
 
 leaf drone-leg-1 drone-leg-1 instanceof box
