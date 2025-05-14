@@ -13,6 +13,7 @@
 #include "PolygonMesh.h"
 #include "Material.h"
 #include "Light.h"
+#include "TextureImage.h"
 #include <istream>
 #include <map>
 #include <string>
@@ -54,6 +55,10 @@ namespace sgraph {
                     else if (command == "dynamic")
                     {
                         parseDynamic(inputWithOutComments);
+                    }
+                    else if (command == "texture")
+                    {
+                        
                     }
                     else if (command == "group") {
                         parseGroup(inputWithOutComments);
