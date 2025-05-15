@@ -14,7 +14,7 @@
 #include "VertexAttrib.h"
 #include "Callbacks.h"
 #include "sgraph/IScenegraph.h"
-
+#include "TextureImage.h"
 #include <stack>
 using namespace std;
 
@@ -24,7 +24,7 @@ class View
 public:
     View();
     ~View();
-    void init(Callbacks* callbacks,map<string,util::PolygonMesh<VertexAttrib>>& meshes);
+    void init(Callbacks* callbacks,map<string,util::PolygonMesh<VertexAttrib>>& meshes, map<string, util::TextureImage*> textureMap);
     void Resize();
     void display(sgraph::IScenegraph *scenegraph);
     bool shouldWindowClose();
@@ -42,6 +42,7 @@ public:
     void initShaderVars();
     void initLights(sgraph::IScenegraph *scenegraph);
     void switchShaders();
+    void initTextures(map<string, util::TextureImage*> textureMap);
     float xDelta, yDelta, zDelta;
 
     //This class saves the shader locations of all the light inputs.
@@ -85,6 +86,7 @@ private:
     vector<util::Light> lights;
     vector<glm::mat4> lightTransformations;
     bool isToonShaderUsed = false;
+    map<string, unsigned int> textureIdMap;
 };
 
 #endif

@@ -30,9 +30,10 @@ namespace sgraph {
          * @param os the map of ObjectInstance objects
          * @param shaderLocations the shader locations for the program used to render
          */
-        GLScenegraphRenderer(stack<glm::mat4>& mv,map<string,util::ObjectInstance *>& os,util::ShaderLocationsVault& shaderLocations) 
+        GLScenegraphRenderer(stack<glm::mat4>& mv,map<string,util::ObjectInstance *>& os,util::ShaderLocationsVault& shaderLocations, map<string, unsigned int>& texIdMap) 
             : modelview(mv)
-            , objects(os) {
+            , objects(os)
+            , textureIdMap(texIdMap) {
             this->shaderLocations = shaderLocations;
             for (map<string,util::ObjectInstance *>::iterator it=objects.begin();it!=objects.end();it++) {
                 cout << "Mesh with name: "<< it->first << endl;
@@ -75,7 +76,15 @@ namespace sgraph {
             
             //texture stuff here!
             glUniformMatrix4fv(shaderLocations.getLocation("texturematrix"), 1, GL_FALSE, glm::value_ptr(leafNode->getTextureTransform()));
-            //TODO: need to move the texture to GPU memory in the scenegraphImporter, and then pass it to GLScenegraphRenderer's constructor.
+            //TODO: need to move the texture to GPU memory in the scenegraphImporter, and then pass it to GLScenegraphRenderer's constructor. - done    
+            string texName = leafNode->getTextureName();
+            if (!texName.empty() && textureIdMap.find(texName) != textureIdMap.end()) {
+                unsigned int texID = textureIdMap[texName];
+                glEnable(GL_TEXTURE_2D);
+                glActiveTexture(GL_TEXTURE0);
+                glBindTexture(GL_TEXTURE_2D, texID);
+                glUniform1i(shaderLocations.getLocation("image"), 0);
+            }
 
             objects[leafNode->getInstanceOf()]->draw();
         }
@@ -129,6 +138,7 @@ namespace sgraph {
         stack<glm::mat4>& modelview;    
         util::ShaderLocationsVault shaderLocations;
         map<string,util::ObjectInstance *> objects;
+        map<string, unsigned int> textureIdMap;
 
    };
 }

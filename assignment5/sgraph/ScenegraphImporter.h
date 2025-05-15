@@ -28,7 +28,7 @@ namespace sgraph {
             {
                 PPMImageLoader textureLoader;
                 textureLoader.load(defaultTexPath);
-                util::TextureImage texImage = *(new util::TextureImage(textureLoader.getPixels(), textureLoader.getWidth(), textureLoader.getHeight(), "default")); // directly converting to reference. Hope this works.
+                util::TextureImage* texImage = new util::TextureImage(textureLoader.getPixels(), textureLoader.getWidth(), textureLoader.getHeight(), "default"); // directly converting to reference. Hope this works.
                 textureMap["default"] = texImage;
             }
 
@@ -117,6 +117,11 @@ namespace sgraph {
                     throw runtime_error("Parsed scene graph, but nothing set as root");
                 }
             }
+
+            map<string, util::TextureImage*> getTextureMap()
+            {
+                return this->textureMap;
+            }
             protected:
 
                 virtual void parseTexture(istream& input)
@@ -125,7 +130,7 @@ namespace sgraph {
                     input >> texName >> texPath;
                     PPMImageLoader textureLoader;
                     textureLoader.load(texPath);
-                    util::TextureImage texImage = *(new util::TextureImage(textureLoader.getPixels(), textureLoader.getWidth(), textureLoader.getHeight(), texName)); // directly converting to reference. Hope this works.
+                    util::TextureImage* texImage = new util::TextureImage(textureLoader.getPixels(), textureLoader.getWidth(), textureLoader.getHeight(), texName); // directly converting to reference. Hope this works.
                     textureMap[texName] = texImage;
                 }
 
@@ -136,9 +141,7 @@ namespace sgraph {
 
                     LeafNode *leafNode = dynamic_cast<LeafNode *>(nodes[leafName]);
                     if ((leafNode != nullptr) && (textureMap.find(textureName) != textureMap.end())) 
-                    {
                         leafNode->setTextureName(textureName);
-                    }
                 }
 
                 virtual void parseDynamic(istream& input)
@@ -168,6 +171,7 @@ namespace sgraph {
                         input >> instanceof;
                     }
                     SGNode *leaf = new LeafNode(instanceof,name,NULL);
+                    dynamic_cast<LeafNode*>(leaf)->setTextureName("default");
                     nodes[varname] = leaf;
                 } 
 
@@ -376,7 +380,7 @@ namespace sgraph {
                 map<string,string> meshPaths;
                 SGNode *root;
                 map<string, util::Light> lights;
-                map<string,util::TextureImage> textureMap;
+                map<string,util::TextureImage*> textureMap;
                 string defaultTexturePath;
         
     };

@@ -1,6 +1,6 @@
 #include "Controller.h"
-#include "ImageLoader.h"
-#include "PPMImageLoader.h"
+#include "sgraph/ImageLoader.h"
+#include "sgraph/PPMImageLoader.h"
 #include "sgraph/IScenegraph.h"
 #include "sgraph/Scenegraph.h"
 #include "sgraph/GroupNode.h"
@@ -30,20 +30,21 @@ void Controller::initScenegraph() {
     //read in the file of commands
     ifstream inFile;
     if(textfile == "")
-        inFile = ifstream("scenegraphmodels/big-ben.txt");
+        inFile = ifstream("scenegraphmodels/test.txt");
     else
         inFile = ifstream(textfile);
     //ifstream inFile("tryout.txt");
     // changed the constructor of scenegraphImporter as all leaf nodes require a default texture.
     sgraph::ScenegraphImporter importer("textures/white.ppm");
     
-    //TODO: 1 - Save the texture name to images map in the model.
-    //      2 - move the textures to the gpu memory, and save the map of names to textureIds - do this in the view, before GLScenegraphRenderer is run.
+    //TODO: 1 - Save the texture name to images map in the model. - done
+    //      2 - move the textures to the gpu memory, and save the map of names to textureIds - do this in the view, before GLScenegraphRenderer is run. - done
     //      3 - Update GLScenegraphRenderer to have access to that textureId map, then hook it to the GPU at runtime.
 
     IScenegraph *scenegraph = importer.parse(inFile);
     //scenegraph->setMeshes(meshes);
     model.setScenegraph(scenegraph);
+    model.saveTextureMap(importer.getTextureMap());
     cout <<"Scenegraph made" << endl;   
     sgraph::ScenegraphDrawer* drawer = new sgraph::ScenegraphDrawer();
     scenegraph->getRoot()->accept(drawer);
@@ -58,7 +59,8 @@ void Controller::run()
 {
     sgraph::IScenegraph * scenegraph = model.getScenegraph();
     map<string,util::PolygonMesh<VertexAttrib> > meshes = scenegraph->getMeshes();
-    view.init(this,meshes);
+    map<string, util::TextureImage*> texMap = model.getTextureMap();
+    view.init(this,meshes, texMap);
     //Save the nodes required for transformation when running!
     view.initScenegraphNodes(scenegraph);
     //Set the initial orientation of the drone!

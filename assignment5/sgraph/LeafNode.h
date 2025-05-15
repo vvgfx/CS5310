@@ -83,6 +83,22 @@ public:
     }
 
     /**
+     * Get the texture transform matrix of this leaf.
+     */
+    glm::mat4 getTextureTransform()
+    {
+        return this->textureTransform;
+    }
+
+    /**
+     * Set the texture transform matrix of this leaf.
+     */
+    void setTextureTransform(glm::mat4 texTransform)
+    {
+        this->textureTransform = texTransform;
+    }
+
+    /**
      * Get the name of the instance this leaf contains
      * 
      * @return string 

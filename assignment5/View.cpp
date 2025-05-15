@@ -19,7 +19,7 @@ View::~View(){
 
 }
 
-void View::init(Callbacks *callbacks,map<string,util::PolygonMesh<VertexAttrib>>& meshes) 
+void View::init(Callbacks *callbacks,map<string,util::PolygonMesh<VertexAttrib>>& meshes, map<string, util::TextureImage*> texMap)
 {
     if (!glfwInit())
         exit(EXIT_FAILURE);
@@ -67,8 +67,8 @@ void View::init(Callbacks *callbacks,map<string,util::PolygonMesh<VertexAttrib>>
     glfwSwapInterval(1);
 
     // create the shader program
-    program.createProgram(string("shaders/toon.vert"),
-                          string("shaders/toon.frag"));
+    program.createProgram(string("shaders/phong-multiple.vert"),
+                          string("shaders/phong-multiple.frag"));
     // assuming it got created, get all the shader variables that it uses
     // so we can initialize them at some point
     // enable the shader program
@@ -112,9 +112,38 @@ void View::init(Callbacks *callbacks,map<string,util::PolygonMesh<VertexAttrib>>
     frames = 0;
     time = glfwGetTime();
 
-    renderer = new sgraph::GLScenegraphRenderer(modelview,objects,shaderLocations);
+    initTextures(texMap);
+    renderer = new sgraph::GLScenegraphRenderer(modelview, objects, shaderLocations, textureIdMap);
     lightRetriever = new sgraph::LightRetriever(modelview);
 }
+
+void View::initTextures(map<string, util::TextureImage*> textureMap)
+{
+    for(typename map<string, util::TextureImage*>::iterator it = textureMap.begin(); it!=textureMap.end(); it++)
+    {
+        //first - name of texture, second - texture itself
+        util::TextureImage* textureObject = it->second;
+
+        //generate texture ID
+        unsigned int textureId;
+        glGenTextures(1,&textureId);
+        glBindTexture(GL_TEXTURE_2D,textureId);
+
+        //texture params
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
+	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,GL_LINEAR_MIPMAP_LINEAR);
+
+        //copy texture to GPU
+	    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, textureObject->getWidth(),textureObject->getHeight(), 0, GL_RGB, GL_UNSIGNED_BYTE,textureObject->getImage());
+        glGenerateMipmap(GL_TEXTURE_2D);
+
+        //save id in map
+        textureIdMap[it->first] = textureId;
+    }
+}
+
 
 void View::Resize()
 {
@@ -206,6 +235,13 @@ void View::display(sgraph::IScenegraph *scenegraph) {
     //send projection matrix to GPU    
     glUniformMatrix4fv(shaderLocations.getLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
+    //enable textures before starting the renderer.
+    glEnable(GL_TEXTURE_2D);
+
+    // Update here for any active textures and their mappings
+    glActiveTexture(GL_TEXTURE0);
+    glUniform1i(shaderLocations.getLocation("image"), 0);
+
     //draw scene graph here
     scenegraph->getRoot()->accept(renderer);
 
@@ -269,13 +305,14 @@ bool View::shouldWindowClose() {
 
 void View::switchShaders()
 {
+    isToonShaderUsed = !isToonShaderUsed;
     if(isToonShaderUsed)
-        program.createProgram(string("shaders/phong-multiple.vert"),string("shaders/phong-multiple.frag"));
-    else
         program.createProgram(string("shaders/toon.vert"),string("shaders/toon.frag"));
+    else
+        program.createProgram(string("shaders/phong-multiple.vert"),string("shaders/phong-multiple.frag"));
     program.enable();
     shaderLocations = program.getAllShaderVariables();
-    isToonShaderUsed = !isToonShaderUsed;
+    cout<<"toon shader status: "<<isToonShaderUsed;
 }
 
 
