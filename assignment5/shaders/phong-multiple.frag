@@ -21,7 +21,7 @@ struct LightProperties
 
 in vec3 fNormal;
 in vec4 fPosition;
-//in vec4 fTexCoord;
+in vec4 fTexCoord;
 
 const int MAXLIGHTS = 10;
 
@@ -30,7 +30,7 @@ uniform LightProperties light[MAXLIGHTS];
 uniform int numLights;
 
 /* texture */
-//uniform sampler2D image;
+uniform sampler2D image;
 
 out vec4 fColor;
 
@@ -85,6 +85,6 @@ void main()
             fColor = fColor + vec4(ambient+diffuse+specular,1.0);
 
     }
-    //fColor = fColor * texture(image,fTexCoord.st);
+    fColor = fColor * texture(image,fTexCoord.st);
     //fColor = vec4(fTexCoord.s,fTexCoord.t,0,1);
 }

@@ -10,6 +10,7 @@
 #include "ScaleTransform.h"
 #include "TranslateTransform.h"
 #include "DynamicTransform.h"
+#include "PPMImageLoader.h"
 #include "PolygonMesh.h"
 #include "Material.h"
 #include "Light.h"
@@ -23,8 +24,12 @@ using namespace std;
 namespace sgraph {
     class ScenegraphImporter {
         public:
-            ScenegraphImporter() {
-
+            ScenegraphImporter(string defaultTexPath) : defaultTexturePath(defaultTexPath) 
+            {
+                PPMImageLoader textureLoader;
+                textureLoader.load(defaultTexPath);
+                util::TextureImage texImage = *(new util::TextureImage(textureLoader.getPixels(), textureLoader.getWidth(), textureLoader.getHeight(), "default")); // directly converting to reference. Hope this works.
+                textureMap["default"] = texImage;
             }
 
             IScenegraph *parse(istream& input) {
@@ -58,7 +63,11 @@ namespace sgraph {
                     }
                     else if (command == "texture")
                     {
-                        
+                        parseTexture(inputWithOutComments);
+                    }
+                    else if (command == "assign-texture")
+                    {
+                        parseAssignTexture(inputWithOutComments);
                     }
                     else if (command == "group") {
                         parseGroup(inputWithOutComments);
@@ -109,6 +118,28 @@ namespace sgraph {
                 }
             }
             protected:
+
+                virtual void parseTexture(istream& input)
+                {
+                    string texName, texPath;
+                    input >> texName >> texPath;
+                    PPMImageLoader textureLoader;
+                    textureLoader.load(texPath);
+                    util::TextureImage texImage = *(new util::TextureImage(textureLoader.getPixels(), textureLoader.getWidth(), textureLoader.getHeight(), texName)); // directly converting to reference. Hope this works.
+                    textureMap[texName] = texImage;
+                }
+
+                virtual void parseAssignTexture(istream& input)
+                {
+                    string textureName, leafName;
+                    input >> textureName >> leafName;
+
+                    LeafNode *leafNode = dynamic_cast<LeafNode *>(nodes[leafName]);
+                    if ((leafNode != nullptr) && (textureMap.find(textureName) != textureMap.end())) 
+                    {
+                        leafNode->setTextureName(textureName);
+                    }
+                }
 
                 virtual void parseDynamic(istream& input)
                 {
@@ -345,7 +376,8 @@ namespace sgraph {
                 map<string,string> meshPaths;
                 SGNode *root;
                 map<string, util::Light> lights;
-
+                map<string,util::TextureImage> textureMap;
+                string defaultTexturePath;
         
     };
 }

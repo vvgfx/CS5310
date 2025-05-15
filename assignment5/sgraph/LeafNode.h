@@ -30,12 +30,16 @@ protected:
      * The material associated with the object instance at this leaf
      */
     util::Material material;
+    string textureName;
+    glm::mat4 textureTransform;
 
 public:
-    LeafNode(const string& instanceOf,util::Material& material,const string& name,sgraph::IScenegraph *graph)
+    LeafNode(const string& instanceOf,util::Material& material,const string& name,sgraph::IScenegraph *graph, string texName)
         :AbstractSGNode(name,graph) {
         this->objInstanceName = instanceOf;
         this->material = material;
+        this->textureName = texName;
+        textureTransform  = glm::mat4(1.0f);//Assuming that the default texture transformation is the identity matrix.
     }
 
     LeafNode(const string& instanceOf,const string& name,sgraph::IScenegraph *graph)
@@ -63,6 +67,22 @@ public:
     }
 
     /**
+     * Set the name of the texture corresponding to this leaf.
+     */
+    void setTextureName(string texName)
+    {
+        textureName = texName;
+    }
+
+    /**
+     * Get the nameof the textuer corresponding to this leaf.
+     */
+    string getTextureName()
+    {
+        return textureName;
+    }
+
+    /**
      * Get the name of the instance this leaf contains
      * 
      * @return string 
@@ -78,7 +98,7 @@ public:
      */
 
     SGNode *clone() {
-        LeafNode *newclone = new LeafNode(this->objInstanceName,material,name,scenegraph);
+        LeafNode *newclone = new LeafNode(this->objInstanceName,material,name,scenegraph, this->textureName);
         return newclone;
     }
 

@@ -91,6 +91,7 @@ void View::init(Callbacks *callbacks,map<string,util::PolygonMesh<VertexAttrib>>
 
     shaderVarsToVertexAttribs["vPosition"] = "position";
     shaderVarsToVertexAttribs["vNormal"] = "normal";
+    shaderVarsToVertexAttribs["vTexCoord"] = "texcoord";
     
     
     for (typename map<string,util::PolygonMesh<VertexAttrib> >::iterator it=meshes.begin();

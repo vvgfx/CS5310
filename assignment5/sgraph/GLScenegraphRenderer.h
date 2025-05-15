@@ -65,13 +65,18 @@ namespace sgraph {
             glm::mat4 normalmatrix = glm::inverse(glm::transpose((modelview.top())));
             glUniformMatrix4fv(shaderLocations.getLocation("modelview"), 1, GL_FALSE, glm::value_ptr(modelview.top()));
             glUniformMatrix4fv(shaderLocations.getLocation("normalmatrix"), 1, GL_FALSE, glm::value_ptr(normalmatrix));
-
+            
             //fragment next
             util::Material leafMat = leafNode->getMaterial();
             glUniform3fv(shaderLocations.getLocation("material.ambient"), 1, glm::value_ptr(leafMat.getAmbient()));
             glUniform3fv(shaderLocations.getLocation("material.diffuse"), 1, glm::value_ptr(leafMat.getDiffuse()));
             glUniform3fv(shaderLocations.getLocation("material.specular"), 1, glm::value_ptr(leafMat.getSpecular()));
             glUniform1f(shaderLocations.getLocation("material.shininess"), leafMat.getShininess());
+            
+            //texture stuff here!
+            glUniformMatrix4fv(shaderLocations.getLocation("texturematrix"), 1, GL_FALSE, glm::value_ptr(leafNode->getTextureTransform()));
+            //TODO: need to move the texture to GPU memory in the scenegraphImporter, and then pass it to GLScenegraphRenderer's constructor.
+
             objects[leafNode->getInstanceOf()]->draw();
         }
 
