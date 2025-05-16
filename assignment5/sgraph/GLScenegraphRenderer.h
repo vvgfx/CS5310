@@ -73,9 +73,9 @@ namespace sgraph {
             glUniform3fv(shaderLocations.getLocation("material.diffuse"), 1, glm::value_ptr(leafMat.getDiffuse()));
             glUniform3fv(shaderLocations.getLocation("material.specular"), 1, glm::value_ptr(leafMat.getSpecular()));
             glUniform1f(shaderLocations.getLocation("material.shininess"), leafMat.getShininess());
-            glm::mat4 testMat(1.0f);
+
             //texture stuff here!
-            glUniformMatrix4fv(shaderLocations.getLocation("texturematrix"), 1, GL_FALSE, glm::value_ptr(testMat));
+            glUniformMatrix4fv(shaderLocations.getLocation("texturematrix"), 1, GL_FALSE, glm::value_ptr(leafNode->getTextureTransform()));
             //TODO: need to move the texture to GPU memory in the scenegraphImporter, and then pass it to GLScenegraphRenderer's constructor. - done    
             string texName = leafNode->getTextureName();
             if (!texName.empty() && textureIdMap.find(texName) != textureIdMap.end()) {

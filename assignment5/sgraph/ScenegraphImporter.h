@@ -172,7 +172,7 @@ namespace sgraph {
                         input >> instanceof;
                     }
                     SGNode *leaf = new LeafNode(instanceof,name,NULL);
-                    dynamic_cast<LeafNode*>(leaf)->setTextureName("default");
+                    LeafNode* leafInstance = dynamic_cast<LeafNode*>(leaf);
                     nodes[varname] = leaf;
                 } 
 

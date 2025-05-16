@@ -45,6 +45,8 @@ public:
     LeafNode(const string& instanceOf,const string& name,sgraph::IScenegraph *graph)
         :AbstractSGNode(name,graph) {
         this->objInstanceName = instanceOf;
+        this->textureName = "default";
+        this->textureTransform = glm::mat4(1.0f);
     }
 	
 	~LeafNode(){}

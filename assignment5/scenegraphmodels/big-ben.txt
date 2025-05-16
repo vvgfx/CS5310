@@ -15,9 +15,9 @@ end-material
 
 #material
 material mat-cone
-ambient 0.6 0.6 0.6
-diffuse 0.6 0.6 0.6
-specular 0.2 0.2 0.2
+ambient 1 1 1
+diffuse 1 1 1
+specular 0.9 0.9 0.9
 shininess 100
 end-material
 
@@ -53,13 +53,14 @@ spot-direction 0 -1 0
 spot-angle 20
 end-light
 
+image grass textures/grass_texture.ppm
 
 #root stuff
 group root root
 scale ground-scale ground-scale 200 5 200
 leaf ground-leaf ground instanceof box
 assign-material ground-leaf mat-ground
-
+assign-texture ground-leaf grass
 
 #build tree with only root
 add-child ground-scale root
@@ -98,9 +99,11 @@ add-child wall-4 wall-4-rotate
 add-child wall-4-rotate wall-4-translate
 add-child wall-4-translate walls
 
+image roof textures/roof_tile.ppm
 
 leaf cone-1 cone-1 instanceof cone
 assign-material cone-1 mat-cone
+assign-texture cone-1 roof
 scale cone-1-scale cone-1-scale 28 40 28
 translate cone-1-translate cone-1-translate 0 200 0
 add-child cone-1 cone-1-scale

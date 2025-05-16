@@ -42,3 +42,16 @@ Several examples of scene graphs have been given, in the scenegraphmodels folder
 4. face-hierarchy-with-copy-commands.txt: shows an example of a command that allows one to create a copy of part of a scene graph. See towards the end of this file.
 
 5. two-humanoids.txt: shows an example of how one command can be used to import an entire scene graph from another command file. This is helpful when creating a more complicated scene. Instead of writing all the commands in one file, one can create smaller pieces in separate files and then create a "main commands file" that imports them.
+
+
+Further additions:
+
+1. Support for a 3rd type of node: Dynamic Transform -  This is to make runtime modifications to the scenegraph easier.
+2. Support for lighting - extended the xml parser to support new commands "light" and "assign-light", then factored changes for supporting the same in the scenegraph and view.
+3. Support for textures - extended the xml parser ot support new commands "image" and "assign-texture", then factored changes for supporting the same in the scenegraph and view. Note: only PPM P3 textures are supported currently.
+4. Sample scene - big-ben.txt
+
+All textures used in the sample scene are from https://freestylized.com . They have a royalty free license for all commercial and non-commercial purposes. THey were converted to PPM P3 using GIMP (with ASCII export option.)
+Stylized grass : https://freestylized.com/material/grass_01/
+Stylized walls : https://freestylized.com/material/bricks_wall_11/, https://freestylized.com/material/stones_wall_03/
+Stylized roof : 
