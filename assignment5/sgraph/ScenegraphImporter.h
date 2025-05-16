@@ -61,7 +61,7 @@ namespace sgraph {
                     {
                         parseDynamic(inputWithOutComments);
                     }
-                    else if (command == "texture")
+                    else if (command == "image")
                     {
                         parseTexture(inputWithOutComments);
                     }
@@ -128,6 +128,7 @@ namespace sgraph {
                 {
                     string texName, texPath;
                     input >> texName >> texPath;
+                    cout << "Read " << texName << " " << texPath << endl;
                     PPMImageLoader textureLoader;
                     textureLoader.load(texPath);
                     util::TextureImage* texImage = new util::TextureImage(textureLoader.getPixels(), textureLoader.getWidth(), textureLoader.getHeight(), texName); // directly converting to reference. Hope this works.
@@ -137,7 +138,7 @@ namespace sgraph {
                 virtual void parseAssignTexture(istream& input)
                 {
                     string textureName, leafName;
-                    input >> textureName >> leafName;
+                    input >> leafName >> textureName;
 
                     LeafNode *leafNode = dynamic_cast<LeafNode *>(nodes[leafName]);
                     if ((leafNode != nullptr) && (textureMap.find(textureName) != textureMap.end())) 
