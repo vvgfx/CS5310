@@ -235,12 +235,6 @@ void View::display(sgraph::IScenegraph *scenegraph) {
     //send projection matrix to GPU    
     glUniformMatrix4fv(shaderLocations.getLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
-    //enable textures before starting the renderer.
-    glEnable(GL_TEXTURE_2D);
-
-    // Update here for any active textures and their mappings
-    glActiveTexture(GL_TEXTURE0);
-    glUniform1i(shaderLocations.getLocation("image"), 0);
 
     //draw scene graph here
     scenegraph->getRoot()->accept(renderer);

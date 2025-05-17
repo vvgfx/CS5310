@@ -13,9 +13,9 @@ end-material
 
 #material
 material mat-clock
-ambient 0.5 0.882 0.117
-diffuse 0.5 0.882 0.117 
-specular 0.5 0.882 0.117 
+ambient 0.5 0.117 0.882 
+diffuse 0.5 0.117 0.882  
+specular 0.5 0.117 0.882  
 shininess 1          
 end-material
 
