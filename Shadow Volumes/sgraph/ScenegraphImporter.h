@@ -15,6 +15,7 @@
 #include "Material.h"
 #include "Light.h"
 #include "TextureImage.h"
+#include "ObjAdjImporter.h"
 #include <istream>
 #include <map>
 #include <string>
@@ -45,7 +46,7 @@ namespace sgraph {
                         meshPaths[name] = path;
                         ifstream in(path);
                        if (in.is_open()) {
-                        util::PolygonMesh<VertexAttrib> mesh = util::ObjImporter<VertexAttrib>::importFile(in,false);
+                        util::PolygonMesh<VertexAttrib> mesh = util::ObjAdjImporter<VertexAttrib>::importFile(in,false);
                         meshes[name] = mesh;         
                        } 
                     }
