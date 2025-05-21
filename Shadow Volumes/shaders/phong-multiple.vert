@@ -14,17 +14,20 @@ out vec3 fNormal;
 out vec4 fPosition;
 out vec4 fTexCoord;
 
+out vec4 vertPosition;
+
 void main()
 {
-    vec3 lightVec,viewVec,reflectVec;
-    vec3 normalView;
-    vec3 ambient,diffuse,specular;
-    float nDotL,rDotV;
+    // vec3 lightVec,viewVec,reflectVec;
+    // vec3 normalView;
+    // vec3 ambient,diffuse,specular;
+    // float nDotL,rDotV;
 
     fPosition = modelview * vec4(vPosition.xyzw);
     gl_Position = projection * fPosition;
 
-
+    vertPosition = fPosition;
+    
     vec4 tNormal = inverse(transpose(modelview)) * vNormal;
     fNormal = normalize(tNormal.xyz);
 
