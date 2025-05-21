@@ -7,7 +7,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <cstdio>
-#include <ShaderProgram.h>
+#include <ShaderGeoProgram.h>
 #include "sgraph/SGNodeVisitor.h"
 #include "ObjectInstance.h"
 #include "PolygonMesh.h"
@@ -63,7 +63,7 @@ public:
 private: 
     void rotate();
     GLFWwindow* window;
-    util::ShaderProgram program;
+    util::ShaderGeoProgram program;
     util::ShaderLocationsVault shaderLocations;
     map<string,util::ObjectInstance *> objects;
     glm::mat4 projection;

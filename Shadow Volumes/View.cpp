@@ -68,7 +68,8 @@ void View::init(Callbacks *callbacks,map<string,util::PolygonMesh<VertexAttrib>>
 
     // create the shader program
     program.createProgram(string("shaders/phong-multiple.vert"),
-                          string("shaders/phong-multiple.frag"));
+                          string("shaders/phong-multiple.frag"), 
+                        string("shaders/silhouette.geom"));
     // assuming it got created, get all the shader variables that it uses
     // so we can initialize them at some point
     // enable the shader program
@@ -299,14 +300,14 @@ bool View::shouldWindowClose() {
 
 void View::switchShaders()
 {
-    isToonShaderUsed = !isToonShaderUsed;
-    if(isToonShaderUsed)
-        program.createProgram(string("shaders/toon.vert"),string("shaders/toon.frag"));
-    else
-        program.createProgram(string("shaders/phong-multiple.vert"),string("shaders/phong-multiple.frag"));
-    program.enable();
-    shaderLocations = program.getAllShaderVariables();
-    cout<<"toon shader status: "<<isToonShaderUsed<<endl;
+    // isToonShaderUsed = !isToonShaderUsed;
+    // if(isToonShaderUsed)
+    //     program.createProgram(string("shaders/toon.vert"),string("shaders/toon.frag"));
+    // else
+    //     program.createProgram(string("shaders/phong-multiple.vert"),string("shaders/phong-multiple.frag"));
+    // program.enable();
+    // shaderLocations = program.getAllShaderVariables();
+    // cout<<"toon shader status: "<<isToonShaderUsed<<endl;
 }
 
 
