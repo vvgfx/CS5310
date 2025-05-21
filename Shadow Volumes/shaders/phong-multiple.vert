@@ -8,7 +8,7 @@ in vec4 vTexCoord;
 
 uniform mat4 projection;
 uniform mat4 modelview;
-uniform mat4 normalmatrix;
+// uniform mat4 normalmatrix;
 uniform mat4 texturematrix;
 out vec3 fNormal;
 out vec4 fPosition;
@@ -25,7 +25,7 @@ void main()
     gl_Position = projection * fPosition;
 
 
-    vec4 tNormal = normalmatrix * vNormal;
+    vec4 tNormal = inverse(transpose(modelview)) * vNormal;
     fNormal = normalize(tNormal.xyz);
 
     fTexCoord = texturematrix * vec4(1*vTexCoord.s,1*vTexCoord.t,0,1);

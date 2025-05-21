@@ -63,9 +63,9 @@ namespace sgraph {
             // adding lighting stuff here
 
             //vertex first
-            glm::mat4 normalmatrix = glm::inverse(glm::transpose((modelview.top())));
+            // glm::mat4 normalmatrix = glm::inverse(glm::transpose((modelview.top()))); Moved this to the vertex shader instead of calculating on the cpu
             glUniformMatrix4fv(shaderLocations.getLocation("modelview"), 1, GL_FALSE, glm::value_ptr(modelview.top()));
-            glUniformMatrix4fv(shaderLocations.getLocation("normalmatrix"), 1, GL_FALSE, glm::value_ptr(normalmatrix));
+            // glUniformMatrix4fv(shaderLocations.getLocation("normalmatrix"), 1, GL_FALSE, glm::value_ptr(normalmatrix));
             
             //fragment next
             util::Material leafMat = leafNode->getMaterial();

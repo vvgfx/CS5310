@@ -188,7 +188,7 @@ void View::display(sgraph::IScenegraph *scenegraph) {
     
     modelview.push(glm::mat4(1.0));
     if(cameraType == 1)
-        modelview.top() = modelview.top() * glm::lookAt(glm::vec3(0.0f, 300.0f, 300.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        modelview.top() = modelview.top() * glm::lookAt(glm::vec3(0.0f, 100.0f, 100.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     else if(cameraType == 2)
         modelview.top() = modelview.top() * glm::lookAt(glm::vec3(0.0f, 150.0f, 300.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     else if(cameraType == 3)
