@@ -8,6 +8,7 @@ in vec4 vTexCoord;
 
 uniform mat4 projection;
 uniform mat4 modelview;
+uniform mat4 viewMat;
 // uniform mat4 normalmatrix;
 uniform mat4 texturematrix;
 out vec3 fNormal;
@@ -21,11 +22,11 @@ void main()
     vec3 ambient,diffuse,specular;
     float nDotL,rDotV;
 
-    fPosition = modelview * vec4(vPosition.xyzw);
+    fPosition = viewMat * modelview * vec4(vPosition.xyzw);
     gl_Position = projection * fPosition;
 
 
-    vec4 tNormal = inverse(transpose(modelview)) * vNormal;
+    vec4 tNormal = inverse(transpose(viewMat * modelview)) * vNormal;
     fNormal = normalize(tNormal.xyz);
 
     fTexCoord = texturematrix * vec4(1*vTexCoord.s,1*vTexCoord.t,0,1);

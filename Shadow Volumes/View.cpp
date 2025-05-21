@@ -187,10 +187,11 @@ void View::display(sgraph::IScenegraph *scenegraph) {
     rotate();
     
     modelview.push(glm::mat4(1.0));
+    glm::mat4 viewMat(1.0f);
     if(cameraType == 1)
-        modelview.top() = modelview.top() * glm::lookAt(glm::vec3(0.0f, 100.0f, 100.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        viewMat =  glm::lookAt(glm::vec3(0.0f, 100.0f, 100.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     else if(cameraType == 2)
-        modelview.top() = modelview.top() * glm::lookAt(glm::vec3(0.0f, 150.0f, 300.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        viewMat =  glm::lookAt(glm::vec3(0.0f, 150.0f, 300.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     else if(cameraType == 3)
     {
             //Drone camera. Need to find a point that is forward(for the lookAt), find the drone co-ordinates(for the eye) and the up-direction for the up-axis
@@ -205,23 +206,24 @@ void View::display(sgraph::IScenegraph *scenegraph) {
             glm::vec3 droneLookAt = droneTransformMatrix * glm::vec4(0.0f, 0.0f, 25.0f, 1.0f);
             glm::vec3 droneUp = droneTransformMatrix * glm::vec4(0.0f, 1.0f, 0.0f, 0.0f);//homogenous coordinate is 0.0f as the vector is an axis, not a point.
             
-            modelview.top() = modelview.top() * glm::lookAt(droneEye, droneLookAt, droneUp);        
+            viewMat =  glm::lookAt(droneEye, droneLookAt, droneUp);        
     }
 
     initLights(scenegraph);
     initShaderVars();
     glUniform1i(shaderLocations.getLocation("numLights"), lights.size());
+    glUniformMatrix4fv(shaderLocations.getLocation("viewMat"), 1, GL_FALSE, glm::value_ptr(viewMat));
 
     for (int i = 0; i < lights.size(); i++) {
     
         glm::vec4 pos = lights[i].getPosition();
         // cout<<"Light position : "<<i<<pos.x<<" , "<<pos.y<<" , "<<pos.z<<endl;
-        pos = lightTransformations[i] * pos;
+        pos = viewMat * lightTransformations[i] * pos;
         // position
         
         //adding direction for spotlight
         glm::vec4 spotDirection = lights[i].getSpotDirection();
-        spotDirection = lightTransformations[i] * spotDirection;
+        spotDirection = viewMat * lightTransformations[i] * spotDirection;
         // Set light colors
         glUniform3fv(lightLocations[i].ambient, 1, glm::value_ptr(lights[i].getAmbient()));
         glUniform3fv(lightLocations[i].diffuse, 1, glm::value_ptr(lights[i].getDiffuse()));
