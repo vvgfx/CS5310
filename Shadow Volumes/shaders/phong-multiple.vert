@@ -15,14 +15,14 @@ out vec4 vertPosition;
 
 void main()
 {
-    fPosition = modelview * vec4(vPosition.xyzw);
-    gl_Position = projection * fPosition;
+    gPosition = modelview * vec4(vPosition.xyzw);
+    gl_Position = projection * gPosition;
 
-    vertPosition = fPosition;
+    vertPosition = gPosition;
 
     vec4 tNormal = inverse(transpose(modelview)) * vNormal;
-    fNormal = normalize(tNormal.xyz);
+    gNormal = normalize(tNormal.xyz);
 
-    fTexCoord = texturematrix * vec4(1*vTexCoord.s,1*vTexCoord.t,0,1);
+    gTexCoord = texturematrix * vec4(1*vTexCoord.s,1*vTexCoord.t,0,1);
 
 }

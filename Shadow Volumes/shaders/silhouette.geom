@@ -1,7 +1,8 @@
 #version 330
 
 layout(triangles_adjacency) in;
-layout(line_strip, max_vertices = 6) out;
+layout(triangle_strip, max_vertices = 6) out;
+
 in vec4 vertPosition[];
 in vec3 gNormal[];
 in vec4 gPosition[];
@@ -20,6 +21,10 @@ struct LightProperties
 const int MAXLIGHTS = 10;
 uniform int numLights;
 uniform LightProperties light[MAXLIGHTS];
+
+out vec3 fNormal;
+out vec4 fPosition;
+out vec4 fTexCoord;
 
 void EmitLine(int StartIndex, int EndIndex)
 {
@@ -40,43 +45,31 @@ void EmitLine(int StartIndex, int EndIndex)
     EndPrimitive();
 }
 
+void EmitTriangle(int vert1, int vert2, int vert3)
+{
+    gl_Position = gl_in[vert1].gl_Position;
+    fNormal = gNormal[vert1];
+    fPosition = gPosition[vert1];
+    fTexCoord = gTexCoord[vert1];
+    EmitVertex();
+
+    gl_Position = gl_in[vert2].gl_Position;
+    fNormal = gNormal[vert2];
+    fPosition = gPosition[vert2];
+    fTexCoord = gTexCoord[vert2];
+    EmitVertex();
+
+    gl_Position = gl_in[vert3].gl_Position;
+    fNormal = gNormal[vert3];
+    fPosition = gPosition[vert3];
+    fTexCoord = gTexCoord[vert3];
+    EmitVertex();
+
+}
+
 // uniform vec3 gLightPos; // need to change this!!!
 
 void main()
 {
-    vec4 e1 = vertPosition[2] - vertPosition[0];
-    vec4 e2 = vertPosition[4] - vertPosition[0];
-    vec4 e3 = vertPosition[1] - vertPosition[0];
-    vec4 e4 = vertPosition[3] - vertPosition[2];
-    vec4 e5 = vertPosition[4] - vertPosition[2];
-    vec4 e6 = vertPosition[5] - vertPosition[0];
-    
-    // vec3 Normal = cross(e1, e2);
-    // for (int i = 0; i < numLights; i++)
-    // {
-    //     vec3 gLightPos(light[i].position);
-    //     vec3 LightDir = gLightPos - vertPosition[0];
-
-    //     if (dot(Normal, LightDir) > 0.00001) {
-    //         Normal = cross(e3, e1);
-
-    //         if (dot(Normal, LightDir) <= 0) {
-    //             EmitLine(0, 2);
-    //         }
-
-    //         Normal = cross(e4, e5);
-    //         LightDir = gLightPos - vertPosition[2];
-
-    //         if (dot(Normal, LightDir) <= 0) {
-    //             EmitLine(2, 4);
-    //         }
-
-    //         Normal = cross(e2, e6);
-    //         LightDir = gLightPos - vertPosition[4];
-
-    //         if (dot(Normal, LightDir) <= 0) {
-    //             EmitLine(4, 0);
-    //         }
-    //     }
-    // }
+    EmitTriangle(0,2,4);
 }
