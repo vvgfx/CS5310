@@ -67,14 +67,14 @@ void View::init(Callbacks *callbacks,map<string,util::PolygonMesh<VertexAttrib>>
     glfwSwapInterval(1);
 
     // create the shader program
-    program.createProgram(string("shaders/phong-multiple.vert"),
-                          string("shaders/phong-multiple.frag"), 
-                        string("shaders/silhouette.geom"));
+    renderProgram.createProgram(string("shaders/phong-multiple.vert"),
+                          string("shaders/phong-multiple.frag"));
+                        // string("shaders/geometry-test.geom"));
     // assuming it got created, get all the shader variables that it uses
     // so we can initialize them at some point
     // enable the shader program
-    program.enable();
-    shaderLocations = program.getAllShaderVariables();
+    renderProgram.enable();
+    shaderLocations = renderProgram.getAllShaderVariables();
 
     
     /* In the mesh, we have some attributes for each vertex. In the shader
@@ -170,7 +170,7 @@ void View::resetTrackball()
 
 void View::display(sgraph::IScenegraph *scenegraph) {
     // cout<<"Entered here!"<<endl;
-    program.enable();
+    renderProgram.enable();
     glClearColor(0,0,0,1);
     glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
@@ -248,7 +248,7 @@ void View::display(sgraph::IScenegraph *scenegraph) {
     
     modelview.pop();
     glFlush();
-    program.disable();
+    renderProgram.disable();
     
     glfwSwapBuffers(window);
     glfwPollEvents();

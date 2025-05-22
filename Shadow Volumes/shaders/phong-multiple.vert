@@ -1,28 +1,33 @@
 #version 330
 
+
+
 in vec4 vPosition;
 in vec4 vNormal;
 in vec4 vTexCoord;
 
 uniform mat4 projection;
 uniform mat4 modelview;
+// uniform mat4 normalmatrix;
 uniform mat4 texturematrix;
-
-out vec3 gNormal;
-out vec4 gPosition;
-out vec4 gTexCoord;
-out vec4 vertPosition;
+out vec3 fNormal;
+out vec4 fPosition;
+out vec4 fTexCoord;
 
 void main()
 {
-    gPosition = modelview * vec4(vPosition.xyzw);
-    gl_Position = projection * gPosition;
+    vec3 lightVec,viewVec,reflectVec;
+    vec3 normalView;
+    vec3 ambient,diffuse,specular;
+    float nDotL,rDotV;
 
-    vertPosition = gPosition;
+    fPosition = modelview * vec4(vPosition.xyzw);
+    gl_Position = projection * fPosition;
+
 
     vec4 tNormal = inverse(transpose(modelview)) * vNormal;
-    gNormal = normalize(tNormal.xyz);
+    fNormal = normalize(tNormal.xyz);
 
-    gTexCoord = texturematrix * vec4(1*vTexCoord.s,1*vTexCoord.t,0,1);
+    fTexCoord = texturematrix * vec4(1*vTexCoord.s,1*vTexCoord.t,0,1);
 
 }
