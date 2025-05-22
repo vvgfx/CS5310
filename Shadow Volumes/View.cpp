@@ -8,6 +8,7 @@ using namespace std;
 #include <glm/gtc/type_ptr.hpp>
 #include "sgraph/GLScenegraphRenderer.h"
 #include "sgraph/LightRetriever.h"
+#include "sgraph/ShadowRenderer.h"
 #include "VertexAttrib.h"
 
 
@@ -129,6 +130,7 @@ void View::init(Callbacks *callbacks,map<string,util::PolygonMesh<VertexAttrib>>
     initTextures(texMap);
     renderer = new sgraph::GLScenegraphRenderer(modelview, objects, renderShaderLocations, textureIdMap);
     lightRetriever = new sgraph::LightRetriever(modelview);
+    shadowRenderer = new sgraph::ShadowRenderer(modelview, objects, shadhowShaderLocations);
 }
 
 void View::initTextures(map<string, util::TextureImage*> textureMap)
@@ -270,6 +272,24 @@ void View::display(sgraph::IScenegraph *scenegraph)
     renderProgram.disable();
     #pragma endregion
     
+
+    #pragma region silhouettePass
+
+    modelview.push(glm::mat4(1.0));
+    modelview.top() = modelview.top() * viewMat;
+    // Should be able to reuse the lightlocations from the previous pass.
+    for (int i = 0; i < lights.size(); i++) 
+    {
+        glm::vec4 pos = lights[i].getPosition();
+        pos = lightTransformations[i] * pos;
+        glUniform4fv(lightLocations[i].position, 1, glm::value_ptr(pos));
+        // scenegraph->getRoot()->accept(shadowRenderer);
+    }
+
+    modelview.pop();
+
+
+    #pragma endregion
     glFlush();
     glfwSwapBuffers(window);
     glfwPollEvents();

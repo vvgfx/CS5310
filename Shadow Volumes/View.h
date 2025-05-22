@@ -73,6 +73,7 @@ public:
     stack<glm::mat4> modelview;
     sgraph::SGNodeVisitor *renderer;
     sgraph::SGNodeVisitor *lightRetriever;
+    sgraph::SGNodeVisitor *shadowRenderer;
     int frames;
     double time;
     float rotationSpeed = 0.5f;
