@@ -80,7 +80,7 @@ namespace sgraph {
             string texName = leafNode->getTextureName();
             if (!texName.empty() && textureIdMap.find(texName) != textureIdMap.end()) {
                 unsigned int texID = textureIdMap[texName];
-                glEnable(GL_TEXTURE_2D);
+                // glEnable(GL_TEXTURE_2D); // commenting this because it throws error 1280 and is not required anyways.
                 glActiveTexture(GL_TEXTURE0);
                 glBindTexture(GL_TEXTURE_2D, texID);
                 glUniform1i(shaderLocations.getLocation("image"), 0);

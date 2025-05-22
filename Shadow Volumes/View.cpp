@@ -149,8 +149,8 @@ void View::initTextures(map<string, util::TextureImage*> textureMap)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
-	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,GL_LINEAR_MIPMAP_LINEAR);
-
+	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,GL_LINEAR); // Mipmaps are not available for maximization
+        
         //copy texture to GPU
 	    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, textureObject->getWidth(),textureObject->getHeight(), 0, GL_RGB, GL_UNSIGNED_BYTE,textureObject->getImage());
         glGenerateMipmap(GL_TEXTURE_2D);
@@ -257,14 +257,14 @@ void View::display(sgraph::IScenegraph *scenegraph)
         glUniform1f(lightLocations[i].spotAngle, lights[i].getSpotCutoff());
         glUniform3fv(lightLocations[i].spotDirection, 1, glm::value_ptr(spotDirection));
     }
-        
+    
     //send projection matrix to GPU    
     glUniformMatrix4fv(renderShaderLocations.getLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
-
-
+    
+    
     //draw scene graph here
     scenegraph->getRoot()->accept(renderer);
-
+    
     // glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
     // glEnable(GL_CULL_FACE);
     // glCullFace(GL_FRONT_FACE);
@@ -272,22 +272,27 @@ void View::display(sgraph::IScenegraph *scenegraph)
     renderProgram.disable();
     #pragma endregion
     
-
+    
     #pragma region silhouettePass
 
     modelview.push(glm::mat4(1.0));
     modelview.top() = modelview.top() * viewMat;
+    
+    // ENABLE THE SHADOW SHADERS!!!!!
+    shadowProgram.enable();
+    glUniformMatrix4fv(shadhowShaderLocations.getLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
     // Should be able to reuse the lightlocations from the previous pass.
     for (int i = 0; i < lights.size(); i++) 
     {
         glm::vec4 pos = lights[i].getPosition();
         pos = lightTransformations[i] * pos;
-        glUniform4fv(lightLocations[i].position, 1, glm::value_ptr(pos));
-        // scenegraph->getRoot()->accept(shadowRenderer);
+        glm::vec3 sendingVal = glm::vec3(pos);
+        glUniform3fv(shadhowShaderLocations.getLocation("gLightPos"), 1, glm::value_ptr(sendingVal));
+        scenegraph->getRoot()->accept(shadowRenderer);
     }
 
     modelview.pop();
-
+    shadowProgram.disable();
 
     #pragma endregion
     glFlush();

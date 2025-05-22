@@ -73,14 +73,13 @@ namespace sgraph {
             glUniform3fv(shaderLocations.getLocation("material.diffuse"), 1, glm::value_ptr(leafMat.getDiffuse()));
             glUniform3fv(shaderLocations.getLocation("material.specular"), 1, glm::value_ptr(leafMat.getSpecular()));
             glUniform1f(shaderLocations.getLocation("material.shininess"), leafMat.getShininess());
-
             //texture stuff here!
             glUniformMatrix4fv(shaderLocations.getLocation("texturematrix"), 1, GL_FALSE, glm::value_ptr(leafNode->getTextureTransform()));
             //TODO: need to move the texture to GPU memory in the scenegraphImporter, and then pass it to GLScenegraphRenderer's constructor. - done    
             string texName = leafNode->getTextureName();
             if (!texName.empty() && textureIdMap.find(texName) != textureIdMap.end()) {
                 unsigned int texID = textureIdMap[texName];
-                glEnable(GL_TEXTURE_2D);
+                // glEnable(GL_TEXTURE_2D); // commenting this out because it throws a 1280 error and opengl doesn't need it anyways.
                 glActiveTexture(GL_TEXTURE0);
                 glBindTexture(GL_TEXTURE_2D, texID);
                 glUniform1i(shaderLocations.getLocation("image"), 0);
