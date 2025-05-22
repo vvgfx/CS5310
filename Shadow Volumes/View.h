@@ -40,17 +40,16 @@ public:
     void setDroneOrientation(glm::mat4 resetMatrix);
     void rotateDrone(int yawDir, int pitchDir);
     void changeCameraType(int type);
-    void initShaderVars();
     void initLights(sgraph::IScenegraph *scenegraph);
     void switchShaders();
     void initTextures(map<string, util::TextureImage*> textureMap);
     float xDelta, yDelta, zDelta;
-
+    
     //This class saves the shader locations of all the light inputs.
     class LightLocation 
     {
-
-    public:
+        
+        public:
         int ambient,diffuse,specular,position;
         int spotDirection, spotAngle;
         LightLocation()
@@ -58,15 +57,17 @@ public:
             ambient = diffuse = specular = position = -1;
             spotDirection = spotAngle = -1;
         }
-
+        
     };
-
-private: 
+    
+    private: 
+    void initLightShaderVars();
     void rotate();
     GLFWwindow* window;
     util::ShaderProgram renderProgram;
-    util::ShaderGeoProgram silhouetteProgram;
-    util::ShaderLocationsVault shaderLocations;
+    util::ShaderGeoProgram shadowProgram;
+    util::ShaderLocationsVault renderShaderLocations;
+    util::ShaderLocationsVault shadhowShaderLocations;
     map<string,util::ObjectInstance *> objects;
     glm::mat4 projection;
     stack<glm::mat4> modelview;

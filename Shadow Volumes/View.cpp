@@ -66,15 +66,28 @@ void View::init(Callbacks *callbacks,map<string,util::PolygonMesh<VertexAttrib>>
     gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
     glfwSwapInterval(1);
 
-    // create the shader program
+    // create the shader programs
+
+    // render shaders first
     renderProgram.createProgram(string("shaders/phong-multiple.vert"),
-                          string("shaders/phong-multiple.frag"));
-                        // string("shaders/geometry-test.geom"));
+                                string("shaders/phong-multiple.frag"));
     // assuming it got created, get all the shader variables that it uses
     // so we can initialize them at some point
     // enable the shader program
     renderProgram.enable();
-    shaderLocations = renderProgram.getAllShaderVariables();
+    renderShaderLocations = renderProgram.getAllShaderVariables();
+    renderProgram.disable();
+
+
+    // silhouette/shadow shaders next
+    shadowProgram.createProgram(string("shaders/silhouette.vert"),
+                                string("shaders/silhouette.frag"),
+                                string("shaders/silhouette.geom"));
+
+    shadowProgram.enable();
+    shadhowShaderLocations = shadowProgram.getAllShaderVariables();
+    shadowProgram.disable();
+    
 
     
     /* In the mesh, we have some attributes for each vertex. In the shader
@@ -89,7 +102,7 @@ void View::init(Callbacks *callbacks,map<string,util::PolygonMesh<VertexAttrib>>
        We create such a shader variable -> vertex attribute mapping now
      */
     map<string, string> shaderVarsToVertexAttribs;
-
+    // This is a singular mapping for all the shader programs. Might have issues with variable names later.
     shaderVarsToVertexAttribs["vPosition"] = "position";
     shaderVarsToVertexAttribs["vNormal"] = "normal";
     shaderVarsToVertexAttribs["vTexCoord"] = "texcoord";
@@ -99,7 +112,7 @@ void View::init(Callbacks *callbacks,map<string,util::PolygonMesh<VertexAttrib>>
            it!=meshes.end();
            it++) {
         util::ObjectInstance * obj = new util::ObjectInstance(it->first);
-        obj->initPolygonMesh(shaderLocations,shaderVarsToVertexAttribs,it->second);
+        obj->initPolygonMesh(renderShaderLocations,shaderVarsToVertexAttribs,it->second);
         objects[it->first] = obj;
     }
     
@@ -114,7 +127,7 @@ void View::init(Callbacks *callbacks,map<string,util::PolygonMesh<VertexAttrib>>
     time = glfwGetTime();
 
     initTextures(texMap);
-    renderer = new sgraph::GLScenegraphRenderer(modelview, objects, shaderLocations, textureIdMap);
+    renderer = new sgraph::GLScenegraphRenderer(modelview, objects, renderShaderLocations, textureIdMap);
     lightRetriever = new sgraph::LightRetriever(modelview);
 }
 
@@ -168,8 +181,40 @@ void View::resetTrackball()
 }
 
 
-void View::display(sgraph::IScenegraph *scenegraph) {
-    // cout<<"Entered here!"<<endl;
+void View::display(sgraph::IScenegraph *scenegraph) 
+{
+    
+    #pragma region lightSetup
+
+    // setting up the view matrices beforehand because all render calculations are going to be on the view coordinate system.
+
+    glm::mat4 viewMat(1.0f);
+    if(cameraType == 1)
+        viewMat = viewMat * glm::lookAt(glm::vec3(0.0f, 100.0f, 100.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    else if(cameraType == 2)
+        viewMat = viewMat * glm::lookAt(glm::vec3(0.0f, 150.0f, 300.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    else if(cameraType == 3)
+    {
+            //Drone camera. Need to find a point that is forward(for the lookAt), find the drone co-ordinates(for the eye) and the up-direction for the up-axis
+            //drone co-ordinates seem simple enough. I can just use the transform matrix with a translation of 20 in the z-axis
+            //target = same as eye, the translation must be higher, so 25?
+            //for the up-axis, I can convert the y axis to vec4, pre-multiply by the transformation matrix, then convert back to vec3.
+            //This seems super hacky though, is there an alternate way that's easier?
+            
+            glm::mat4 droneTransformMatrix = dynamic_cast<sgraph::DynamicTransform*>(cachedNodes["drone-movement"])->getTransformMatrix();
+            glm::vec3 droneEye = droneTransformMatrix * glm::vec4(0.0f, 0.0f, 20.0f, 1.0f); // setting 1 as the homogenous coordinate
+            // Implicit typecasts work!!!!
+            glm::vec3 droneLookAt = droneTransformMatrix * glm::vec4(0.0f, 0.0f, 25.0f, 1.0f);
+            glm::vec3 droneUp = droneTransformMatrix * glm::vec4(0.0f, 1.0f, 0.0f, 0.0f);//homogenous coordinate is 0.0f as the vector is an axis, not a point.
+            
+            viewMat = viewMat * glm::lookAt(droneEye, droneLookAt, droneUp);        
+    }
+
+    #pragma endregion
+
+
+    #pragma region renderPass
+
     renderProgram.enable();
     glClearColor(0,0,0,1);
     glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);
@@ -185,41 +230,19 @@ void View::display(sgraph::IScenegraph *scenegraph) {
     rotatePropeller("propeller-3-rotate", glfwGetTime());
     rotatePropeller("propeller-4-rotate", glfwGetTime());
 
-    rotate();
-    
+    rotate(); // drone movement rotate
+
     modelview.push(glm::mat4(1.0));
-    if(cameraType == 1)
-        modelview.top() = modelview.top() * glm::lookAt(glm::vec3(0.0f, 100.0f, 100.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-    else if(cameraType == 2)
-        modelview.top() = modelview.top() * glm::lookAt(glm::vec3(0.0f, 150.0f, 300.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-    else if(cameraType == 3)
+    modelview.top() = modelview.top() * viewMat; // this should return the same behavior now.
+    initLights(scenegraph); // lighting scenegraph tranversal happens here.
+    initLightShaderVars(); // lighting to shader variables mapping. Saves map in LightLocation.
+    glUniform1i(renderShaderLocations.getLocation("numLights"), lights.size());
+
+    for (int i = 0; i < lights.size(); i++) 
     {
-            //Drone camera. Need to find a point that is forward(for the lookAt), find the drone co-ordinates(for the eye) and the up-direction for the up-axis
-            //drone co-ordinates seem simple enough. I can just use the transform matrix with a translation of 20 in the z-axis
-            //target = same as eye, the translation must be higher, so 25?
-            //for the up-axis, I can convert the y axis to vec4, pre-multiply by the transformation matrix, then convert back to vec3.
-            //This seems super hacky though, is there an alternate way that's easier?
-            
-            glm::mat4 droneTransformMatrix = dynamic_cast<sgraph::DynamicTransform*>(cachedNodes["drone-movement"])->getTransformMatrix();
-            glm::vec3 droneEye = droneTransformMatrix * glm::vec4(0.0f, 0.0f, 20.0f, 1.0f); // setting 1 as the homogenous coordinate
-            // Implicit typecasts work!!!!
-            glm::vec3 droneLookAt = droneTransformMatrix * glm::vec4(0.0f, 0.0f, 25.0f, 1.0f);
-            glm::vec3 droneUp = droneTransformMatrix * glm::vec4(0.0f, 1.0f, 0.0f, 0.0f);//homogenous coordinate is 0.0f as the vector is an axis, not a point.
-            
-            modelview.top() = modelview.top() * glm::lookAt(droneEye, droneLookAt, droneUp);        
-    }
-
-    initLights(scenegraph);
-    initShaderVars();
-    glUniform1i(shaderLocations.getLocation("numLights"), lights.size());
-
-    for (int i = 0; i < lights.size(); i++) {
-    
         glm::vec4 pos = lights[i].getPosition();
-        // cout<<"Light position : "<<i<<pos.x<<" , "<<pos.y<<" , "<<pos.z<<endl;
         pos = lightTransformations[i] * pos;
         // position
-        
         //adding direction for spotlight
         glm::vec4 spotDirection = lights[i].getSpotDirection();
         spotDirection = lightTransformations[i] * spotDirection;
@@ -234,7 +257,7 @@ void View::display(sgraph::IScenegraph *scenegraph) {
     }
         
     //send projection matrix to GPU    
-    glUniformMatrix4fv(shaderLocations.getLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
+    glUniformMatrix4fv(renderShaderLocations.getLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
 
     //draw scene graph here
@@ -243,13 +266,11 @@ void View::display(sgraph::IScenegraph *scenegraph) {
     // glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
     // glEnable(GL_CULL_FACE);
     // glCullFace(GL_FRONT_FACE);
-
-    
-    
     modelview.pop();
-    glFlush();
     renderProgram.disable();
+    #pragma endregion
     
+    glFlush();
     glfwSwapBuffers(window);
     glfwPollEvents();
     frames++;
@@ -270,11 +291,9 @@ void View::initLights(sgraph::IScenegraph *scenegraph)
     scenegraph->getRoot()->accept(lightRetriever);
     lights = lightsParser->getLights();
     lightTransformations = lightsParser->getLightTransformations();
-
-    // cout<<"Light count: "<<lights.size()<<endl;
 }
 
-void View::initShaderVars()
+void View::initLightShaderVars()
 {
     lightLocations.clear();
     for (int i = 0; i < lights.size(); i++)
@@ -283,13 +302,13 @@ void View::initShaderVars()
       stringstream name;
 
       name << "light[" << i << "]";
-      ll.ambient = shaderLocations.getLocation(name.str() + "" +".ambient");
-      ll.diffuse = shaderLocations.getLocation(name.str() + ".diffuse");
-      ll.specular = shaderLocations.getLocation(name.str() + ".specular");
-      ll.position = shaderLocations.getLocation(name.str() + ".position");
+      ll.ambient = renderShaderLocations.getLocation(name.str() + "" +".ambient");
+      ll.diffuse = renderShaderLocations.getLocation(name.str() + ".diffuse");
+      ll.specular = renderShaderLocations.getLocation(name.str() + ".specular");
+      ll.position = renderShaderLocations.getLocation(name.str() + ".position");
       //adding spotDirection and spotAngle.
-      ll.spotDirection = shaderLocations.getLocation(name.str() + ".spotDirection");
-      ll.spotAngle = shaderLocations.getLocation(name.str() + ".spotAngle");
+      ll.spotDirection = renderShaderLocations.getLocation(name.str() + ".spotDirection");
+      ll.spotAngle = renderShaderLocations.getLocation(name.str() + ".spotAngle");
       lightLocations.push_back(ll);
     }
 }
@@ -306,7 +325,7 @@ void View::switchShaders()
     // else
     //     program.createProgram(string("shaders/phong-multiple.vert"),string("shaders/phong-multiple.frag"));
     // program.enable();
-    // shaderLocations = program.getAllShaderVariables();
+    // renderShaderLocations = program.getAllShaderVariables();
     // cout<<"toon shader status: "<<isToonShaderUsed<<endl;
 }
 

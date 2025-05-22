@@ -256,7 +256,7 @@ private:
             {
                 string error_message = printShaderInfoLog(shaders[i].shader);
                 releaseShaders();
-                throw runtime_error(error_message);
+                throw runtime_error(i + " : "  + error_message);
             }
             glAttachShader(program, shaders[i].shader);
         }
