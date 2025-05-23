@@ -9,6 +9,8 @@ using namespace std;
 #include "sgraph/GLScenegraphRenderer.h"
 #include "sgraph/LightRetriever.h"
 #include "sgraph/ShadowRenderer.h"
+#include "sgraph/DepthRenderer.h"
+#include "sgraph/AmbientRenderer.h"
 #include "VertexAttrib.h"
 
 
@@ -29,6 +31,10 @@ void View::init(Callbacks *callbacks,map<string,util::PolygonMesh<VertexAttrib>>
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+
+    glfwWindowHint(GLFW_STENCIL_BITS, 8);  // enable stencil buffer
+    glfwWindowHint(GLFW_DEPTH_BITS, 24);   // For depth testing
+    glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE);  // Double buffering
 
     window = glfwCreateWindow(800, 800, "Hello GLFW: Per-vertex coloring", NULL, NULL);
     if (!window)
@@ -70,8 +76,8 @@ void View::init(Callbacks *callbacks,map<string,util::PolygonMesh<VertexAttrib>>
     // create the shader programs
 
     // render shaders first
-    renderProgram.createProgram(string("shaders/phong-multiple.vert"),
-                                string("shaders/phong-multiple.frag"));
+    renderProgram.createProgram(string("shaders/shadow/phong-shadow.vert"),
+                                string("shaders/shadow/phong-shadow.frag"));
     // assuming it got created, get all the shader variables that it uses
     // so we can initialize them at some point
     // enable the shader program
@@ -79,19 +85,19 @@ void View::init(Callbacks *callbacks,map<string,util::PolygonMesh<VertexAttrib>>
     renderShaderLocations = renderProgram.getAllShaderVariables();
     renderProgram.disable();
 
-    // //depth program for shadow first pass
-    // depthProgram.createProgram(string("shaders/shadow/depth.vert"),
-    //                             string("shaders/shadow/depth.frag"));
-    // depthProgram.enable();
-    // depthShaderLocations = depthProgram.getAllShaderVariables();
-    // depthProgram.disable();
+    //depth program for shadow first pass
+    depthProgram.createProgram(string("shaders/shadow/depth.vert"),
+                                string("shaders/shadow/depth.frag"));
+    depthProgram.enable();
+    depthShaderLocations = depthProgram.getAllShaderVariables();
+    depthProgram.disable();
 
-    // //ambient program for shadow final pass
-    // ambientProgram.createProgram(string("shaders/shadow/ambient.vert"),
-    //                             string("shaders/shadow/ambient.frag"));
-    // ambientProgram.enable();
-    // ambientShaderLocations = ambientProgram.getAllShaderVariables();
-    // ambientProgram.disable();
+    //ambient program for shadow final pass
+    ambientProgram.createProgram(string("shaders/shadow/ambient.vert"),
+                                string("shaders/shadow/ambient.frag"));
+    ambientProgram.enable();
+    ambientShaderLocations = ambientProgram.getAllShaderVariables();
+    ambientProgram.disable();
 
 
     //shadow shaders next
@@ -144,6 +150,10 @@ void View::init(Callbacks *callbacks,map<string,util::PolygonMesh<VertexAttrib>>
     renderer = new sgraph::GLScenegraphRenderer(modelview, objects, renderShaderLocations, textureIdMap);
     lightRetriever = new sgraph::LightRetriever(modelview);
     shadowRenderer = new sgraph::ShadowRenderer(modelview, objects, shadhowShaderLocations);
+
+    //scenegraph renderers for shadow volumes
+    depthRenderer = new sgraph::DepthRenderer(modelview, objects, depthShaderLocations);
+    ambientRenderer = new sgraph::AmbientRenderer(modelview, objects, ambientShaderLocations);
 }
 
 void View::initTextures(map<string, util::TextureImage*> textureMap)
@@ -225,33 +235,67 @@ void View::display(sgraph::IScenegraph *scenegraph)
             viewMat = viewMat * glm::lookAt(droneEye, droneLookAt, droneUp);        
     }
 
+    modelview.push(glm::mat4(1.0f));
+    modelview.top() = modelview.top() * viewMat;
+    initLights(scenegraph); // lighting scenegraph traversal happens here. I've moved this to the first because the lights need to be initialized
+    // for the shadow volume pass before the rendering pass
+    initLightShaderVars(); // lighting to shader variables mapping. Saves map in LightLocation.
+    modelview.pop();
+
+
     #pragma endregion
 
+    //rotate the propellers!
+    rotatePropeller("propeller-1-rotate", glfwGetTime());
+    rotatePropeller("propeller-2-rotate", glfwGetTime());
+    rotatePropeller("propeller-3-rotate", glfwGetTime());
+    rotatePropeller("propeller-4-rotate", glfwGetTime());
 
-    renderObjectPass(scenegraph, viewMat);
+    rotate(); // drone movement rotate
 
+
+    #pragma region pipeline
+
+    // all the heavylifting happens here.
+    // shadow volumes are rendered using depth fail method.
+    glClearColor(0,0,0,1);
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_STENCIL_BUFFER_BIT); // enable the stencil buffer.
+    glDepthMask(GL_TRUE); // enable writing to the depth buffer.
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT); //clear everything before starting the render loop.
+
+    depthPass(scenegraph, viewMat); // set the depth buffer from the actual camera location to set up for the stencil test.
+    glEnable(GL_STENCIL_TEST); // enable stencil test.
+    shadowStencilPass(scenegraph, viewMat); // render the shadow volume into the stencil buffer.
+    renderObjectPass(scenegraph, viewMat); // render all the objects with lighting (except ambient) into the scene. (fragments that fail the stencil test will not touch the fragment shader).
+    glDisable(GL_STENCIL_TEST); // need to disable the stencil test for the ambient pass.
+    ambientPass(scenegraph, viewMat); // ambient pass for all objects.
+
+    #pragma endregion
+
+    //do not need this anymore.
     #pragma region silhouettePass
 
-    modelview.push(glm::mat4(1.0));
-    modelview.top() = modelview.top() * viewMat;
+    // modelview.push(glm::mat4(1.0));
+    // modelview.top() = modelview.top() * viewMat;
     
-    // ENABLE THE SHADOW SHADERS!!!!!
-    shadowProgram.enable();
-    glUniformMatrix4fv(shadhowShaderLocations.getLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
-    // Should be able to reuse the lightlocations from the previous pass.
-    for (int i = 0; i < lights.size(); i++) 
-    {
-        glm::vec4 pos = lights[i].getPosition();
-        pos = lightTransformations[i] * pos;
-        glm::vec3 sendingVal = glm::vec3(pos);
-        glUniform3fv(shadhowShaderLocations.getLocation("gLightPos"), 1, glm::value_ptr(sendingVal));
-        glLineWidth(5.0f);
-        glDepthFunc(GL_LEQUAL);
-        scenegraph->getRoot()->accept(shadowRenderer);
-    }
+    // // ENABLE THE SHADOW SHADERS!!!!!
+    // shadowProgram.enable();
+    // glUniformMatrix4fv(shadhowShaderLocations.getLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
+    // // Should be able to reuse the lightlocations from the previous pass.
+    // for (int i = 0; i < lights.size(); i++) 
+    // {
+    //     glm::vec4 pos = lights[i].getPosition();
+    //     pos = lightTransformations[i] * pos;
+    //     glm::vec3 sendingVal = glm::vec3(pos);
+    //     glUniform3fv(shadhowShaderLocations.getLocation("gLightPos"), 1, glm::value_ptr(sendingVal));
+    //     glLineWidth(5.0f);
+    //     glDepthFunc(GL_LEQUAL);
+    //     scenegraph->getRoot()->accept(shadowRenderer);
+    // }
 
-    modelview.pop();
-    shadowProgram.disable();
+    // modelview.pop();
+    // shadowProgram.disable();
 
     #pragma endregion
     
@@ -272,53 +316,104 @@ void View::display(sgraph::IScenegraph *scenegraph)
 
 }
 
-
-void View::depthPass(sgraph::IScenegraph *scenegraph)
+/**
+ * Render the scene into the depth buffer. Using this for depth fail method in stencil shadow volumes.
+ */
+void View::depthPass(sgraph::IScenegraph *scenegraph, glm::mat4& viewMat)
 {
+    glDrawBuffer(GL_NONE); // Don't want to draw anything, only fill the depth buffer.
+    depthProgram.enable();
+    modelview.push(glm::mat4(1.0));
+    modelview.top() = modelview.top() * viewMat;
+    glUniformMatrix4fv(shadhowShaderLocations.getLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
+    // the modelview will be passed by the renderer (hopefully)
+    scenegraph->getRoot()->accept(depthRenderer);
+    modelview.pop();
+    depthProgram.disable();
+}
 
+/**
+ * Render the shadow volumes into the stencil buffer. This should run after the depth pass,
+ * and the colorBuffer write must still be disabled.
+ */
+void View::shadowStencilPass(sgraph::IScenegraph *scenegraph, glm::mat4& viewMat)
+{
+    glDepthMask(GL_FALSE); // do not write into the depth buffer anymore.
+    glEnable(GL_DEPTH_CLAMP); // Don't want to clip the back polygons.
+    glDisable(GL_CULL_FACE); // Don't want the back-facing polygons to get culled. need them to increment the stencil buffer.
+    glStencilFunc(GL_ALWAYS, 0, 0xff); // Always pass the stencil test, reference value 0,mask value 1(should probably use ~0)
+
+    glStencilOpSeparate(GL_BACK, // for backfacing polygons
+                        GL_KEEP, // stencil test fails - doesnt happen because stencil function is set to always pass
+                        GL_INCR_WRAP, // stencil passes but depth fails - our required condition - increment the stencil buffer value
+                        GL_KEEP); // both stencil and depth passes - not relevant; do nothing.
+    
+    glStencilOpSeparate(GL_FRONT, GL_KEEP, GL_DECR_WRAP, GL_KEEP); // similarly, for front facing polygons, decrement the stencil buffer
+
+    // I think I can swap the incrememnt and decrement and I'll still be fine.
+
+    // Now render the scene
+    shadowProgram.enable();
+    modelview.push(glm::mat4(1.0));
+    modelview.top() = modelview.top() * viewMat;
+    glUniformMatrix4fv(shadhowShaderLocations.getLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
+    // did the light pass at the first now.
+    for (int i = 0; i < lights.size(); i++) 
+    {
+        glm::vec4 pos = lights[i].getPosition();
+        pos = lightTransformations[i] * pos;
+        // remember that all the lightlocations are in the view coordinate system.
+        glm::vec3 sendingVal = glm::vec3(pos);
+        glUniform3fv(shadhowShaderLocations.getLocation("gLightPos"), 1, glm::value_ptr(sendingVal));
+        glLineWidth(5.0f);
+        glDepthFunc(GL_LEQUAL);
+        scenegraph->getRoot()->accept(shadowRenderer); // TODO: change the shadow program later.
+    }
+    modelview.pop();
+    shadowProgram.disable();
+
+    // restore original settings now
+    glDisable(GL_DEPTH_CLAMP);
+    glEnable(GL_CULL_FACE); // need to enable culling so that the next pass doesn't render all faces.
 }
 
 
-void View::shadowStencilPass(sgraph::IScenegraph *scenegraph)
-{
 
+void View::ambientPass(sgraph::IScenegraph *scenegraph, glm::mat4& viewMat)
+{
+    ambientProgram.enable();
+    glEnable(GL_BLEND); // blend the ambient light.
+    glBlendEquation(GL_FUNC_ADD); // blend by addition.
+    glBlendFunc(GL_ONE, GL_ONE); // equal parts of existing and ambient. This is fine because the ambient shader has intensity reduced to 0.2 times.
+    modelview.push(glm::mat4(1.0));
+    modelview.top() = modelview.top() * viewMat;
+    glUniformMatrix4fv(shadhowShaderLocations.getLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
+    scenegraph->getRoot()->accept(ambientRenderer);
+    modelview.pop();
+    ambientProgram.disable();
+    glDisable(GL_BLEND);
 }
 
-void View::shadowRenderPass(sgraph::IScenegraph *scenegraph)
+void View::renderObjectPass(sgraph::IScenegraph *scenegraph, glm::mat4& viewMat)
 {
-
-}
-
-void View::ambientPass(sgraph::IScenegraph *scenegraph)
-{
-
-}
-
-void View::renderObjectPass(sgraph::IScenegraph *scenegraph, glm::mat4 viewMat)
-{
-     #pragma region renderPass
 
     renderProgram.enable();
-    glClearColor(0,0,0,1);
-    glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);
-    glEnable(GL_DEPTH_TEST);
+    glDrawBuffer(GL_BACK); // Enable writing to the color buffer. This was disabled in the depth pass.
+    glStencilFunc(GL_EQUAL, 0x0, 0xFF); // draw only if stencil value is 0
+    glStencilOpSeparate(GL_BACK, GL_KEEP, GL_KEEP, GL_KEEP); // do not write to the stencil buffer.
+
+    // glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT); // clearing all the buffers in the main method now.
+    
     //glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
     //glEnable(GL_CULL_FACE);
     //glCullFace(GL_FRONT_FACE);
 
-    
-    //rotate the propellers!
-    rotatePropeller("propeller-1-rotate", glfwGetTime());
-    rotatePropeller("propeller-2-rotate", glfwGetTime());
-    rotatePropeller("propeller-3-rotate", glfwGetTime());
-    rotatePropeller("propeller-4-rotate", glfwGetTime());
-
-    rotate(); // drone movement rotate
 
     modelview.push(glm::mat4(1.0));
     modelview.top() = modelview.top() * viewMat; // this should return the same behavior now.
-    initLights(scenegraph); // lighting scenegraph tranversal happens here.
-    initLightShaderVars(); // lighting to shader variables mapping. Saves map in LightLocation.
+    //lighting setup now happens at display(). This is because the lights are required for the stencil shadow pass
+    // which runs before the renderObject pass.
+
     glUniform1i(renderShaderLocations.getLocation("numLights"), lights.size());
 
     for (int i = 0; i < lights.size(); i++) 
@@ -351,7 +446,6 @@ void View::renderObjectPass(sgraph::IScenegraph *scenegraph, glm::mat4 viewMat)
     // glCullFace(GL_FRONT_FACE);
     modelview.pop();
     renderProgram.disable();
-    #pragma endregion
 }
 
 void View::initLights(sgraph::IScenegraph *scenegraph)

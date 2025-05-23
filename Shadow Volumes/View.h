@@ -63,11 +63,10 @@ public:
     private: 
     void initLightShaderVars();
     void rotate();
-    void depthPass(sgraph::IScenegraph *scenegraph);
-    void shadowStencilPass(sgraph::IScenegraph *scenegraph);
-    void shadowRenderPass(sgraph::IScenegraph *scenegraph);
-    void ambientPass(sgraph::IScenegraph *scenegraph);
-    void renderObjectPass(sgraph::IScenegraph *scenegraph, glm::mat4 viewMat);
+    void depthPass(sgraph::IScenegraph *scenegraph, glm::mat4& viewMat);
+    void shadowStencilPass(sgraph::IScenegraph *scenegraph, glm::mat4& viewMat);
+    void ambientPass(sgraph::IScenegraph *scenegraph, glm::mat4& viewMat);
+    void renderObjectPass(sgraph::IScenegraph *scenegraph, glm::mat4& viewMat);
     GLFWwindow* window;
     util::ShaderProgram renderProgram;
     util::ShaderGeoProgram shadowProgram;
@@ -83,6 +82,8 @@ public:
     sgraph::SGNodeVisitor *renderer;
     sgraph::SGNodeVisitor *lightRetriever;
     sgraph::SGNodeVisitor *shadowRenderer;
+    sgraph::SGNodeVisitor *depthRenderer;
+    sgraph::SGNodeVisitor *ambientRenderer;
     int frames;
     double time;
     float rotationSpeed = 0.5f;
