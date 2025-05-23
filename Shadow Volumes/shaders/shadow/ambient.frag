@@ -6,6 +6,6 @@ out vec4 fColor;
 
 void main()
 {
-    // fColor = outColor * 0.2f;
-    fColor = vec4(0.0, 0.0,0.0, 0.0);
+    fColor = outColor * 0.2f;
+    // fColor = vec4(1.0, 1.0,1.0, 1.0);
 }

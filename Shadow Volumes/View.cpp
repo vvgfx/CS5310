@@ -210,7 +210,6 @@ void View::display(sgraph::IScenegraph *scenegraph)
 {
     
     #pragma region lightSetup
-
     // setting up the view matrices beforehand because all render calculations are going to be on the view coordinate system.
 
     glm::mat4 viewMat(1.0f);
@@ -241,8 +240,6 @@ void View::display(sgraph::IScenegraph *scenegraph)
     // for the shadow volume pass before the rendering pass
     initLightShaderVars(); // lighting to shader variables mapping. Saves map in LightLocation.
     modelview.pop();
-
-
     #pragma endregion
 
     //rotate the propellers!
@@ -259,7 +256,7 @@ void View::display(sgraph::IScenegraph *scenegraph)
     // shadow volumes are rendered using depth fail method.
     glClearColor(0,0,0,1);
     glEnable(GL_DEPTH_TEST);
-    glEnable(GL_STENCIL_TEST); // enable the stencil buffer.
+    // glEnable(GL_STENCIL_TEST); // enable the stencil buffer.
     glDepthMask(GL_TRUE); // enable writing to the depth buffer.
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT); //clear everything before starting the render loop.
     
@@ -361,6 +358,8 @@ void View::ambientPass(sgraph::IScenegraph *scenegraph, glm::mat4& viewMat)
     glEnable(GL_BLEND); // blend the ambient light.
     glBlendEquation(GL_FUNC_ADD); // blend by addition.
     glBlendFunc(GL_ONE, GL_ONE); // equal parts of existing and ambient. This is fine because the ambient shader has intensity reduced to 0.2 times.
+    // glClear(GL_DEPTH_BUFFER_BIT); // remove later
+    glDisable(GL_DEPTH_TEST); // remove later
     modelview.push(glm::mat4(1.0));
     modelview.top() = modelview.top() * viewMat;
     glUniformMatrix4fv(ambientShaderLocations.getLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));

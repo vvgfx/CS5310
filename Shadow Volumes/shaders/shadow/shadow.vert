@@ -8,6 +8,7 @@ uniform mat4 modelview;
 
 void main()
 {
-    gPosition = vec3(modelview * vPosition);
+    gPosition = vec3(modelview * vPosition); // remember-view coordinates already
+    // gPosition = vec3(vPosition);
     // gl_Position = projection * modelview * vPosition;
 }
