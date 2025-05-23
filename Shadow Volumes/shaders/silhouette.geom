@@ -28,7 +28,7 @@ void main()
     vec3 LightDir = gLightPos - gPosition[0];
 
     if (dot(Normal, LightDir) > 0.00001) {
-
+        // If control enters here, the e1-e2-e5 triangle faces the light
         Normal = cross(e3,e1);
 
         if (dot(Normal, LightDir) <= 0) {

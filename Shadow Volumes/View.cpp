@@ -81,9 +81,9 @@ void View::init(Callbacks *callbacks,map<string,util::PolygonMesh<VertexAttrib>>
 
 
     // silhouette/shadow shaders next
-    shadowProgram.createProgram(string("shaders/silhouette.vert"),
-                                string("shaders/silhouette.frag"),
-                                string("shaders/silhouette.geom"));
+    shadowProgram.createProgram(string("shaders/shadow.vert"),
+                                string("shaders/shadow.frag"),
+                                string("shaders/shadow.geom"));
 
     shadowProgram.enable();
     shadhowShaderLocations = shadowProgram.getAllShaderVariables();
@@ -288,6 +288,8 @@ void View::display(sgraph::IScenegraph *scenegraph)
         pos = lightTransformations[i] * pos;
         glm::vec3 sendingVal = glm::vec3(pos);
         glUniform3fv(shadhowShaderLocations.getLocation("gLightPos"), 1, glm::value_ptr(sendingVal));
+        glLineWidth(5.0f);
+        glDepthFunc(GL_LEQUAL);
         scenegraph->getRoot()->accept(shadowRenderer);
     }
 

@@ -32,7 +32,7 @@ light two-light
 ambient 0.3 0.3 0.3
 diffuse 0.5 0.5 0.5
 specular 0.5 0.5 0.5
-position 0 20 0 # was 0 50 0 initially
+position 0 20 10 # was 0 50 0 initially
 #spot-direction 0 -1 0 
 #spot-angle 20
 end-light
@@ -78,7 +78,9 @@ assign-texture one-sphere checkerboard
 add-child one-sphere s-scale
 add-child s-scale s-translate
 add-child s-translate root
+dynamic trackball trackball
+add-child root trackball
 
 
-assign-root root
+assign-root trackball
 
