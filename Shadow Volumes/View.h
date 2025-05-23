@@ -63,11 +63,20 @@ public:
     private: 
     void initLightShaderVars();
     void rotate();
+    void depthPass(sgraph::IScenegraph *scenegraph);
+    void shadowStencilPass(sgraph::IScenegraph *scenegraph);
+    void shadowRenderPass(sgraph::IScenegraph *scenegraph);
+    void ambientPass(sgraph::IScenegraph *scenegraph);
+    void renderObjectPass(sgraph::IScenegraph *scenegraph, glm::mat4 viewMat);
     GLFWwindow* window;
     util::ShaderProgram renderProgram;
     util::ShaderGeoProgram shadowProgram;
+    util::ShaderProgram depthProgram;
+    util::ShaderProgram ambientProgram;
     util::ShaderLocationsVault renderShaderLocations;
     util::ShaderLocationsVault shadhowShaderLocations;
+    util::ShaderLocationsVault depthShaderLocations;
+    util::ShaderLocationsVault ambientShaderLocations;
     map<string,util::ObjectInstance *> objects;
     glm::mat4 projection;
     stack<glm::mat4> modelview;

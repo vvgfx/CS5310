@@ -79,12 +79,25 @@ void View::init(Callbacks *callbacks,map<string,util::PolygonMesh<VertexAttrib>>
     renderShaderLocations = renderProgram.getAllShaderVariables();
     renderProgram.disable();
 
+    // //depth program for shadow first pass
+    // depthProgram.createProgram(string("shaders/shadow/depth.vert"),
+    //                             string("shaders/shadow/depth.frag"));
+    // depthProgram.enable();
+    // depthShaderLocations = depthProgram.getAllShaderVariables();
+    // depthProgram.disable();
 
-    // silhouette/shadow shaders next
-    shadowProgram.createProgram(string("shaders/shadow.vert"),
-                                string("shaders/shadow.frag"),
-                                string("shaders/shadow.geom"));
+    // //ambient program for shadow final pass
+    // ambientProgram.createProgram(string("shaders/shadow/ambient.vert"),
+    //                             string("shaders/shadow/ambient.frag"));
+    // ambientProgram.enable();
+    // ambientShaderLocations = ambientProgram.getAllShaderVariables();
+    // ambientProgram.disable();
 
+
+    //shadow shaders next
+    shadowProgram.createProgram(string("shaders/shadow/shadow.vert"),
+                                string("shaders/shadow/shadow.frag"),
+                                string("shaders/shadow/shadow.geom"));
     shadowProgram.enable();
     shadhowShaderLocations = shadowProgram.getAllShaderVariables();
     shadowProgram.disable();
@@ -215,7 +228,75 @@ void View::display(sgraph::IScenegraph *scenegraph)
     #pragma endregion
 
 
-    #pragma region renderPass
+    renderObjectPass(scenegraph, viewMat);
+
+    #pragma region silhouettePass
+
+    modelview.push(glm::mat4(1.0));
+    modelview.top() = modelview.top() * viewMat;
+    
+    // ENABLE THE SHADOW SHADERS!!!!!
+    shadowProgram.enable();
+    glUniformMatrix4fv(shadhowShaderLocations.getLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
+    // Should be able to reuse the lightlocations from the previous pass.
+    for (int i = 0; i < lights.size(); i++) 
+    {
+        glm::vec4 pos = lights[i].getPosition();
+        pos = lightTransformations[i] * pos;
+        glm::vec3 sendingVal = glm::vec3(pos);
+        glUniform3fv(shadhowShaderLocations.getLocation("gLightPos"), 1, glm::value_ptr(sendingVal));
+        glLineWidth(5.0f);
+        glDepthFunc(GL_LEQUAL);
+        scenegraph->getRoot()->accept(shadowRenderer);
+    }
+
+    modelview.pop();
+    shadowProgram.disable();
+
+    #pragma endregion
+    
+    
+    
+    
+    glFlush();
+    glfwSwapBuffers(window);
+    glfwPollEvents();
+    frames++;
+    double currenttime = glfwGetTime();
+    if ((currenttime-time)>1.0) {
+        printf("Framerate: %2.0f\r",frames/(currenttime-time));
+        frames = 0;
+        time = currenttime;
+    }
+    
+
+}
+
+
+void View::depthPass(sgraph::IScenegraph *scenegraph)
+{
+
+}
+
+
+void View::shadowStencilPass(sgraph::IScenegraph *scenegraph)
+{
+
+}
+
+void View::shadowRenderPass(sgraph::IScenegraph *scenegraph)
+{
+
+}
+
+void View::ambientPass(sgraph::IScenegraph *scenegraph)
+{
+
+}
+
+void View::renderObjectPass(sgraph::IScenegraph *scenegraph, glm::mat4 viewMat)
+{
+     #pragma region renderPass
 
     renderProgram.enable();
     glClearColor(0,0,0,1);
@@ -271,44 +352,6 @@ void View::display(sgraph::IScenegraph *scenegraph)
     modelview.pop();
     renderProgram.disable();
     #pragma endregion
-    
-    
-    #pragma region silhouettePass
-
-    modelview.push(glm::mat4(1.0));
-    modelview.top() = modelview.top() * viewMat;
-    
-    // ENABLE THE SHADOW SHADERS!!!!!
-    shadowProgram.enable();
-    glUniformMatrix4fv(shadhowShaderLocations.getLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
-    // Should be able to reuse the lightlocations from the previous pass.
-    for (int i = 0; i < lights.size(); i++) 
-    {
-        glm::vec4 pos = lights[i].getPosition();
-        pos = lightTransformations[i] * pos;
-        glm::vec3 sendingVal = glm::vec3(pos);
-        glUniform3fv(shadhowShaderLocations.getLocation("gLightPos"), 1, glm::value_ptr(sendingVal));
-        glLineWidth(5.0f);
-        glDepthFunc(GL_LEQUAL);
-        scenegraph->getRoot()->accept(shadowRenderer);
-    }
-
-    modelview.pop();
-    shadowProgram.disable();
-
-    #pragma endregion
-    glFlush();
-    glfwSwapBuffers(window);
-    glfwPollEvents();
-    frames++;
-    double currenttime = glfwGetTime();
-    if ((currenttime-time)>1.0) {
-        printf("Framerate: %2.0f\r",frames/(currenttime-time));
-        frames = 0;
-        time = currenttime;
-    }
-    
-
 }
 
 void View::initLights(sgraph::IScenegraph *scenegraph)
@@ -346,6 +389,7 @@ bool View::shouldWindowClose() {
 
 void View::switchShaders()
 {
+    // Not supporting toon shaders for shadow volumes and pbr
     // isToonShaderUsed = !isToonShaderUsed;
     // if(isToonShaderUsed)
     //     program.createProgram(string("shaders/toon.vert"),string("shaders/toon.frag"));
