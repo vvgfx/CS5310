@@ -36,7 +36,7 @@ void View::init(Callbacks *callbacks,map<string,util::PolygonMesh<VertexAttrib>>
     glfwWindowHint(GLFW_DEPTH_BITS, 24);   // For depth testing
     glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE);  // Double buffering
 
-    window = glfwCreateWindow(800, 800, "Hello GLFW: Per-vertex coloring", NULL, NULL);
+    window = glfwCreateWindow(1280, 720, "Shadow Volumes", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
@@ -255,7 +255,7 @@ void View::display(sgraph::IScenegraph *scenegraph)
     // all the heavylifting happens here.
     // shadow volumes are rendered using depth fail method.
     glClearColor(0,0,0,1);
-    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_DEPTH_TEST); // uncomment later.
     // glEnable(GL_STENCIL_TEST); // enable the stencil buffer.
     glDepthMask(GL_TRUE); // enable writing to the depth buffer.
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT); //clear everything before starting the render loop.
@@ -316,12 +316,20 @@ void View::shadowStencilPass(sgraph::IScenegraph *scenegraph, glm::mat4& viewMat
     glEnable(GL_DEPTH_CLAMP); // Don't want to clip the back polygons.
     glDisable(GL_CULL_FACE); // Don't want the back-facing polygons to get culled. need them to increment the stencil buffer.
     glStencilFunc(GL_ALWAYS, 0, 0xff); // Always pass the stencil test, reference value 0,mask value 1(should probably use ~0)
+
+    // For some reason, the depth-fail method breaks down for some fragments of the sphere.
+    /** depth fail start 
     glStencilOpSeparate(GL_BACK, // for backfacing polygons
                         GL_KEEP, // stencil test fails - doesnt happen because stencil function is set to always pass
                         GL_INCR_WRAP, // stencil passes but depth fails - our required condition - increment the stencil buffer value
                         GL_KEEP); // both stencil and depth passes - not relevant; do nothing.
     
     glStencilOpSeparate(GL_FRONT, GL_KEEP, GL_DECR_WRAP, GL_KEEP); // similarly, for front facing polygons, decrement the stencil buffer
+    */
+
+    // These are for depth pass. This works for now, but will fail when the camera is placed inside a shadow.
+    glStencilOpSeparate(GL_FRONT,GL_KEEP, GL_KEEP,GL_INCR_WRAP);
+    glStencilOpSeparate(GL_BACK, GL_KEEP, GL_KEEP, GL_DECR_WRAP);
 
     // I think I can swap the incrememnt and decrement and I'll still be fine.
 
