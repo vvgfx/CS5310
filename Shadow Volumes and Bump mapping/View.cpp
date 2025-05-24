@@ -22,7 +22,7 @@ View::~View(){
 
 }
 
-void View::init(Callbacks *callbacks,map<string,util::PolygonMesh<VertexAttrib>>& meshes, map<string, util::TextureImage*> texMap)
+void View::init(Callbacks *callbacks,map<string,util::PolygonMesh<VertexAttrib>>& meshes, map<string, util::TextureImage*> texMap, map<string, util::TextureImage*> normMap)
 {
     if (!glfwInit())
         exit(EXIT_FAILURE);
@@ -149,8 +149,8 @@ void View::init(Callbacks *callbacks,map<string,util::PolygonMesh<VertexAttrib>>
     frames = 0;
     time = glfwGetTime();
 
-    initTextures(texMap);
-    renderer = new sgraph::GLScenegraphRenderer(modelview, objects, renderShaderLocations, textureIdMap);
+    initTextures(texMap, normMap);
+    renderer = new sgraph::GLScenegraphRenderer(modelview, objects, renderShaderLocations, textureIdMap, normalIdMap);
     lightRetriever = new sgraph::LightRetriever(modelview);
     shadowRenderer = new sgraph::ShadowRenderer(modelview, objects, shadhowShaderLocations);
 
@@ -159,18 +159,18 @@ void View::init(Callbacks *callbacks,map<string,util::PolygonMesh<VertexAttrib>>
     ambientRenderer = new sgraph::AmbientRenderer(modelview, objects, ambientShaderLocations);
 }
 
-void View::initTextures(map<string, util::TextureImage*> textureMap)
+void View::initTextures(map<string, util::TextureImage*>& textureMap, map<string, util::TextureImage*>& normalMap)
 {
     for(typename map<string, util::TextureImage*>::iterator it = textureMap.begin(); it!=textureMap.end(); it++)
     {
         //first - name of texture, second - texture itself
         util::TextureImage* textureObject = it->second;
-
+        
         //generate texture ID
         unsigned int textureId;
         glGenTextures(1,&textureId);
         glBindTexture(GL_TEXTURE_2D,textureId);
-
+        
         //texture params
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -180,9 +180,34 @@ void View::initTextures(map<string, util::TextureImage*> textureMap)
         //copy texture to GPU
 	    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, textureObject->getWidth(),textureObject->getHeight(), 0, GL_RGB, GL_UNSIGNED_BYTE,textureObject->getImage());
         glGenerateMipmap(GL_TEXTURE_2D);
-
+        
         //save id in map
         textureIdMap[it->first] = textureId;
+    }
+    
+    // Similarly, do the same for normalMaps
+    for(typename map<string, util::TextureImage*>::iterator it = normalMap.begin(); it!=normalMap.end(); it++)
+    {
+        util::TextureImage* textureObject = it->second;
+        
+        //generate texture ID
+        unsigned int textureId;
+        glGenTextures(1,&textureId);
+        glBindTexture(GL_TEXTURE_2D,textureId);
+        
+        //texture params
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
+	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,GL_LINEAR); // Mipmaps are not available for maximization
+        
+        //copy texture to GPU
+	    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, textureObject->getWidth(),textureObject->getHeight(), 0, GL_RGB, GL_UNSIGNED_BYTE,textureObject->getImage());
+        glGenerateMipmap(GL_TEXTURE_2D);
+        
+        //save id in map
+        normalIdMap[it->first] = textureId;
+
     }
 }
 

@@ -19,7 +19,7 @@ void Model::setScenegraph(sgraph::IScenegraph *scenegraph) {
     this->scenegraph = scenegraph;
 }
 
-void Model::saveTextureMap(map<string, util::TextureImage*> texMap)
+void Model::saveTextureMap(map<string, util::TextureImage*>& texMap)
 {
     this->textureMap = texMap;
 }
@@ -27,4 +27,14 @@ void Model::saveTextureMap(map<string, util::TextureImage*> texMap)
 map<string, util::TextureImage*> Model::getTextureMap()
 {
     return this->textureMap;
+}
+
+void Model::saveNormalMap(map<string, util::TextureImage*>& normMap)
+{
+    this->normalMap = normalMap;
+}
+
+map<string, util::TextureImage*> Model::getNormalMap()
+{
+    return this->normalMap;
 }

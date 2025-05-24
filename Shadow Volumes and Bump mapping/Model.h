@@ -15,12 +15,15 @@ public:
     ~Model();
     sgraph::IScenegraph *getScenegraph();
     void setScenegraph(sgraph::IScenegraph *scenegraph);
-    void saveTextureMap(map<string, util::TextureImage*> texMap);
+    void saveTextureMap(map<string, util::TextureImage*>& texMap);
+    void saveNormalMap(map<string, util::TextureImage*>& normMap);
     map<string, util::TextureImage*> getTextureMap();
+    map<string, util::TextureImage*> getNormalMap();
 private:
     
     sgraph::IScenegraph *scenegraph;
     map<string, util::TextureImage*> textureMap;
+    map<string, util::TextureImage*> normalMap;
 
 };
 #endif

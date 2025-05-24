@@ -133,6 +133,11 @@ namespace sgraph {
             {
                 return this->textureMap;
             }
+
+            map<string, util::TextureImage*> getNormalMap()
+            {
+                return this->normalMap;
+            }
             protected:
 
                 virtual void parseTexture(istream& input)
