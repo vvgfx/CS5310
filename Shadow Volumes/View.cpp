@@ -256,15 +256,14 @@ void View::display(sgraph::IScenegraph *scenegraph)
     // all the heavylifting happens here.
     // shadow volumes are rendered using depth fail method.
     glClearColor(0,0,0,1);
-    glEnable(GL_DEPTH_TEST); // uncomment later.
-    // glEnable(GL_STENCIL_TEST); // enable the stencil buffer.
+    glEnable(GL_DEPTH_TEST);
     glDepthMask(GL_TRUE); // enable writing to the depth buffer.
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT); //clear everything before starting the render loop.
     
     depthPass(scenegraph, viewMat); // set the depth buffer from the actual camera location to set up for the stencil test.
     glEnable(GL_STENCIL_TEST); // enable stencil test.
     glEnable(GL_BLEND); // for multiple lights
-    glBlendFunc(GL_ONE, GL_ONE);
+    glBlendFunc(GL_ONE, GL_ONE); //  Equally blend all the effects from eall the lights (is this correct?)
     for (int i = 0; i < lights.size(); i++) 
     {
         glClear(GL_STENCIL_BUFFER_BIT);
@@ -272,7 +271,7 @@ void View::display(sgraph::IScenegraph *scenegraph)
         renderObjectPass(scenegraph, viewMat, i); // render all the objects with lighting (except ambient) into the scene. (fragments that fail the stencil test will not touch the fragment shader).
     }
     glDisable(GL_BLEND);
-    glDisable(GL_STENCIL_TEST); // need to disable the stencil test for the ambient pass.
+    glDisable(GL_STENCIL_TEST); // need to disable the stencil test for the ambient pass because all objects require ambient lighting.
     ambientPass(scenegraph, viewMat); // ambient pass for all objects.
     #pragma endregion
 
@@ -320,7 +319,7 @@ void View::depthPass(sgraph::IScenegraph *scenegraph, glm::mat4& viewMat)
  */
 void View::shadowStencilPass(sgraph::IScenegraph *scenegraph, glm::mat4& viewMat, int lightIndex)
 {
-    glDepthMask(GL_FALSE); // do not write into the depth buffer anymore.
+    glDepthMask(GL_FALSE); // do not write into the depth buffer anymore. This is so that the shadow volumes do not obstruct the actual objects.
     glEnable(GL_DEPTH_CLAMP); // Don't want to clip the back polygons.
     glDisable(GL_CULL_FACE); // Don't want the back-facing polygons to get culled. need them to increment the stencil buffer.
     glStencilFunc(GL_ALWAYS, 0, 0xff); // Always pass the stencil test, reference value 0,mask value 1(should probably use ~0)
@@ -347,13 +346,13 @@ void View::shadowStencilPass(sgraph::IScenegraph *scenegraph, glm::mat4& viewMat
     modelview.top() = modelview.top() * viewMat;
     glUniformMatrix4fv(shadhowShaderLocations.getLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
     
-    // did the light pass at the first now.
+    // did the light traversal at the first now.
     glm::vec4 pos = lights[lightIndex].getPosition();
     pos = lightTransformations[lightIndex] * pos;
     // remember that all the lightlocations are in the view coordinate system.
     glm::vec3 sendingVal = glm::vec3(pos);
     glUniform3fv(shadhowShaderLocations.getLocation("gLightPos"), 1, glm::value_ptr(sendingVal));
-    scenegraph->getRoot()->accept(shadowRenderer); // TODO: change the shadow program later.
+    scenegraph->getRoot()->accept(shadowRenderer); 
     
     modelview.pop();
     shadowProgram.disable();
@@ -374,6 +373,7 @@ void View::ambientPass(sgraph::IScenegraph *scenegraph, glm::mat4& viewMat)
     modelview.push(glm::mat4(1.0));
     modelview.top() = modelview.top() * viewMat;
     glUniformMatrix4fv(ambientShaderLocations.getLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
+    // This uses only the material's ambient. Ideally it should use each light's ambient as well. Maybe later tho.
     scenegraph->getRoot()->accept(ambientRenderer);
     modelview.pop();
     ambientProgram.disable();

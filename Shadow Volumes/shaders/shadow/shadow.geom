@@ -73,7 +73,8 @@ void main()
             vec3 EndVertex = gPosition[0];
             EmitQuad(StartVertex, EndVertex);
         }
-     // render the front cap
+        // I think the cap isn't rendered properly, and is why depth-fail fails sometimes, but depth pass works.
+        // render the front cap
         // // vec3 PosL0(gPosition[0]);
         LightDir = (normalize(gPosition[0] - gLightPos));
         gl_Position = projection * vec4((gPosition[0] + LightDir * EPSILON), 1.0);

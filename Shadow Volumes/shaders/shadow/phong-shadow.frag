@@ -33,7 +33,10 @@ uniform int numLights;
 uniform sampler2D image;
 
 out vec4 fColor;
-// The only difference between phong-multiple and phong-shadow is that the ambient light is not added to the final color, and the diffuse is 0.8f times the original value.
+// There are a few differences between phong-multiple and phong-shadow
+// 1. The ambient light is not added to the final color.
+// 2. The diffuse is 0.8f times the original value.
+// 3. This accepts only 1 light. So the render loop must have a loop through all lights.
 void main()
 {
     vec3 lightVec,viewVec,reflectVec;
