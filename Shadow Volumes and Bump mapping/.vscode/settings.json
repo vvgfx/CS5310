@@ -29,6 +29,11 @@
             "cwd": "e:\\Coursework\\CG 5310\\Shadow Volumes",
             "binaryPath": "e:\\Coursework\\CG 5310\\Shadow Volumes\\ShadowVolumes.exe",
             "binaryArgs": []
+        },
+        {
+            "cwd": "e:\\Coursework\\CG 5310\\Shadow Volumes and Bump mapping",
+            "binaryPath": "e:\\Coursework\\CG 5310\\Shadow Volumes and Bump mapping\\ShadowVolumesAndBumpMapping.exe",
+            "binaryArgs": []
         }
     ],
     "files.associations": {

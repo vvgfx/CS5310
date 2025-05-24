@@ -3,7 +3,7 @@ INCLUDES = -I../include
 LIBS = -L../lib
 LDFLAGS = -lglad -lglfw3
 CFLAGS = -g -std=c++11
-PROGRAM = ShadowVolumes
+PROGRAM = ShadowVolumesAndBumpMapping
 
 
 ifeq ($(OS),Windows_NT)     # is Windows_NT on XP, 2000, 7, Vista, 10...
@@ -15,7 +15,7 @@ else ifeq ($(shell uname -s),Darwin)     # is MACOSX
 	COMPILER = clang++
 endif
 
-ShadowVolumes: $(OBJS)
+ShadowVolumesAndBumpMapping: $(OBJS)
 	$(COMPILER) -o $(PROGRAM) $(OBJS) $(LIBS) $(LDFLAGS)
 
 Scenegraphs.o: Scenegraphs.cpp

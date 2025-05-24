@@ -34,12 +34,9 @@ void Controller::initScenegraph() {
     else
         inFile = ifstream(textfile);
     //ifstream inFile("tryout.txt");
-    // changed the constructor of scenegraphImporter as all leaf nodes require a default texture.
-    sgraph::ScenegraphImporter importer("textures/white.ppm");
+    // changed the constructor of scenegraphImporter as all leaf nodes require a default texture and a default normal
+    sgraph::ScenegraphImporter importer("textures/white.ppm", "textures/blank_normal.ppm");
     
-    //TODO: 1 - Save the texture name to images map in the model. - done
-    //      2 - move the textures to the gpu memory, and save the map of names to textureIds - do this in the view, before GLScenegraphRenderer is run. - done
-    //      3 - Update GLScenegraphRenderer to have access to that textureId map, then hook it to the GPU at runtime.
 
     IScenegraph *scenegraph = importer.parse(inFile);
     //scenegraph->setMeshes(meshes);

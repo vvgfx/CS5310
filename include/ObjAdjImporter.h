@@ -85,7 +85,7 @@ namespace util
 
         static vector<unsigned int> findAdjacencies(const vector<unsigned int> &triangles)
         {
-            cout << "finding adjacencies!" << endl;
+            // cout << "finding adjacencies!" << endl;
             // create map between each edge and the two edges that share it!
             vector<unsigned int> indices;
             map<Edge, vector<Face>> edgeMap;
@@ -456,7 +456,7 @@ namespace util
             // mesh.setPrimitives(triangles); // Converting this to the adjacency type for Geometry Shaders.
             mesh.setPrimitives(findAdjacencies(triangles));
             mesh.setPrimitiveType(GL_TRIANGLES_ADJACENCY);
-            mesh.setPrimitiveSize(3);
+            mesh.setPrimitiveSize(6); // fix - its 6 not 3
             return mesh;
         }
     };

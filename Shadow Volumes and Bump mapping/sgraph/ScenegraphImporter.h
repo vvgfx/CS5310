@@ -25,12 +25,18 @@ using namespace std;
 namespace sgraph {
     class ScenegraphImporter {
         public:
-            ScenegraphImporter(string defaultTexPath) : defaultTexturePath(defaultTexPath) 
+            ScenegraphImporter(string defaultTexPath, string defaultNorPath) 
             {
                 PPMImageLoader textureLoader;
                 textureLoader.load(defaultTexPath);
                 util::TextureImage* texImage = new util::TextureImage(textureLoader.getPixels(), textureLoader.getWidth(), textureLoader.getHeight(), "default"); // directly converting to reference. Hope this works.
                 textureMap["default"] = texImage;
+
+                //do the same for the normal map
+                PPMImageLoader normalLoader;
+                normalLoader.load(defaultNorPath);
+                util::TextureImage* normalImage = new util::TextureImage(normalLoader.getPixels(), normalLoader.getWidth(), normalLoader.getHeight(), "default-normal"); // directly converting to reference. Hope this works.
+                normalMap["default-normal"] = normalImage;
             }
 
             IScenegraph *parse(istream& input) {
@@ -69,6 +75,10 @@ namespace sgraph {
                     else if (command == "assign-texture")
                     {
                         parseAssignTexture(inputWithOutComments);
+                    }
+                    else if (command == "assign-normal")
+                    {
+                        parseAssignNormal(inputWithOutComments);
                     }
                     else if (command == "group") {
                         parseGroup(inputWithOutComments);
@@ -136,6 +146,17 @@ namespace sgraph {
                     textureMap[texName] = texImage;
                 }
 
+                virtual void parseAssignNormal(istream& input)
+                {
+                    string normalTexName, normalTexPath;
+                    input >> normalTexName >> normalTexPath;
+                    cout << "Read " << normalTexName << " " << normalTexPath << endl;
+                    PPMImageLoader normalTextureLoader;
+                    normalTextureLoader.load(normalTexPath);
+                    util::TextureImage* normalTexImage = new util::TextureImage(normalTextureLoader.getPixels(), normalTextureLoader.getWidth(), normalTextureLoader.getHeight(), normalTexName); // directly converting to reference. Hope this works.
+                    normalMap[normalTexName] = normalTexImage;
+                }
+
                 virtual void parseAssignTexture(istream& input)
                 {
                     string textureName, leafName;
@@ -172,7 +193,7 @@ namespace sgraph {
                     if (command == "instanceof") {
                         input >> instanceof;
                     }
-                    SGNode *leaf = new LeafNode(instanceof,name,NULL);
+                    SGNode *leaf = new LeafNode(instanceof,name,NULL, "default", "default-normal"); // changed this to remove "default" and "default-normal" hardcode from leafNode.
                     LeafNode* leafInstance = dynamic_cast<LeafNode*>(leaf);
                     nodes[varname] = leaf;
                 } 
@@ -383,8 +404,8 @@ namespace sgraph {
                 SGNode *root;
                 map<string, util::Light> lights;
                 map<string,util::TextureImage*> textureMap;
-                string defaultTexturePath;
-        
+                map<string,util::TextureImage*> normalMap; // for bump mapping.
+                //removed references to defaultTexturePath and defaultNormalPath because its not needed after the constructor :)
     };
 }
 

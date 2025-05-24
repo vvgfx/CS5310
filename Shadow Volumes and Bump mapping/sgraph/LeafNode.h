@@ -32,20 +32,23 @@ protected:
     util::Material material;
     string textureName;
     glm::mat4 textureTransform;
+    string normalTextureName;
 
 public:
-    LeafNode(const string& instanceOf,util::Material& material,const string& name,sgraph::IScenegraph *graph, string texName)
+    LeafNode(const string& instanceOf,util::Material& material,const string& name,sgraph::IScenegraph *graph, string texName, string normalName)
         :AbstractSGNode(name,graph) {
         this->objInstanceName = instanceOf;
         this->material = material;
         this->textureName = texName;
+        this->normalTextureName = normalName;
         textureTransform  = glm::mat4(1.0f);//Assuming that the default texture transformation is the identity matrix.
     }
 
-    LeafNode(const string& instanceOf,const string& name,sgraph::IScenegraph *graph)
+    LeafNode(const string& instanceOf,const string& name,sgraph::IScenegraph *graph, string texName, string normalName)
         :AbstractSGNode(name,graph) {
         this->objInstanceName = instanceOf;
-        this->textureName = "default";
+        this->textureName = texName;
+        this->normalTextureName = normalName;
         this->textureTransform = glm::mat4(1.0f);
     }
 	
@@ -116,7 +119,7 @@ public:
      */
 
     SGNode *clone() {
-        LeafNode *newclone = new LeafNode(this->objInstanceName,material,name,scenegraph, this->textureName);
+        LeafNode *newclone = new LeafNode(this->objInstanceName,material,name,scenegraph, this->textureName, this->normalTextureName);
         return newclone;
     }
 
