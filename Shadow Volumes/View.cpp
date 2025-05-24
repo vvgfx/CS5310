@@ -241,7 +241,7 @@ void View::display(sgraph::IScenegraph *scenegraph)
     initLightShaderVars(); // lighting to shader variables mapping. Saves map in LightLocation.
     modelview.pop();
     #pragma endregion
-
+    glDepthFunc(GL_LEQUAL); // This gave me 3 hours of pain :(
     //rotate the propellers!
     rotatePropeller("propeller-1-rotate", glfwGetTime());
     rotatePropeller("propeller-2-rotate", glfwGetTime());
@@ -358,8 +358,6 @@ void View::ambientPass(sgraph::IScenegraph *scenegraph, glm::mat4& viewMat)
     glEnable(GL_BLEND); // blend the ambient light.
     glBlendEquation(GL_FUNC_ADD); // blend by addition.
     glBlendFunc(GL_ONE, GL_ONE); // equal parts of existing and ambient. This is fine because the ambient shader has intensity reduced to 0.2 times.
-    // glClear(GL_DEPTH_BUFFER_BIT); // remove later
-    glDisable(GL_DEPTH_TEST); // remove later
     modelview.push(glm::mat4(1.0));
     modelview.top() = modelview.top() * viewMat;
     glUniformMatrix4fv(ambientShaderLocations.getLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));

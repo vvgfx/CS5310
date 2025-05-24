@@ -9,7 +9,7 @@ uniform mat4 projection; // these should share the memory with the vertex shader
 uniform mat4 modelview;
 uniform vec3 gLightPos; // Pass this through the shadowRenderer
 
-float EPSILON = 0.0001;
+float EPSILON = 0.1;
 // Emit a quad using a triangle strip
 void EmitQuad(vec3 StartVertex, vec3 EndVertex)
 {
@@ -75,32 +75,32 @@ void main()
         }
      // render the front cap
         // // vec3 PosL0(gPosition[0]);
-        // LightDir = (normalize(gPosition[0] - gLightPos));
-        // gl_Position = projection * vec4((gPosition[0] + LightDir * EPSILON), 1.0);
-        // EmitVertex();
+        LightDir = (normalize(gPosition[0] - gLightPos));
+        gl_Position = projection * vec4((gPosition[0] + LightDir * EPSILON), 1.0);
+        EmitVertex();
 
-        // // vec3 PosL2(gPosition[2]);
-        // LightDir = (normalize(gPosition[2] - gLightPos));
-        // gl_Position = projection * vec4((gPosition[2] + LightDir * EPSILON), 1.0);
-        // EmitVertex();
+        // vec3 PosL2(gPosition[2]);
+        LightDir = (normalize(gPosition[2] - gLightPos));
+        gl_Position = projection * vec4((gPosition[2] + LightDir * EPSILON), 1.0);
+        EmitVertex();
 
-        // // vec3 PosL4(gPosition[4]);
-        // LightDir = (normalize(gPosition[4] - gLightPos));
-        // gl_Position = projection * vec4((gPosition[4] + LightDir * EPSILON), 1.0);
-        // EmitVertex();
-        // EndPrimitive();
+        // vec3 PosL4(gPosition[4]);
+        LightDir = (normalize(gPosition[4] - gLightPos));
+        gl_Position = projection * vec4((gPosition[4] + LightDir * EPSILON), 1.0);
+        EmitVertex();
+        EndPrimitive();
 
-        // // render the back cap
-        // LightDir = gPosition[0] - gLightPos;
-        // gl_Position = projection * vec4(LightDir, 0.0);
-        // EmitVertex();
+        // render the back cap
+        LightDir = gPosition[0] - gLightPos;
+        gl_Position = projection * vec4(LightDir, 0.0);
+        EmitVertex();
 
-        // LightDir = gPosition[4] - gLightPos;
-        // gl_Position = projection * vec4(LightDir, 0.0);
-        // EmitVertex();
+        LightDir = gPosition[4] - gLightPos;
+        gl_Position = projection * vec4(LightDir, 0.0);
+        EmitVertex();
 
-        // LightDir = gPosition[2] - gLightPos;
-        // gl_Position = projection * vec4(LightDir, 0.0);
-        // EmitVertex();
+        LightDir = gPosition[2] - gLightPos;
+        gl_Position = projection * vec4(LightDir, 0.0);
+        EmitVertex();
     }
 }
