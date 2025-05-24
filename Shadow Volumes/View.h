@@ -64,9 +64,9 @@ public:
     void initLightShaderVars();
     void rotate();
     void depthPass(sgraph::IScenegraph *scenegraph, glm::mat4& viewMat);
-    void shadowStencilPass(sgraph::IScenegraph *scenegraph, glm::mat4& viewMat);
+    void shadowStencilPass(sgraph::IScenegraph *scenegraph, glm::mat4& viewMat, int i);
     void ambientPass(sgraph::IScenegraph *scenegraph, glm::mat4& viewMat);
-    void renderObjectPass(sgraph::IScenegraph *scenegraph, glm::mat4& viewMat);
+    void renderObjectPass(sgraph::IScenegraph *scenegraph, glm::mat4& viewMat, int i);
     GLFWwindow* window;
     util::ShaderProgram renderProgram;
     util::ShaderGeoProgram shadowProgram;

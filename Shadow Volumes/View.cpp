@@ -238,10 +238,11 @@ void View::display(sgraph::IScenegraph *scenegraph)
     modelview.top() = modelview.top() * viewMat;
     initLights(scenegraph); // lighting scenegraph traversal happens here. I've moved this to the first because the lights need to be initialized
     // for the shadow volume pass before the rendering pass
-    initLightShaderVars(); // lighting to shader variables mapping. Saves map in LightLocation.
+    // initLightShaderVars(); // lighting to shader variables mapping. Saves map in LightLocation.
     modelview.pop();
     #pragma endregion
     glDepthFunc(GL_LEQUAL); // This gave me 3 hours of pain :(
+    
     //rotate the propellers!
     rotatePropeller("propeller-1-rotate", glfwGetTime());
     rotatePropeller("propeller-2-rotate", glfwGetTime());
@@ -262,8 +263,15 @@ void View::display(sgraph::IScenegraph *scenegraph)
     
     depthPass(scenegraph, viewMat); // set the depth buffer from the actual camera location to set up for the stencil test.
     glEnable(GL_STENCIL_TEST); // enable stencil test.
-    shadowStencilPass(scenegraph, viewMat); // render the shadow volume into the stencil buffer.
-    renderObjectPass(scenegraph, viewMat); // render all the objects with lighting (except ambient) into the scene. (fragments that fail the stencil test will not touch the fragment shader).
+    glEnable(GL_BLEND); // for multiple lights
+    glBlendFunc(GL_ONE, GL_ONE);
+    for (int i = 0; i < lights.size(); i++) 
+    {
+        glClear(GL_STENCIL_BUFFER_BIT);
+        shadowStencilPass(scenegraph, viewMat, i); // render the shadow volume into the stencil buffer.
+        renderObjectPass(scenegraph, viewMat, i); // render all the objects with lighting (except ambient) into the scene. (fragments that fail the stencil test will not touch the fragment shader).
+    }
+    glDisable(GL_BLEND);
     glDisable(GL_STENCIL_TEST); // need to disable the stencil test for the ambient pass.
     ambientPass(scenegraph, viewMat); // ambient pass for all objects.
     #pragma endregion
@@ -310,7 +318,7 @@ void View::depthPass(sgraph::IScenegraph *scenegraph, glm::mat4& viewMat)
  * Render the shadow volumes into the stencil buffer. This should run after the depth pass,
  * and the colorBuffer write must still be disabled.
  */
-void View::shadowStencilPass(sgraph::IScenegraph *scenegraph, glm::mat4& viewMat)
+void View::shadowStencilPass(sgraph::IScenegraph *scenegraph, glm::mat4& viewMat, int lightIndex)
 {
     glDepthMask(GL_FALSE); // do not write into the depth buffer anymore.
     glEnable(GL_DEPTH_CLAMP); // Don't want to clip the back polygons.
@@ -318,14 +326,14 @@ void View::shadowStencilPass(sgraph::IScenegraph *scenegraph, glm::mat4& viewMat
     glStencilFunc(GL_ALWAYS, 0, 0xff); // Always pass the stencil test, reference value 0,mask value 1(should probably use ~0)
 
     // For some reason, the depth-fail method breaks down for some fragments of the sphere.
-    /** depth fail start 
-    glStencilOpSeparate(GL_BACK, // for backfacing polygons
-                        GL_KEEP, // stencil test fails - doesnt happen because stencil function is set to always pass
-                        GL_INCR_WRAP, // stencil passes but depth fails - our required condition - increment the stencil buffer value
-                        GL_KEEP); // both stencil and depth passes - not relevant; do nothing.
+    // depth fail
+    // glStencilOpSeparate(GL_BACK, // for backfacing polygons
+    //                     GL_KEEP, // stencil test fails - doesnt happen because stencil function is set to always pass
+    //                     GL_INCR_WRAP, // stencil passes but depth fails - our required condition - increment the stencil buffer value
+    //                     GL_KEEP); // both stencil and depth passes - not relevant; do nothing.
     
-    glStencilOpSeparate(GL_FRONT, GL_KEEP, GL_DECR_WRAP, GL_KEEP); // similarly, for front facing polygons, decrement the stencil buffer
-    */
+    // glStencilOpSeparate(GL_FRONT, GL_KEEP, GL_DECR_WRAP, GL_KEEP); // similarly, for front facing polygons, decrement the stencil buffer
+    
 
     // These are for depth pass. This works for now, but will fail when the camera is placed inside a shadow.
     glStencilOpSeparate(GL_FRONT,GL_KEEP, GL_KEEP,GL_INCR_WRAP);
@@ -340,15 +348,12 @@ void View::shadowStencilPass(sgraph::IScenegraph *scenegraph, glm::mat4& viewMat
     glUniformMatrix4fv(shadhowShaderLocations.getLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
     
     // did the light pass at the first now.
-    for (int i = 0; i < lights.size(); i++) 
-    {
-        glm::vec4 pos = lights[i].getPosition();
-        pos = lightTransformations[i] * pos;
-        // remember that all the lightlocations are in the view coordinate system.
-        glm::vec3 sendingVal = glm::vec3(pos);
-        glUniform3fv(shadhowShaderLocations.getLocation("gLightPos"), 1, glm::value_ptr(sendingVal));
-        scenegraph->getRoot()->accept(shadowRenderer); // TODO: change the shadow program later.
-    }
+    glm::vec4 pos = lights[lightIndex].getPosition();
+    pos = lightTransformations[lightIndex] * pos;
+    // remember that all the lightlocations are in the view coordinate system.
+    glm::vec3 sendingVal = glm::vec3(pos);
+    glUniform3fv(shadhowShaderLocations.getLocation("gLightPos"), 1, glm::value_ptr(sendingVal));
+    scenegraph->getRoot()->accept(shadowRenderer); // TODO: change the shadow program later.
     
     modelview.pop();
     shadowProgram.disable();
@@ -375,7 +380,7 @@ void View::ambientPass(sgraph::IScenegraph *scenegraph, glm::mat4& viewMat)
     glDisable(GL_BLEND);
 }
 
-void View::renderObjectPass(sgraph::IScenegraph *scenegraph, glm::mat4& viewMat)
+void View::renderObjectPass(sgraph::IScenegraph *scenegraph, glm::mat4& viewMat, int lightIndex)
 {
 
     renderProgram.enable();
@@ -397,23 +402,22 @@ void View::renderObjectPass(sgraph::IScenegraph *scenegraph, glm::mat4& viewMat)
 
     glUniform1i(renderShaderLocations.getLocation("numLights"), lights.size());
 
-    for (int i = 0; i < lights.size(); i++) 
-    {
-        glm::vec4 pos = lights[i].getPosition();
-        pos = lightTransformations[i] * pos;
-        // position
-        //adding direction for spotlight
-        glm::vec4 spotDirection = lights[i].getSpotDirection();
-        spotDirection = lightTransformations[i] * spotDirection;
-        // Set light colors
-        glUniform3fv(lightLocations[i].ambient, 1, glm::value_ptr(lights[i].getAmbient()));
-        glUniform3fv(lightLocations[i].diffuse, 1, glm::value_ptr(lights[i].getDiffuse()));
-        glUniform3fv(lightLocations[i].specular, 1, glm::value_ptr(lights[i].getSpecular()));
-        glUniform4fv(lightLocations[i].position, 1, glm::value_ptr(pos));
-        //spotlight stuff here
-        glUniform1f(lightLocations[i].spotAngle, lights[i].getSpotCutoff());
-        glUniform3fv(lightLocations[i].spotDirection, 1, glm::value_ptr(spotDirection));
-    }
+    // send the data for the ith light
+    glm::vec4 pos = lights[lightIndex].getPosition();
+    pos = lightTransformations[lightIndex] * pos;
+    // position
+    //adding direction for spotlight
+    glm::vec4 spotDirection = lights[lightIndex].getSpotDirection();
+    spotDirection = lightTransformations[lightIndex] * spotDirection;
+    // Set light colors
+    glUniform3fv(renderShaderLocations.getLocation("light.ambient"), 1, glm::value_ptr(lights[lightIndex].getAmbient()));
+    glUniform3fv(renderShaderLocations.getLocation("light.diffuse"), 1, glm::value_ptr(lights[lightIndex].getDiffuse()));
+    glUniform3fv(renderShaderLocations.getLocation("light.specular"), 1, glm::value_ptr(lights[lightIndex].getSpecular()));
+    glUniform4fv(renderShaderLocations.getLocation("light.position"), 1, glm::value_ptr(pos));
+    //spotlight stuff here
+    glUniform1f(renderShaderLocations.getLocation("light.spotAngle"), lights[lightIndex].getSpotCutoff());
+    glUniform3fv(renderShaderLocations.getLocation("light.spotDirection"), 1, glm::value_ptr(spotDirection));
+
     
     //send projection matrix to GPU    
     glUniformMatrix4fv(renderShaderLocations.getLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));

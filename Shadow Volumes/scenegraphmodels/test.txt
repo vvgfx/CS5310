@@ -22,9 +22,9 @@ end-material
 #lights
 light one-light
 ambient 0.3 0.3 0.3
-diffuse 0.5 0.5 0.5
+diffuse 0.7 0.7 0.7
 specular 0.5 0.5 0.5
-position 0 0 30
+position 0 10 30
 end-light
 
 #lights
@@ -32,9 +32,9 @@ light two-light
 ambient 0.3 0.3 0.3
 diffuse 0.5 0.5 0.5
 specular 0.5 0.5 0.5
-position 0 20 10 # was 0 50 0 initially
-#spot-direction 0 -1 0 
-#spot-angle 20
+position 0 50 0 # was 0 50 0 initially
+spot-direction 0 -1 0 
+spot-angle 20
 end-light
 
 #textures
@@ -43,7 +43,7 @@ image checkerboard textures/white.ppm
 
 #the root
 group root root
-#assign-light one-light root
+assign-light one-light root
 assign-light two-light root
 
 #box

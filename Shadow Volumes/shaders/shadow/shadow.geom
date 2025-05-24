@@ -1,7 +1,7 @@
 #version 330
 
 layout(triangles_adjacency) in;
-layout(triangle_strip, max_vertices = 18) out;
+layout(triangle_strip, max_vertices = 22) out;
 
 in vec3 gPosition[];
 
@@ -102,5 +102,6 @@ void main()
         LightDir = gPosition[2] - gLightPos;
         gl_Position = projection * vec4(LightDir, 0.0);
         EmitVertex();
+        EndPrimitive();
     }
 }
