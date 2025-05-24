@@ -10,7 +10,7 @@ Features:
     - Meshed objects: any obj format object is supported. This program imports only the position, normal and texture coordinate data.
     - Lights : Point and spot lights
     - Shadows : Resolution independent shadows using stencil shadow volumes.
-    - Textures : Support for textures with mip-mapping.
+    - Textures : Support for textures with mip-mapping. The program can import only PPM P3 Images.
 
 Note:
 - By default, the program runs the "test.txt" scene.

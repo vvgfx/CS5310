@@ -1,0 +1,99 @@
+#all the instances
+instance box models/box.obj
+instance cylinder models/cylinder.obj
+instance cone models/cone.obj
+
+#material
+material propeller-body-mat
+ambient 1 1 0
+diffuse 1 1 0
+specular 1 1 0
+shininess 1
+end-material
+
+#material
+material propeller-fin-mat
+ambient 1 0 0
+diffuse 1 0 0
+specular 1 0 0
+shininess 1
+end-material
+
+
+group fin-origin fin-origin
+scale fin-1-scale fin-1-scale 5 2 2
+rotate fin-1-rotate fin-1-rotate 0 0 1 0
+translate fin-1-translate fin-1-translate 4 0 0
+scale fin-2-scale fin-2-scale 5 2 2
+rotate fin-2-rotate fin-2-rotate 90 0 1 0
+translate fin-2-translate fin-2-translate 4 0 0
+scale fin-3-scale fin-3-scale 5 2 2
+rotate fin-3-rotate fin-3-rotate 180 0 1 0
+translate fin-3-translate fin-3-translate 4 0 0
+scale fin-4-scale fin-4-scale 5 2 2
+rotate fin-4-rotate fin-4-rotate 270 0 1 0
+translate fin-4-translate fin-4-translate 4 0 0
+
+
+#scale first, then translate, then rotate.
+
+add-child fin-1-scale fin-1-translate
+add-child fin-2-scale fin-2-translate
+add-child fin-3-scale fin-3-translate
+add-child fin-4-scale fin-4-translate
+
+add-child fin-1-translate fin-1-rotate
+add-child fin-2-translate fin-2-rotate
+add-child fin-3-translate fin-3-rotate
+add-child fin-4-translate fin-4-rotate
+
+#creating fin-leaves
+
+leaf fin-1-leaf fin-1-leaf instanceof box
+assign-material fin-1-leaf propeller-fin-mat
+leaf fin-2-leaf fin-2-leaf instanceof box
+assign-material fin-2-leaf propeller-fin-mat
+leaf fin-3-leaf fin-3-leaf instanceof box
+assign-material fin-3-leaf propeller-fin-mat
+leaf fin-4-leaf fin-4-leaf instanceof box
+assign-material fin-4-leaf propeller-fin-mat
+
+
+#adding fin-leaves as children
+
+add-child fin-1-leaf fin-1-scale
+add-child fin-2-leaf fin-2-scale
+add-child fin-3-leaf fin-3-scale
+add-child fin-4-leaf fin-4-scale
+
+#Adding rotations to a group that can be translated together
+
+add-child fin-1-rotate fin-origin
+add-child fin-2-rotate fin-origin
+add-child fin-3-rotate fin-origin
+add-child fin-4-rotate fin-origin
+
+#Translate fin-origin to the top of the cylinder
+#Assuming cylinder size is 20 for now!
+
+translate translate-fins translate-fins 0 10 0
+add-child fin-origin translate-fins
+
+#Create cylinder for base of fins and add it
+
+leaf propeller-body propeller-body instanceof cylinder
+assign-material propeller-body propeller-body-mat
+
+scale propeller-body-scale propeller-body-scale 2 10 2
+translate propeller-body-translate propeller-body-translate 0 0 0
+
+add-child propeller-body propeller-body-scale
+add-child propeller-body-scale propeller-body-translate
+
+#Create a common group for the fin-translate and cylinder, then set that as root
+
+group propeller-root propeller-root
+add-child propeller-body-translate propeller-root
+add-child translate-fins propeller-root
+
+assign-root propeller-root
