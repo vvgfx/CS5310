@@ -30,11 +30,10 @@ namespace sgraph {
          * @param os the map of ObjectInstance objects
          * @param shaderLocations the shader locations for the program used to render
          */
-        GLScenegraphRenderer(stack<glm::mat4>& mv,map<string,util::ObjectInstance *>& os,util::ShaderLocationsVault& shaderLocations, map<string, unsigned int>& texIdMap, map<string, unsigned int>& normTexIdMap) 
+        GLScenegraphRenderer(stack<glm::mat4>& mv,map<string,util::ObjectInstance *>& os,util::ShaderLocationsVault& shaderLocations, map<string, unsigned int>& texIdMap) 
             : modelview(mv)
             , objects(os)
-            , textureIdMap(texIdMap)
-            , normalTextureIdMap(normTexIdMap) {
+            , textureIdMap(texIdMap) {
             this->shaderLocations = shaderLocations;
             for (map<string,util::ObjectInstance *>::iterator it=objects.begin();it!=objects.end();it++) {
                 cout << "Mesh with name: "<< it->first << endl;
@@ -86,9 +85,20 @@ namespace sgraph {
                 glBindTexture(GL_TEXTURE_2D, texID);
                 glUniform1i(shaderLocations.getLocation("image"), 0);
             }
-
+            
             //similarly, do the same for normal textures!
-
+            //setting normal textures as texture 1
+            string normalTexName = leafNode->getNormalTextureName();
+            bool isBumpMapping = leafNode->getBumpMappingBool();
+            glUniform1i(shaderLocations.getLocation("bumpMapping"), isBumpMapping);
+            // cout<<"bump mapping: "<<isBumpMapping<<endl;
+            //passing whether bump mapping is used for this object. This is because the normal map I built doesn't seem to work.
+            if (isBumpMapping && !normalTexName.empty() && textureIdMap.find(normalTexName) != textureIdMap.end()) {
+                unsigned int texID = textureIdMap[normalTexName];
+                glActiveTexture(GL_TEXTURE1);
+                glBindTexture(GL_TEXTURE_2D, texID);
+                glUniform1i(shaderLocations.getLocation("normalImage"), 1);
+            }
             objects[leafNode->getInstanceOf()]->draw();
         }
 
@@ -142,7 +152,6 @@ namespace sgraph {
         util::ShaderLocationsVault shaderLocations;
         map<string,util::ObjectInstance *> objects;
         map<string, unsigned int> textureIdMap;
-        map<string, unsigned int> normalTextureIdMap;
 
    };
 }

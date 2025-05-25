@@ -24,6 +24,7 @@ public:
         position = glm::vec4(0,0,0,1);
         normal = glm::vec4(0,0,0,0);
         texcoord = glm::vec4(0,0,0,1);
+        tangent = glm::vec4(0,0,0,0);
     }
 
     ~VertexAttrib(){}
@@ -35,7 +36,8 @@ public:
 
         if ((attribName == "position")
                 || (attribName == "normal")
-                || (attribName == "texcoord"))
+                || (attribName == "texcoord")
+                || (attribName == "tangent"))
         {
             return true;
         }
@@ -71,6 +73,13 @@ public:
             result.push_back(texcoord.y);
             result.push_back(texcoord.z);
             result.push_back(texcoord.w);
+        }
+        else if (attribName == "tangent")
+        {
+            result.push_back(tangent.x);
+            result.push_back(tangent.y);
+            result.push_back(tangent.z);
+            result.push_back(tangent.w);
         }
         else
         {
@@ -127,6 +136,20 @@ public:
                 throw runtime_error(message.str());
             }
         }
+        else if (attribName == "tangent")
+        {
+            tangent = glm::vec4(0,0,0,1);
+            switch (data.size()) {
+            case 4: tangent.w = data[3];
+            case 3: tangent.z = data[2];
+            case 2: tangent.y = data[1];
+            case 1: tangent.x = data[0];
+                break;
+            default:
+                message << "Too much data for attribute: " << attribName;
+                throw runtime_error(message.str());
+            }
+        }
         else
         {
             message << "Attribute: " << attribName << " unsupported!";
@@ -141,6 +164,7 @@ public:
         attributes.push_back("position");
         attributes.push_back("normal");
         attributes.push_back("texcoord");
+        attributes.push_back("tangent");
         return attributes;
     }
 
@@ -148,6 +172,7 @@ private:
     glm::vec4 position;
     glm::vec4 normal;
     glm::vec4 texcoord;
+    glm::vec4 tangent;
 };
 
 #endif

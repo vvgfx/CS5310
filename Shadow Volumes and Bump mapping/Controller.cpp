@@ -44,8 +44,6 @@ void Controller::initScenegraph() {
     map<string, util::TextureImage*> textureMap = importer.getTextureMap();
     model.saveTextureMap(textureMap);
 
-    map<string, util::TextureImage*> normalMap = importer.getNormalMap();
-    model.saveNormalMap(normalMap);
 
     cout <<"Scenegraph made" << endl;   
     sgraph::ScenegraphDrawer* drawer = new sgraph::ScenegraphDrawer();
@@ -62,8 +60,7 @@ void Controller::run()
     sgraph::IScenegraph * scenegraph = model.getScenegraph();
     map<string,util::PolygonMesh<VertexAttrib> > meshes = scenegraph->getMeshes();
     map<string, util::TextureImage*> texMap = model.getTextureMap();
-    map<string, util::TextureImage*> normMap = model.getNormalMap();
-    view.init(this,meshes, texMap, normMap);
+    view.init(this,meshes, texMap);
     //Save the nodes required for transformation when running!
     view.initScenegraphNodes(scenegraph);
     //Set the initial orientation of the drone!

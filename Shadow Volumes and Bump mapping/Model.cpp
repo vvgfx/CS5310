@@ -28,13 +28,3 @@ map<string, util::TextureImage*> Model::getTextureMap()
 {
     return this->textureMap;
 }
-
-void Model::saveNormalMap(map<string, util::TextureImage*>& normMap)
-{
-    this->normalMap = normalMap;
-}
-
-map<string, util::TextureImage*> Model::getNormalMap()
-{
-    return this->normalMap;
-}

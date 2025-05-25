@@ -33,6 +33,7 @@ protected:
     string textureName;
     glm::mat4 textureTransform;
     string normalTextureName;
+    bool isBumpMapping;
 
 public:
     LeafNode(const string& instanceOf,util::Material& material,const string& name,sgraph::IScenegraph *graph, string texName, string normalName)
@@ -49,6 +50,7 @@ public:
         this->objInstanceName = instanceOf;
         this->textureName = texName;
         this->normalTextureName = normalName;
+        this->isBumpMapping = false;
         this->textureTransform = glm::mat4(1.0f);
     }
 	
@@ -80,11 +82,39 @@ public:
     }
 
     /**
-     * Get the nameof the textuer corresponding to this leaf.
+     * Get the nameof the texture corresponding to this leaf.
      */
     string getTextureName()
     {
         return textureName;
+    }
+
+
+    /**
+     * Set the name of the normal texture corresponding to this leaf.
+     */
+    void setNormalTextureName(string texName)
+    {
+        this->isBumpMapping = true;
+        cout<<"bump mapping set to true"<<endl;
+        normalTextureName = texName;
+    }
+
+
+    /**
+     * get if bump mapping is used. Temporary testing code.
+     */
+    bool getBumpMappingBool()
+    {
+        return this->isBumpMapping;
+    }
+
+    /**
+     * Get the nameof the normal texture corresponding to this leaf.
+     */
+    string getNormalTextureName()
+    {
+        return normalTextureName;
     }
 
     /**

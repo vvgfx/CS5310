@@ -41,6 +41,7 @@ end-light
 image white textures/white.ppm
 image checkerboard textures/white.ppm
 image ground-tex textures/stone_wall.ppm
+image ground-normal textures/stone_wall_normal.ppm
 
 #the root
 group root root
@@ -64,6 +65,7 @@ scale b2-scale b2-scale 80 5 80
 leaf two-box two-box instanceof box 
 assign-material two-box box-material
 assign-texture two-box ground-tex
+assign-normal two-box ground-normal
 
 add-child two-box b2-scale
 add-child b2-scale b2-translate

@@ -153,13 +153,12 @@ namespace sgraph {
 
                 virtual void parseAssignNormal(istream& input)
                 {
-                    string normalTexName, normalTexPath;
-                    input >> normalTexName >> normalTexPath;
-                    cout << "Read " << normalTexName << " " << normalTexPath << endl;
-                    PPMImageLoader normalTextureLoader;
-                    normalTextureLoader.load(normalTexPath);
-                    util::TextureImage* normalTexImage = new util::TextureImage(normalTextureLoader.getPixels(), normalTextureLoader.getWidth(), normalTextureLoader.getHeight(), normalTexName); // directly converting to reference. Hope this works.
-                    normalMap[normalTexName] = normalTexImage;
+                    string textureName, leafName;
+                    input >> leafName >> textureName;
+
+                    LeafNode *leafNode = dynamic_cast<LeafNode *>(nodes[leafName]);
+                    if ((leafNode != nullptr) && (textureMap.find(textureName) != textureMap.end())) 
+                        leafNode->setNormalTextureName(textureName);
                 }
 
                 virtual void parseAssignTexture(istream& input)

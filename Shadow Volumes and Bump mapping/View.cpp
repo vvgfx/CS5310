@@ -22,7 +22,7 @@ View::~View(){
 
 }
 
-void View::init(Callbacks *callbacks,map<string,util::PolygonMesh<VertexAttrib>>& meshes, map<string, util::TextureImage*> texMap, map<string, util::TextureImage*> normMap)
+void View::init(Callbacks *callbacks,map<string,util::PolygonMesh<VertexAttrib>>& meshes, map<string, util::TextureImage*> texMap)
 {
     if (!glfwInit())
         exit(EXIT_FAILURE);
@@ -76,8 +76,8 @@ void View::init(Callbacks *callbacks,map<string,util::PolygonMesh<VertexAttrib>>
     // create the shader programs
 
     // render shaders first
-    renderProgram.createProgram(string("shaders/shadow/phong-shadow.vert"),
-                                string("shaders/shadow/phong-shadow.frag"));
+    renderProgram.createProgram(string("shaders/shadow/phong-shadow-bump.vert"),
+                                string("shaders/shadow/phong-shadow-bump.frag"));
     // assuming it got created, get all the shader variables that it uses
     // so we can initialize them at some point
     // enable the shader program
@@ -126,19 +126,20 @@ void View::init(Callbacks *callbacks,map<string,util::PolygonMesh<VertexAttrib>>
     shaderVarsToVertexAttribs["vPosition"] = "position";
     shaderVarsToVertexAttribs["vNormal"] = "normal";
     shaderVarsToVertexAttribs["vTexCoord"] = "texcoord";
-    // shaderVarsToVertexAttribs["vTangent"] = "tangent"; //adding tangent data for bump mapping. - uncomment later.
+    shaderVarsToVertexAttribs["vTangent"] = "tangent"; //adding tangent data for bump mapping. - uncomment later.
     
     
     for (typename map<string,util::PolygonMesh<VertexAttrib> >::iterator it=meshes.begin();
            it!=meshes.end();
            it++) 
     {
-        // computeTangents(it->second); // uncomment later
+        cout<<"computing tangents"<<endl;
+        computeTangents(it->second); // uncomment later
         util::ObjectInstance * obj = new util::ObjectInstance(it->first);
         obj->initPolygonMesh(renderShaderLocations,shaderVarsToVertexAttribs,it->second);
         objects[it->first] = obj;
     }
-    
+    cout<<"computed tangents!"<<endl;
 	int window_width,window_height;
     glfwGetFramebufferSize(window,&window_width,&window_height);
 
@@ -149,17 +150,18 @@ void View::init(Callbacks *callbacks,map<string,util::PolygonMesh<VertexAttrib>>
     frames = 0;
     time = glfwGetTime();
 
-    initTextures(texMap, normMap);
-    renderer = new sgraph::GLScenegraphRenderer(modelview, objects, renderShaderLocations, textureIdMap, normalIdMap);
+    initTextures(texMap);
+    renderer = new sgraph::GLScenegraphRenderer(modelview, objects, renderShaderLocations, textureIdMap);
     lightRetriever = new sgraph::LightRetriever(modelview);
     shadowRenderer = new sgraph::ShadowRenderer(modelview, objects, shadhowShaderLocations);
 
     //scenegraph renderers for shadow volumes
     depthRenderer = new sgraph::DepthRenderer(modelview, objects, depthShaderLocations);
     ambientRenderer = new sgraph::AmbientRenderer(modelview, objects, ambientShaderLocations);
+    // cout<<"Error:"<<glGetError()<<endl;
 }
 
-void View::initTextures(map<string, util::TextureImage*>& textureMap, map<string, util::TextureImage*>& normalMap)
+void View::initTextures(map<string, util::TextureImage*>& textureMap)
 {
     for(typename map<string, util::TextureImage*>::iterator it = textureMap.begin(); it!=textureMap.end(); it++)
     {
@@ -183,31 +185,6 @@ void View::initTextures(map<string, util::TextureImage*>& textureMap, map<string
         
         //save id in map
         textureIdMap[it->first] = textureId;
-    }
-    
-    // Similarly, do the same for normalMaps
-    for(typename map<string, util::TextureImage*>::iterator it = normalMap.begin(); it!=normalMap.end(); it++)
-    {
-        util::TextureImage* textureObject = it->second;
-        
-        //generate texture ID
-        unsigned int textureId;
-        glGenTextures(1,&textureId);
-        glBindTexture(GL_TEXTURE_2D,textureId);
-        
-        //texture params
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
-	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,GL_LINEAR); // Mipmaps are not available for maximization
-        
-        //copy texture to GPU
-	    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, textureObject->getWidth(),textureObject->getHeight(), 0, GL_RGB, GL_UNSIGNED_BYTE,textureObject->getImage());
-        glGenerateMipmap(GL_TEXTURE_2D);
-        
-        //save id in map
-        normalIdMap[it->first] = textureId;
-
     }
 }
 
@@ -242,6 +219,7 @@ void View::computeTangents(util::PolygonMesh<VertexAttrib>& tmesh)
     //go through all the triangles
     for (i = 0; i < primitives.size(); i += primitiveSize)
     {
+        // cout<<"i: "<<i<<endl;
         int i0, i1, i2;
         i0 = primitives[i + vert1];
         i1 = primitives[i + vert2];
@@ -289,37 +267,37 @@ void View::computeTangents(util::PolygonMesh<VertexAttrib>& tmesh)
         //         tangents[primitives[i + j]] + glm::vec4(tangent, 0.0f);
         //     }
         // }
-
-        //orthogonalization
-        for (i = 0; i < tangents.size(); i++) 
-        {
-            glm::vec3 t = glm::vec3(tangents[i].x,tangents[i].y,tangents[i].z);
-            t = glm::normalize(t);
-            data = vertexData[i].getData("normal");
-            glm::vec3 n = glm::vec3(data[0],data[1],data[2]);
-
-            glm::vec3 b = glm::cross(n,t);
-            t = glm::cross(b,n);
-
-            t = glm::normalize(t);
-
-            tangents[i] = glm::vec4(t,0.0f);
-        }
-
-        // set the vertex data
-        for (i = 0; i < vertexData.size(); i++)
-        {
-            data.clear();
-            data.push_back(tangents[i].x);
-            data.push_back(tangents[i].y);
-            data.push_back(tangents[i].z);
-            data.push_back(tangents[i].w);
-
-            vertexData[i].setData("tangent", data);
-        }
-        tmesh.setVertexData(vertexData);
     }
+        //orthogonalization
+    for (i = 0; i < tangents.size(); i++) 
+    {
+        glm::vec3 t = glm::vec3(tangents[i].x,tangents[i].y,tangents[i].z);
+        t = glm::normalize(t);
+        data = vertexData[i].getData("normal");
+        glm::vec3 n = glm::vec3(data[0],data[1],data[2]);
+
+        glm::vec3 b = glm::cross(n,t);
+        t = glm::cross(b,n);
+
+        t = glm::normalize(t);
+
+        tangents[i] = glm::vec4(t,0.0f);
+    }
+
+    // set the vertex data
+    for (i = 0; i < vertexData.size(); i++)
+    {
+        data.clear();
+        data.push_back(tangents[i].x);
+        data.push_back(tangents[i].y);
+        data.push_back(tangents[i].z);
+        data.push_back(tangents[i].w);
+
+        vertexData[i].setData("tangent", data);
+    }
+    tmesh.setVertexData(vertexData);
 }
+
 
 void View::Resize()
 {
