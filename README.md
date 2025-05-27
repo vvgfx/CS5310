@@ -38,5 +38,7 @@ Each folder contains different features I've implemented on top of the base soft
 ### Acknowledgements:
 
 A huge thank you to my professor, Amit Shesh, for all his guidance.
+
 Thank you, to the graphics community for paving the way and providing me with the motivation to continue building this.
+
 Shoutout to https://freestylized.com , for providing me with the textures to make something beautiful.
