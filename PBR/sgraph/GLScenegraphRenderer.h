@@ -77,7 +77,7 @@ namespace sgraph {
             //texture stuff here!
             glUniformMatrix4fv(shaderLocations.getLocation("texturematrix"), 1, GL_FALSE, glm::value_ptr(leafNode->getTextureTransform()));
             //TODO: need to move the texture to GPU memory in the scenegraphImporter, and then pass it to GLScenegraphRenderer's constructor. - done    
-            string texName = leafNode->getTextureName();
+            string texName = leafNode->getTextureMap();
             if (!texName.empty() && textureIdMap.find(texName) != textureIdMap.end()) {
                 unsigned int texID = textureIdMap[texName];
                 // glEnable(GL_TEXTURE_2D); // commenting this because it throws error 1280 and is not required anyways.
@@ -88,8 +88,8 @@ namespace sgraph {
             
             //similarly, do the same for normal textures!
             //setting normal textures as texture 1
-            string normalTexName = leafNode->getNormalTextureName();
-            bool isBumpMapping = leafNode->getBumpMappingBool();
+            string normalTexName = leafNode->getNormalMap();
+            bool isBumpMapping = leafNode->getPBRBool();
             glUniform1i(shaderLocations.getLocation("bumpMapping"), isBumpMapping);
             // cout<<"bump mapping: "<<isBumpMapping<<endl;
             //passing whether bump mapping is used for this object. This is because the normal map I built doesn't seem to work.

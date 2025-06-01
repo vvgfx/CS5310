@@ -32,11 +32,11 @@ namespace sgraph {
                 util::TextureImage* texImage = new util::TextureImage(textureLoader.getPixels(), textureLoader.getWidth(), textureLoader.getHeight(), "default"); // directly converting to reference. Hope this works.
                 textureMap["default"] = texImage;
 
-                //do the same for the normal map
-                PPMImageLoader normalLoader;
-                normalLoader.load(defaultNorPath);
-                util::TextureImage* normalImage = new util::TextureImage(normalLoader.getPixels(), normalLoader.getWidth(), normalLoader.getHeight(), "default-normal"); // directly converting to reference. Hope this works.
-                normalMap["default-normal"] = normalImage;
+                // //do the same for the normal map
+                // PPMImageLoader normalLoader;
+                // normalLoader.load(defaultNorPath);
+                // util::TextureImage* normalImage = new util::TextureImage(normalLoader.getPixels(), normalLoader.getWidth(), normalLoader.getHeight(), "default-normal"); // directly converting to reference. Hope this works.
+                // normalMap["default-normal"] = normalImage;
             }
 
             IScenegraph *parse(istream& input) {
@@ -79,6 +79,18 @@ namespace sgraph {
                     else if (command == "assign-normal")
                     {
                         parseAssignNormal(inputWithOutComments);
+                    }
+                    else if (command == "assign-metallic")
+                    {
+                        parseAssignMetallic(inputWithOutComments);
+                    }
+                    else if (command == "assign-roughness")
+                    {
+                        parseAssignRoughness(inputWithOutComments);
+                    }
+                    else if (command == "assign-ao")
+                    {
+                        parseAssignAO(inputWithOutComments);
                     }
                     else if (command == "group") {
                         parseGroup(inputWithOutComments);
@@ -134,10 +146,10 @@ namespace sgraph {
                 return this->textureMap;
             }
 
-            map<string, util::TextureImage*> getNormalMap()
-            {
-                return this->normalMap;
-            }
+            // map<string, util::TextureImage*> getNormalMap()
+            // {
+            //     return this->normalMap;
+            // }
             protected:
 
                 virtual void parseTexture(istream& input)
@@ -158,7 +170,35 @@ namespace sgraph {
 
                     LeafNode *leafNode = dynamic_cast<LeafNode *>(nodes[leafName]);
                     if ((leafNode != nullptr) && (textureMap.find(textureName) != textureMap.end())) 
-                        leafNode->setNormalTextureName(textureName);
+                        leafNode->setNormalMap(textureName);
+                }
+
+                virtual void parseAssignMetallic(istream& input)
+                {
+                    string textureName, leafName;
+                    input >> leafName >> textureName;
+
+                    LeafNode *leafNode = dynamic_cast<LeafNode *>(nodes[leafName]);
+                    if ((leafNode != nullptr) && (textureMap.find(textureName) != textureMap.end())) 
+                        leafNode->setMetallicMap(textureName);
+                }
+                virtual void parseAssignRoughness(istream& input)
+                {
+                    string textureName, leafName;
+                    input >> leafName >> textureName;
+
+                    LeafNode *leafNode = dynamic_cast<LeafNode *>(nodes[leafName]);
+                    if ((leafNode != nullptr) && (textureMap.find(textureName) != textureMap.end())) 
+                        leafNode->setRoughnessMap(textureName);
+                }
+                virtual void parseAssignAO(istream& input)
+                {
+                    string textureName, leafName;
+                    input >> leafName >> textureName;
+
+                    LeafNode *leafNode = dynamic_cast<LeafNode *>(nodes[leafName]);
+                    if ((leafNode != nullptr) && (textureMap.find(textureName) != textureMap.end())) 
+                        leafNode->setAOMap(textureName);
                 }
 
                 virtual void parseAssignTexture(istream& input)
@@ -168,7 +208,7 @@ namespace sgraph {
 
                     LeafNode *leafNode = dynamic_cast<LeafNode *>(nodes[leafName]);
                     if ((leafNode != nullptr) && (textureMap.find(textureName) != textureMap.end())) 
-                        leafNode->setTextureName(textureName);
+                        leafNode->setTextureMap(textureName);
                 }
 
                 virtual void parseDynamic(istream& input)
@@ -197,7 +237,7 @@ namespace sgraph {
                     if (command == "instanceof") {
                         input >> instanceof;
                     }
-                    SGNode *leaf = new LeafNode(instanceof,name,NULL, "default", "default-normal"); // changed this to remove "default" and "default-normal" hardcode from leafNode.
+                    SGNode *leaf = new LeafNode(instanceof,name,NULL, "default"); // changed this to remove "default" and "default-normal" hardcode from leafNode.
                     LeafNode* leafInstance = dynamic_cast<LeafNode*>(leaf);
                     nodes[varname] = leaf;
                 } 
@@ -408,7 +448,7 @@ namespace sgraph {
                 SGNode *root;
                 map<string, util::Light> lights;
                 map<string,util::TextureImage*> textureMap;
-                map<string,util::TextureImage*> normalMap; // for bump mapping.
+                // map<string,util::TextureImage*> normalMap; // for bump mapping.
                 //removed references to defaultTexturePath and defaultNormalPath because its not needed after the constructor :)
     };
 }

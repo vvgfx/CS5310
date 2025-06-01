@@ -30,27 +30,31 @@ protected:
      * The material associated with the object instance at this leaf
      */
     util::Material material;
-    string textureName;
+    string textureMap; // albedo map
     glm::mat4 textureTransform;
-    string normalTextureName;
-    bool isBumpMapping;
+    string normalMap;
+    bool isPBR;
+    string metallicMap;
+    string roughnessMap;
+    string aoMap;
 
 public:
     LeafNode(const string& instanceOf,util::Material& material,const string& name,sgraph::IScenegraph *graph, string texName, string normalName)
         :AbstractSGNode(name,graph) {
         this->objInstanceName = instanceOf;
         this->material = material;
-        this->textureName = texName;
-        this->normalTextureName = normalName;
+        this->textureMap = texName;
+        this->normalMap = normalName;
+        this->isPBR = true; // this is true if the normalMap is set.
         textureTransform  = glm::mat4(1.0f);//Assuming that the default texture transformation is the identity matrix.
     }
 
-    LeafNode(const string& instanceOf,const string& name,sgraph::IScenegraph *graph, string texName, string normalName)
+    LeafNode(const string& instanceOf,const string& name,sgraph::IScenegraph *graph, string texName)
         :AbstractSGNode(name,graph) {
         this->objInstanceName = instanceOf;
-        this->textureName = texName;
-        this->normalTextureName = normalName;
-        this->isBumpMapping = false;
+        this->textureMap = texName;
+        // this->normalMap = normalName;
+        this->isPBR = false;
         this->textureTransform = glm::mat4(1.0f);
     }
 	
@@ -76,45 +80,95 @@ public:
     /**
      * Set the name of the texture corresponding to this leaf.
      */
-    void setTextureName(string texName)
+    void setTextureMap(string texName)
     {
-        textureName = texName;
+        textureMap = texName;
     }
 
     /**
      * Get the nameof the texture corresponding to this leaf.
      */
-    string getTextureName()
+    string getTextureMap()
     {
-        return textureName;
+        return textureMap;
     }
 
 
     /**
      * Set the name of the normal texture corresponding to this leaf.
      */
-    void setNormalTextureName(string texName)
+    void setNormalMap(string texName)
     {
-        this->isBumpMapping = true;
-        cout<<"bump mapping set to true"<<endl;
-        normalTextureName = texName;
+        this->isPBR = true;
+        cout<<"PBR set to true"<<endl;
+        normalMap = texName;
     }
 
+    /**
+     * Set the metallic map of this leaf.
+     */
+    void setMetallicMap(string metalMapName)
+    {
+        this->isPBR = true;
+        this->metallicMap = metalMapName;
+    }
 
     /**
-     * get if bump mapping is used. Temporary testing code.
+     * Get the metallic map of this leaf.
      */
-    bool getBumpMappingBool()
+    string getMetallicMap()
     {
-        return this->isBumpMapping;
+        return this->metallicMap;
+    }
+
+    /**
+     * Set the roughness map of this leaf.
+     */
+    void setRoughnessMap(string roughMap)
+    {
+        this->isPBR = true;
+        this->roughnessMap = roughMap;
+    }
+
+    /**
+     * Get the roughness map of this leaf.
+     */
+    string getRoughnessMap()
+    {
+        return this->roughnessMap;
+    }
+
+    /**
+     * Set the ambient occlusion map of this leaf.
+     */
+    void setAOMap(string aoMap)
+    {
+        this->isPBR = true;
+        this->aoMap = aoMap;
+    }
+
+    /**
+     * Get the ambient occlusion map of this leaf.
+     */
+    string getAOMap()
+    {
+        return this->aoMap;
+    }
+
+    /**
+     * get if PBR is used. Temporary testing code.
+     */
+    bool getPBRBool()
+    {
+        return this->isPBR;
     }
 
     /**
      * Get the nameof the normal texture corresponding to this leaf.
      */
-    string getNormalTextureName()
+    string getNormalMap()
     {
-        return normalTextureName;
+        return normalMap;
     }
 
     /**
@@ -149,7 +203,7 @@ public:
      */
 
     SGNode *clone() {
-        LeafNode *newclone = new LeafNode(this->objInstanceName,material,name,scenegraph, this->textureName, this->normalTextureName);
+        LeafNode *newclone = new LeafNode(this->objInstanceName,material,name,scenegraph, this->textureMap, this->normalMap);
         return newclone;
     }
 
