@@ -413,7 +413,7 @@ void View::display(sgraph::IScenegraph *scenegraph)
 }
 
 /**
- * Render the scene into the depth buffer. Using this for depth fail method in stencil shadow volumes.
+ * Render the scene into the depth buffer. Using this for depth fail and depth pass methods in stencil shadow volumes.
  */
 void View::depthPass(sgraph::IScenegraph *scenegraph, glm::mat4& viewMat)
 {
