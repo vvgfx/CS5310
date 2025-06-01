@@ -83,21 +83,21 @@ namespace sgraph {
                 // glEnable(GL_TEXTURE_2D); // commenting this because it throws error 1280 and is not required anyways.
                 glActiveTexture(GL_TEXTURE0);
                 glBindTexture(GL_TEXTURE_2D, texID);
-                glUniform1i(shaderLocations.getLocation("albedoMap"), 0);
+                glUniform1i(shaderLocations.getLocation("image"), 0);
             }
             
             //similarly, do the same for normal textures!
             //setting normal textures as texture 1
             string normalTexName = leafNode->getNormalMap();
-            bool isPBR = leafNode->getPBRBool();
-            glUniform1i(shaderLocations.getLocation("PBR"), isPBR);
+            bool isBumpMapping = leafNode->getPBRBool();
+            glUniform1i(shaderLocations.getLocation("bumpMapping"), isBumpMapping);
             // cout<<"bump mapping: "<<isBumpMapping<<endl;
             //passing whether bump mapping is used for this object. This is because the normal map I built doesn't seem to work.
-            if (isPBR && !normalTexName.empty() && textureIdMap.find(normalTexName) != textureIdMap.end()) {
+            if (isBumpMapping && !normalTexName.empty() && textureIdMap.find(normalTexName) != textureIdMap.end()) {
                 unsigned int texID = textureIdMap[normalTexName];
                 glActiveTexture(GL_TEXTURE1);
                 glBindTexture(GL_TEXTURE_2D, texID);
-                glUniform1i(shaderLocations.getLocation("normalMap"), 1);
+                glUniform1i(shaderLocations.getLocation("normalImage"), 1);
             }
             objects[leafNode->getInstanceOf()]->draw();
         }

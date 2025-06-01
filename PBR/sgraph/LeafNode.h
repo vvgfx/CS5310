@@ -8,6 +8,7 @@
 #include <map>
 #include <stack>
 #include <string>
+#include <glm/gtc/matrix_transform.hpp>
 using namespace std;
 
 namespace sgraph
@@ -55,7 +56,7 @@ public:
         this->textureMap = texName;
         // this->normalMap = normalName;
         this->isPBR = false;
-        this->textureTransform = glm::mat4(1.0f);
+        this->textureTransform = glm::mat4(1.0f) * glm::scale(glm::mat4(1.0f), glm::vec3(5.0f, 5.0f, 5.0f));
     }
 	
 	~LeafNode(){}

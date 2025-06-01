@@ -8,6 +8,7 @@
 #include <map>
 #include <stack>
 #include <string>
+#include <glm/gtc/matrix_transform.hpp>
 using namespace std;
 
 namespace sgraph
@@ -51,6 +52,7 @@ public:
         this->textureName = texName;
         this->normalTextureName = normalName;
         this->isBumpMapping = false;
+        // this->textureTransform = glm::mat4(1.0f) * glm::scale(glm::mat4(1.0f), glm::vec3(5.0f, 5.0f, 5.0f)); // Clean build before using!!
         this->textureTransform = glm::mat4(1.0f);
     }
 	

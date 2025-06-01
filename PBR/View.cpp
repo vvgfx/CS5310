@@ -11,6 +11,7 @@ using namespace std;
 #include "sgraph/ShadowRenderer.h"
 #include "sgraph/DepthRenderer.h"
 #include "sgraph/AmbientRenderer.h"
+#include "sgraph/PBRRenderer.h"
 #include "VertexAttrib.h"
 
 
@@ -151,7 +152,7 @@ void View::init(Callbacks *callbacks,map<string,util::PolygonMesh<VertexAttrib>>
     time = glfwGetTime();
 
     initTextures(texMap);
-    renderer = new sgraph::GLScenegraphRenderer(modelview, objects, renderShaderLocations, textureIdMap);
+    renderer = new sgraph::PBRRenderer(modelview, objects, renderShaderLocations, textureIdMap);
     lightRetriever = new sgraph::LightRetriever(modelview);
     shadowRenderer = new sgraph::ShadowRenderer(modelview, objects, shadhowShaderLocations);
 
@@ -329,7 +330,7 @@ void View::display(sgraph::IScenegraph *scenegraph)
 
     glm::mat4 viewMat(1.0f);
     if(cameraType == 1)
-        viewMat = viewMat * glm::lookAt(glm::vec3(0.0f, 100.0f, 100.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        viewMat = viewMat * glm::lookAt(glm::vec3(0.0f, 0.0f, 100.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     else if(cameraType == 2)
         viewMat = viewMat * glm::lookAt(glm::vec3(0.0f, 150.0f, 300.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     else if(cameraType == 3)

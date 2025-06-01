@@ -34,9 +34,9 @@ uniform int numLights;
 /* texture */
 uniform sampler2D albedoMap;
 uniform sampler2D normalMap;
-// uniform sampler2D metallicMap;
-// uniform sampler2D roughnessMap;
-// uniform sampler2D aoMap;
+uniform sampler2D metallicMap;
+uniform sampler2D roughnessMap;
+uniform sampler2D aoMap;
 uniform bool PBR; // Using this because the "default" texture seems to have errors
 out vec4 fColor;
 

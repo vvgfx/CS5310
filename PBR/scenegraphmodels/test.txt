@@ -13,7 +13,7 @@ end-material
 
 material sphere-material
 emission 0 0 0
-ambient 0.3 0.3 0.3
+ambient 0.5 0.5 0.5
 diffuse 0.8 0.8 0.8
 specular 0.8 0.8 0.8
 shininess 50
@@ -23,30 +23,32 @@ end-material
 light one-light
 ambient 0.8 0.8 0.8
 diffuse 0.9 0.9 0.9
-specular 0.5 0.5 0.5
-position 0 10 50
+specular 0.9 0.9 0.9
+position 0 10 100
 end-light
 
 #lights
 light two-light
 ambient 0.3 0.3 0.3
-diffuse 0.5 0.5 0.5
-specular 0.5 0.5 0.5
+diffuse 0.9 0.9 0.9
+specular 0.9 0.9 0.9
 position 0 50 0 # was 0 50 0 initially
 spot-direction 0 -1 0 
-spot-angle 20
+#spot-angle 20
 end-light
 
 #textures
 image white textures/white.ppm
-#image checkerboard textures/white.ppm
-#image ground-tex textures/stone_wall.ppm
-#image ground-normal textures/stone_wall_normal.ppm
+image sphere-base textures/metal_texture.ppm
+image sphere-normal textures/metal_normal.ppm
+image sphere-metallic textures/metal_metallic.ppm
+image sphere-roughness textures/metal_roughness.ppm
+image sphere-ao textures/metal_ao.ppm
 
 #the root
 group root root
 assign-light one-light root
-#assign-light two-light root
+assign-light two-light root
 
 #box
 #translate b-translate b-translate -10 0 0
@@ -72,11 +74,12 @@ assign-light one-light root
 #add-child b2-translate root
 
 #sphere
-translate s-translate s-translate 10 0 0
-scale s-scale s-scale 20 20 20
+translate s-translate s-translate 0 0 0
+scale s-scale s-scale 40 40 40
 leaf one-sphere one-sphere instanceof sphere 
 assign-material one-sphere sphere-material
-assign-texture one-sphere white
+assign-texture one-sphere sphere-base
+assign-normal one-sphere sphere-normal
 
 add-child one-sphere s-scale
 add-child s-scale s-translate
