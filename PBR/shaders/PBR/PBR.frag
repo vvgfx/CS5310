@@ -32,12 +32,15 @@ uniform LightProperties light;
 uniform int numLights;
 
 /* texture */
-uniform sampler2D image;
-uniform sampler2D normalImage;
+uniform sampler2D albedoMap;
+uniform sampler2D normalMap;
+// uniform sampler2D metallicMap;
+// uniform sampler2D roughnessMap;
+// uniform sampler2D aoMap;
 uniform bool PBR; // Using this because the "default" texture seems to have errors
 out vec4 fColor;
 
-//This shader supports (and expects) bump mapping
+//This shader supports (and expects) all the PBR-required textureMaps (albedo, normal, metallic, roughness, Ambient Occlusion)
 void main()
 {
     vec3 lightVec,viewVec,reflectVec;
@@ -65,7 +68,7 @@ void main()
     // bump mapping texture lookup.
     if(PBR)
     {
-        tNormal = texture(normalImage,vec2(fTexCoord.s,fTexCoord.t)).rgb;
+        tNormal = texture(normalMap,vec2(fTexCoord.s,fTexCoord.t)).rgb;
         tNormal = 2* tNormal - 1; // [0,1] to [-1,1]
         tNormal = normalize(tNormal);
     }
@@ -119,6 +122,6 @@ void main()
         fColor = fColor + vec4(diffuse+specular,1.0);
 
     
-    fColor = fColor * texture(image,fTexCoord.st);
+    fColor = fColor * texture(albedoMap,fTexCoord.st);
     
 }

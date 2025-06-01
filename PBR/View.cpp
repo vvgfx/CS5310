@@ -76,8 +76,8 @@ void View::init(Callbacks *callbacks,map<string,util::PolygonMesh<VertexAttrib>>
     // create the shader programs
 
     // render shaders first
-    renderProgram.createProgram(string("shaders/shadow/phong-shadow-bump.vert"),
-                                string("shaders/shadow/phong-shadow-bump.frag"));
+    renderProgram.createProgram(string("shaders/PBR/PBR.vert"),
+                                string("shaders/PBR/PBR.frag"));
     // assuming it got created, get all the shader variables that it uses
     // so we can initialize them at some point
     // enable the shader program

@@ -13,9 +13,9 @@ end-material
 
 material sphere-material
 emission 0 0 0
-ambient 0.3 0.3 0
-diffuse 0.8 0.8 0
-specular 0.8 0.8 0
+ambient 0.3 0.3 0.3
+diffuse 0.8 0.8 0.8
+specular 0.8 0.8 0.8
 shininess 50
 end-material
 
