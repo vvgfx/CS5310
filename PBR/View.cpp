@@ -398,7 +398,6 @@ void View::display(sgraph::IScenegraph *scenegraph)
     
     
     
-    
     glFlush();
     glfwSwapBuffers(window);
     glfwPollEvents();
@@ -526,9 +525,11 @@ void View::renderObjectPass(sgraph::IScenegraph *scenegraph, glm::mat4& viewMat,
     glm::vec4 spotDirection = lights[lightIndex].getSpotDirection();
     spotDirection = lightTransformations[lightIndex] * spotDirection;
     // Set light colors
-    glUniform3fv(renderShaderLocations.getLocation("light.ambient"), 1, glm::value_ptr(lights[lightIndex].getAmbient()));
-    glUniform3fv(renderShaderLocations.getLocation("light.diffuse"), 1, glm::value_ptr(lights[lightIndex].getDiffuse()));
-    glUniform3fv(renderShaderLocations.getLocation("light.specular"), 1, glm::value_ptr(lights[lightIndex].getSpecular()));
+    // Changing this for pbr, now we no longer need ambient/diffuse/specular!
+    // glUniform3fv(renderShaderLocations.getLocation("light.ambient"), 1, glm::value_ptr(lights[lightIndex].getAmbient()));
+    // glUniform3fv(renderShaderLocations.getLocation("light.diffuse"), 1, glm::value_ptr(lights[lightIndex].getDiffuse()));
+    // glUniform3fv(renderShaderLocations.getLocation("light.specular"), 1, glm::value_ptr(lights[lightIndex].getSpecular()));
+    glUniform3fv(renderShaderLocations.getLocation("light.color"), 1, glm::value_ptr(lights[lightIndex].getDiffuse()));
     glUniform4fv(renderShaderLocations.getLocation("light.position"), 1, glm::value_ptr(pos));
     //spotlight stuff here
     glUniform1f(renderShaderLocations.getLocation("light.spotAngle"), lights[lightIndex].getSpotCutoff());
