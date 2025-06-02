@@ -398,6 +398,7 @@ void View::display(sgraph::IScenegraph *scenegraph)
     
     
     
+    
     glFlush();
     glfwSwapBuffers(window);
     glfwPollEvents();

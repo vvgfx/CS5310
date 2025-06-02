@@ -39,11 +39,11 @@ end-light
 
 #textures
 image white textures/white.ppm
-image sphere-base textures/metal_texture.ppm
-image sphere-normal textures/metal_normal.ppm
-image sphere-metallic textures/metal_metallic.ppm
-image sphere-roughness textures/metal_roughness.ppm
-image sphere-ao textures/metal_ao.ppm
+image sphere-base textures/metal2_albedo.ppm
+image sphere-normal textures/metal2_normal.ppm
+image sphere-metallic textures/metal2_metallic.ppm
+image sphere-roughness textures/metal2_roughness.ppm
+image sphere-ao textures/metal2_ao.ppm
 
 #the root
 group root root

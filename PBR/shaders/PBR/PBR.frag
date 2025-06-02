@@ -1,19 +1,5 @@
 #version 330
 
-struct MaterialProperties
-{
-    vec3 ambient;
-    vec3 diffuse;
-    vec3 specular;
-    float shininess;
-};
-// struct MaterialProperties
-// {
-//     vec3 albedo;
-//     vec3 metallic;
-//     vec3 roughness;
-//     float ao;
-// };
 
 struct LightProperties
 {
@@ -35,7 +21,7 @@ in vec3 fBiTangent;
 
 const int MAXLIGHTS = 10;
 
-uniform MaterialProperties material;
+// uniform MaterialProperties material;
 uniform LightProperties light;
 uniform int numLights;
 
@@ -102,14 +88,14 @@ void main()
     vec3 tNormal;
 
     // bump mapping texture lookup.
-    if(PBR)
-    {
+    // if(PBR)
+    // {
         tNormal = texture(normalMap,vec2(fTexCoord.s,fTexCoord.t)).rgb;
         tNormal = 2* tNormal - 1; // [0,1] to [-1,1]
         tNormal = normalize(tNormal);
-    }
-    else
-        tNormal = vec3(0,0,1); // test - this works fine.
+    // }
+    // else
+    //     tNormal = vec3(0,0,1); // test - this works fine.
 
 
     // GET THE REQUIRED MATERIAL VALUES FROM THE INPUT TEXTURES --------------------------------------------------
@@ -189,12 +175,12 @@ void main()
     Lo += (kD * albedo / PI + specular) * radiance * nDotL;
 
     ambient = vec3(0.3) * albedo * ao;
-    vec3 color   = ambient + Lo; 
+    vec3 color = ambient + Lo; 
 
-    // // HDR tonemapping
-    // color = color / (color + vec3(1.0));
-    // // gamma correct
-    // color = pow(color, vec3(1.0/2.2));  
+    // HDR tonemapping
+    color = color / (color + vec3(1.0));
+    // gamma correct
+    color = pow(color, vec3(1.0/2.2));  
 
     fColor = vec4(color, 1.0f);
 }

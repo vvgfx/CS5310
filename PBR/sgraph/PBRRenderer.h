@@ -66,10 +66,11 @@ namespace sgraph {
             
             //fragment next
             util::Material leafMat = leafNode->getMaterial();
-            glUniform3fv(shaderLocations.getLocation("material.ambient"), 1, glm::value_ptr(leafMat.getAmbient()));
-            glUniform3fv(shaderLocations.getLocation("material.diffuse"), 1, glm::value_ptr(leafMat.getDiffuse()));
-            glUniform3fv(shaderLocations.getLocation("material.specular"), 1, glm::value_ptr(leafMat.getSpecular()));
-            glUniform1f(shaderLocations.getLocation("material.shininess"), leafMat.getShininess());
+            // Don't need any of this for the pbr workflow.
+            // glUniform3fv(shaderLocations.getLocation("material.ambient"), 1, glm::value_ptr(leafMat.getAmbient()));
+            // glUniform3fv(shaderLocations.getLocation("material.diffuse"), 1, glm::value_ptr(leafMat.getDiffuse()));
+            // glUniform3fv(shaderLocations.getLocation("material.specular"), 1, glm::value_ptr(leafMat.getSpecular()));
+            // glUniform1f(shaderLocations.getLocation("material.shininess"), leafMat.getShininess());
 
             //texture stuff here!
 
@@ -117,9 +118,9 @@ namespace sgraph {
             string aoMapName = leafNode->getAOMap();
             if (isPBR && !aoMapName.empty() && textureIdMap.find(aoMapName) != textureIdMap.end()) {
                 unsigned int texID = textureIdMap[aoMapName];
-                glActiveTexture(GL_TEXTURE3);
+                glActiveTexture(GL_TEXTURE4);
                 glBindTexture(GL_TEXTURE_2D, texID);
-                glUniform1i(shaderLocations.getLocation("aoMap"), 3);
+                glUniform1i(shaderLocations.getLocation("aoMap"), 4);
             }
 
             objects[leafNode->getInstanceOf()]->draw();
