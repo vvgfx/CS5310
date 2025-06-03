@@ -1,0 +1,166 @@
+#all the instances
+instance box models/box.obj
+instance cylinder models/cylinder.obj
+instance cone models/cone.obj
+
+#material
+material mat-ground
+emission 0 0 0         
+ambient 0.2 0.3 0.2    
+diffuse 0.3 0.7 0.3     
+specular 0.1 0.1 0.1    
+shininess 1  
+end-material
+
+
+#material
+material mat-cone
+ambient 1 1 1
+diffuse 1 1 1
+specular 0.9 0.9 0.9
+shininess 100
+end-material
+
+#material
+material mat-wall
+ambient 1 1 0
+diffuse 0.6 0.6 0.6
+specular 0.2 0.2 0.2
+end-material
+
+#material
+material mat-clock
+ambient 1 0 0
+diffuse 0.6 0.6 0.6
+specular 0.2 0.2 0.2
+end-material
+
+
+
+light two-light
+ambient 0.4 0.4 0.4
+diffuse 0.4 0.4 0.4
+specular 0.4 0.4 0.4
+position 0 200 100
+end-light
+
+light one-light
+ambient 0.4 0.4 0.4
+diffuse 0.8 0.8 0.8
+specular 0.8 0.8 0.8
+position 0 200 50
+spot-direction 0 -1 0 
+spot-angle 20
+end-light
+
+image grass textures/grass_texture.ppm
+
+#root stuff
+group root root
+scale ground-scale ground-scale 200 5 200
+leaf ground-leaf ground instanceof box
+assign-material ground-leaf mat-ground
+assign-texture ground-leaf grass
+
+#build tree with only root
+add-child ground-scale root
+add-child ground-leaf ground-scale
+
+
+#Add walls
+group walls walls
+translate wall-1-translate wall-1-translate 0 0 22
+import wall-1 scenegraphmodels/big-ben-wall.txt
+add-child wall-1 wall-1-translate
+add-child wall-1-translate walls
+add-child walls root
+
+
+
+translate wall-2-translate wall-2-translate 22 0 0
+translate wall-3-translate wall-3-translate 0 0 -22
+translate wall-4-translate wall-4-translate -22 0 0
+rotate wall-2-rotate wall-2-rotate 90 0 1 0
+rotate wall-4-rotate wall-4-rotate -90 0 1 0
+
+import wall-2 scenegraphmodels/big-ben-wall.txt
+import wall-3 scenegraphmodels/big-ben-wall.txt
+import wall-4 scenegraphmodels/big-ben-wall.txt
+
+
+add-child wall-2 wall-2-rotate
+add-child wall-2-rotate wall-2-translate
+add-child wall-2-translate walls
+
+add-child wall-3 wall-3-translate
+add-child wall-3-translate walls
+
+add-child wall-4 wall-4-rotate
+add-child wall-4-rotate wall-4-translate
+add-child wall-4-translate walls
+
+image roof textures/roof_tile.ppm
+
+leaf cone-1 cone-1 instanceof cone
+assign-material cone-1 mat-cone
+assign-texture cone-1 roof
+scale cone-1-scale cone-1-scale 28 40 28
+translate cone-1-translate cone-1-translate 0 200 0
+add-child cone-1 cone-1-scale
+add-child cone-1-scale cone-1-translate
+add-child cone-1-translate walls
+
+
+import human-1 scenegraphmodels/humanoid-commands.txt
+import human-2 scenegraphmodels/humanoid-commands.txt
+translate human-1-translate human-1-translate 60 0 60
+translate human-2-translate human-2-translate 90 0 60
+scale s-human-1 s-human-1 80 80 80
+scale s-human-2 s-human-2 80 80 80
+add-child human-1 s-human-1
+add-child human-2 s-human-2
+add-child s-human-1 human-1-translate
+add-child s-human-2 human-2-translate
+add-child human-1-translate root
+add-child human-2-translate root
+
+#remove these lines and uncomment the last line later!
+translate base-translate base-translate 0 -100 0
+add-child root base-translate
+
+
+#Adding the drone to the world
+import drone scenegraphmodels/drone.txt
+
+
+dynamic drone-movement drone-movement
+add-child drone drone-movement
+
+#add a rotate before the translate so that the drone roll behavior can be accesses in realtime
+#rotate drone-roll drone-roll 0 0 0 1
+
+#putting the drone rotate below the drone roll because I want the drone's rotation to be affected by the drone's current orientation
+#rotate drone-rotate-yaw drone-rotate-yaw 0 0 1 0
+#rotate drone-rotate-pitch drone-rotate-pitch 0 1 0 0
+
+#translate drone-translate drone-translate -100 100 150
+#add-child drone drone-rotate-pitch
+#add-child drone-rotate-pitch drone-rotate-yaw
+#add-child drone-rotate-yaw drone-roll
+#add-child drone-roll drone-translate
+
+
+group root-2 root-2
+add-child base-translate root-2
+add-child drone-movement root-2 #Changed this to add drone-movement dynamic node!!!
+#assign-root base-translate
+#assign-root root-2
+
+dynamic trackball trackball
+add-child root-2 trackball
+assign-root trackball
+assign-light two-light base-translate
+assign-light one-light base-translate
+
+#assign-root root
+
