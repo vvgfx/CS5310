@@ -2,7 +2,7 @@
 #define _IPIPELINE_H_
 
 #include <glm/glm.hpp>
-#include "sgraph/IScenegraph.h"
+#include "../sgraph/IScenegraph.h"
 using namespace std;
 
 

@@ -29,6 +29,7 @@ namespace sgraph {
          * @param mv a reference to modelview stack that will be used while rendering
          * @param os the map of ObjectInstance objects
          * @param shaderLocations the shader locations for the program used to render
+         * @param texIdMap the map of textures to their locations in GPU memory
          */
         GLScenegraphRenderer(stack<glm::mat4>& mv,map<string,util::ObjectInstance *>& os,util::ShaderLocationsVault& shaderLocations, map<string, unsigned int>& texIdMap) 
             : modelview(mv)

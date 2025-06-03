@@ -17,6 +17,7 @@
 #include "sgraph/IScenegraph.h"
 #include "TextureImage.h"
 #include <stack>
+#include "Pipeline/ClassicPipeline.h"
 using namespace std;
 
 
@@ -69,6 +70,7 @@ public:
     void renderObjectPass(sgraph::IScenegraph *scenegraph, glm::mat4& viewMat, int i);
     void computeTangents(util::PolygonMesh<VertexAttrib>& mesh);
     GLFWwindow* window;
+    pipeline::ClassicPipeline pipeline;
     util::ShaderProgram renderProgram;
     util::ShaderGeoProgram shadowProgram;
     util::ShaderProgram depthProgram;

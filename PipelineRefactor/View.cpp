@@ -74,40 +74,44 @@ void View::init(Callbacks *callbacks,map<string,util::PolygonMesh<VertexAttrib>>
     gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
     glfwSwapInterval(1);
 
+    #pragma region Pipeline init
+
+    pipeline.init(meshes, texMap, projection);
+    #pragma endregion
     // create the shader programs
 
-    // render shaders first
-    renderProgram.createProgram(string("shaders/PBR/PBR.vert"),
-                                string("shaders/PBR/PBR.frag"));
-    // assuming it got created, get all the shader variables that it uses
-    // so we can initialize them at some point
-    // enable the shader program
-    renderProgram.enable();
-    renderShaderLocations = renderProgram.getAllShaderVariables();
-    renderProgram.disable();
+    // // render shaders first
+    // renderProgram.createProgram(string("shaders/PBR/PBR.vert"),
+    //                             string("shaders/PBR/PBR.frag"));
+    // // assuming it got created, get all the shader variables that it uses
+    // // so we can initialize them at some point
+    // // enable the shader program
+    // renderProgram.enable();
+    // renderShaderLocations = renderProgram.getAllShaderVariables();
+    // renderProgram.disable();
 
-    //depth program for shadow first pass
-    depthProgram.createProgram(string("shaders/shadow/depth.vert"),
-                                string("shaders/shadow/depth.frag"));
-    depthProgram.enable();
-    depthShaderLocations = depthProgram.getAllShaderVariables();
-    depthProgram.disable();
+    // //depth program for shadow first pass
+    // depthProgram.createProgram(string("shaders/shadow/depth.vert"),
+    //                             string("shaders/shadow/depth.frag"));
+    // depthProgram.enable();
+    // depthShaderLocations = depthProgram.getAllShaderVariables();
+    // depthProgram.disable();
 
-    //ambient program for shadow final pass
-    ambientProgram.createProgram(string("shaders/shadow/ambient.vert"),
-                                string("shaders/shadow/ambient.frag"));
-    ambientProgram.enable();
-    ambientShaderLocations = ambientProgram.getAllShaderVariables();
-    ambientProgram.disable();
+    // //ambient program for shadow final pass
+    // ambientProgram.createProgram(string("shaders/shadow/ambient.vert"),
+    //                             string("shaders/shadow/ambient.frag"));
+    // ambientProgram.enable();
+    // ambientShaderLocations = ambientProgram.getAllShaderVariables();
+    // ambientProgram.disable();
 
 
-    //shadow shaders next
-    shadowProgram.createProgram(string("shaders/shadow/shadow.vert"),
-                                string("shaders/shadow/shadow.frag"),
-                                string("shaders/shadow/shadow.geom"));
-    shadowProgram.enable();
-    shadhowShaderLocations = shadowProgram.getAllShaderVariables();
-    shadowProgram.disable();
+    // //shadow shaders next
+    // shadowProgram.createProgram(string("shaders/shadow/shadow.vert"),
+    //                             string("shaders/shadow/shadow.frag"),
+    //                             string("shaders/shadow/shadow.geom"));
+    // shadowProgram.enable();
+    // shadhowShaderLocations = shadowProgram.getAllShaderVariables();
+    // shadowProgram.disable();
     
 
     
@@ -121,26 +125,26 @@ void View::init(Callbacks *callbacks,map<string,util::PolygonMesh<VertexAttrib>>
      * shader variables will be the same.
 
        We create such a shader variable -> vertex attribute mapping now
-     */
-    map<string, string> shaderVarsToVertexAttribs;
-    // This is a singular mapping for all the shader programs. Might have issues with variable names later.
-    shaderVarsToVertexAttribs["vPosition"] = "position";
-    shaderVarsToVertexAttribs["vNormal"] = "normal";
-    shaderVarsToVertexAttribs["vTexCoord"] = "texcoord";
-    shaderVarsToVertexAttribs["vTangent"] = "tangent"; //adding tangent data for bump mapping. - uncomment later.
+    //  */
+    // map<string, string> shaderVarsToVertexAttribs;
+    // // This is a singular mapping for all the shader programs. Might have issues with variable names later.
+    // shaderVarsToVertexAttribs["vPosition"] = "position";
+    // shaderVarsToVertexAttribs["vNormal"] = "normal";
+    // shaderVarsToVertexAttribs["vTexCoord"] = "texcoord";
+    // shaderVarsToVertexAttribs["vTangent"] = "tangent"; //adding tangent data for bump mapping. - uncomment later.
     
     
-    for (typename map<string,util::PolygonMesh<VertexAttrib> >::iterator it=meshes.begin();
-           it!=meshes.end();
-           it++) 
-    {
-        cout<<"computing tangents"<<endl;
-        computeTangents(it->second); // uncomment later
-        util::ObjectInstance * obj = new util::ObjectInstance(it->first);
-        obj->initPolygonMesh(renderShaderLocations,shaderVarsToVertexAttribs,it->second);
-        objects[it->first] = obj;
-    }
-    cout<<"computed tangents!"<<endl;
+    // for (typename map<string,util::PolygonMesh<VertexAttrib> >::iterator it=meshes.begin();
+    //        it!=meshes.end();
+    //        it++) 
+    // {
+    //     cout<<"computing tangents"<<endl;
+    //     computeTangents(it->second); // uncomment later
+    //     util::ObjectInstance * obj = new util::ObjectInstance(it->first);
+    //     obj->initPolygonMesh(renderShaderLocations,shaderVarsToVertexAttribs,it->second);
+    //     objects[it->first] = obj;
+    // }
+    // cout<<"computed tangents!"<<endl;
 	int window_width,window_height;
     glfwGetFramebufferSize(window,&window_width,&window_height);
 
@@ -151,14 +155,14 @@ void View::init(Callbacks *callbacks,map<string,util::PolygonMesh<VertexAttrib>>
     frames = 0;
     time = glfwGetTime();
 
-    initTextures(texMap);
-    renderer = new sgraph::PBRRenderer(modelview, objects, renderShaderLocations, textureIdMap);
-    lightRetriever = new sgraph::LightRetriever(modelview);
-    shadowRenderer = new sgraph::ShadowRenderer(modelview, objects, shadhowShaderLocations);
+    // initTextures(texMap);
+    // renderer = new sgraph::PBRRenderer(modelview, objects, renderShaderLocations, textureIdMap);
+    // lightRetriever = new sgraph::LightRetriever(modelview);
+    // shadowRenderer = new sgraph::ShadowRenderer(modelview, objects, shadhowShaderLocations);
 
-    //scenegraph renderers for shadow volumes
-    depthRenderer = new sgraph::DepthRenderer(modelview, objects, depthShaderLocations);
-    ambientRenderer = new sgraph::AmbientRenderer(modelview, objects, ambientShaderLocations);
+    // //scenegraph renderers for shadow volumes
+    // depthRenderer = new sgraph::DepthRenderer(modelview, objects, depthShaderLocations);
+    // ambientRenderer = new sgraph::AmbientRenderer(modelview, objects, ambientShaderLocations);
     // cout<<"Error:"<<glGetError()<<endl;
 }
 
@@ -350,50 +354,48 @@ void View::display(sgraph::IScenegraph *scenegraph)
             viewMat = viewMat * glm::lookAt(droneEye, droneLookAt, droneUp);        
     }
 
-    modelview.push(glm::mat4(1.0f));
-    modelview.top() = modelview.top() * viewMat;
-    initLights(scenegraph); // lighting scenegraph traversal happens here. I've moved this to the first because the lights need to be initialized
-    // for the shadow volume pass before the rendering pass
-    // initLightShaderVars(); // lighting to shader variables mapping. Saves map in LightLocation.
-    modelview.pop();
+    // modelview.push(glm::mat4(1.0f));
+    // modelview.top() = modelview.top() * viewMat;
+    // initLights(scenegraph); // lighting scenegraph traversal happens here. I've moved this to the first because the lights need to be initialized
+    // // for the shadow volume pass before the rendering pass
+    // // initLightShaderVars(); // lighting to shader variables mapping. Saves map in LightLocation.
+    // modelview.pop();
     #pragma endregion
-    glDepthFunc(GL_LEQUAL); // This gave me 3 hours of pain :(
+    // glDepthFunc(GL_LEQUAL); // This gave me 3 hours of pain :(
     
-    //rotate the propellers!
-    rotatePropeller("propeller-1-rotate", glfwGetTime());
-    rotatePropeller("propeller-2-rotate", glfwGetTime());
-    rotatePropeller("propeller-3-rotate", glfwGetTime());
-    rotatePropeller("propeller-4-rotate", glfwGetTime());
+    // //rotate the propellers!
+    // rotatePropeller("propeller-1-rotate", glfwGetTime());
+    // rotatePropeller("propeller-2-rotate", glfwGetTime());
+    // rotatePropeller("propeller-3-rotate", glfwGetTime());
+    // rotatePropeller("propeller-4-rotate", glfwGetTime());
 
-    rotate(); // drone movement rotate
+    // rotate(); // drone movement rotate
 
 
     #pragma region pipeline
+
+    pipeline.drawFrame(scenegraph, viewMat);
+
     // all the heavylifting happens here.
-    // shadow volumes are rendered using depth fail method.
-    glClearColor(0,0,0,1);
-    glEnable(GL_DEPTH_TEST);
-    glDepthMask(GL_TRUE); // enable writing to the depth buffer.
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT); //clear everything before starting the render loop.
+    // // shadow volumes are rendered using depth fail method.
+    // glClearColor(0,0,0,1);
+    // glEnable(GL_DEPTH_TEST);
+    // glDepthMask(GL_TRUE); // enable writing to the depth buffer.
+    // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT); //clear everything before starting the render loop.
     
-    depthPass(scenegraph, viewMat); // set the depth buffer from the actual camera location to set up for the stencil test.
-    glEnable(GL_STENCIL_TEST); // enable stencil test.
-    glEnable(GL_BLEND); // for multiple lights
-    glBlendFunc(GL_ONE, GL_ONE); //  Equally blend all the effects from eall the lights (is this correct?)
-    for (int i = 0; i < lights.size(); i++) 
-    {
-        glClear(GL_STENCIL_BUFFER_BIT);
-        shadowStencilPass(scenegraph, viewMat, i); // render the shadow volume into the stencil buffer.
-        renderObjectPass(scenegraph, viewMat, i); // render all the objects with lighting (except ambient) into the scene. (fragments that fail the stencil test will not touch the fragment shader).
-    }
-    glDisable(GL_BLEND);
-    glDisable(GL_STENCIL_TEST); // need to disable the stencil test for the ambient pass because all objects require ambient lighting.
-    ambientPass(scenegraph, viewMat); // ambient pass for all objects.
-    #pragma endregion
-
-    //do not need this anymore.
-    #pragma region silhouettePass
-
+    // depthPass(scenegraph, viewMat); // set the depth buffer from the actual camera location to set up for the stencil test.
+    // glEnable(GL_STENCIL_TEST); // enable stencil test.
+    // glEnable(GL_BLEND); // for multiple lights
+    // glBlendFunc(GL_ONE, GL_ONE); //  Equally blend all the effects from eall the lights (is this correct?)
+    // for (int i = 0; i < lights.size(); i++) 
+    // {
+    //     glClear(GL_STENCIL_BUFFER_BIT);
+    //     shadowStencilPass(scenegraph, viewMat, i); // render the shadow volume into the stencil buffer.
+    //     renderObjectPass(scenegraph, viewMat, i); // render all the objects with lighting (except ambient) into the scene. (fragments that fail the stencil test will not touch the fragment shader).
+    // }
+    // glDisable(GL_BLEND);
+    // glDisable(GL_STENCIL_TEST); // need to disable the stencil test for the ambient pass because all objects require ambient lighting.
+    // ambientPass(scenegraph, viewMat); // ambient pass for all objects.
     #pragma endregion
     
     
