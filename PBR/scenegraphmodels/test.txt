@@ -22,15 +22,15 @@ end-material
 #lights
 light one-light
 ambient 0.8 0.8 0.8
-diffuse 0.9 0.9 0.9
+diffuse 350.0 350.0 350.0
 specular 0.9 0.9 0.9
-position 0 10 100
+position 0 10 50
 end-light
 
 #lights
 light two-light
 ambient 0.3 0.3 0.3
-diffuse 0.9 0.9 0.9
+diffuse 350.0 350.0 350.0
 specular 0.9 0.9 0.9
 position 0 50 0 # was 0 50 0 initially
 spot-direction 0 -1 0 
@@ -39,11 +39,11 @@ end-light
 
 #textures
 image white textures/white.ppm
-image sphere-base textures/metal2_albedo.ppm
-image sphere-normal textures/metal2_normal.ppm
-image sphere-metallic textures/metal2_metallic.ppm
-image sphere-roughness textures/metal2_roughness.ppm
-image sphere-ao textures/metal2_ao.ppm
+image sphere-base textures/metal_albedo.ppm
+image sphere-normal textures/metal_normal.ppm
+image sphere-metallic textures/metal_metallic.ppm
+image sphere-roughness textures/metal_roughness.ppm
+image sphere-ao textures/metal_ao.ppm
 
 #the root
 group root root
@@ -75,7 +75,7 @@ assign-light two-light root
 
 #sphere
 translate s-translate s-translate 0 0 0
-scale s-scale s-scale 40 40 40
+scale s-scale s-scale 30 30 30
 leaf one-sphere one-sphere instanceof sphere 
 assign-material one-sphere sphere-material
 assign-texture one-sphere sphere-base

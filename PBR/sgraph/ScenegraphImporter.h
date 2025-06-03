@@ -297,6 +297,25 @@ namespace sgraph {
                             input >> r;
                             mat.setShininess(r);
                         }
+                        // setting up PBR stuff here!
+                        else if (command == "albedo") {
+                            input >> r >> g >> b;
+                            mat.setAlbedo(r,g,b);
+                        }
+                        else if (command == "metallic") {
+                            input >> r >> g >> b;
+                            mat.setMetallic(r,g,b);
+                        }
+                        else if (command == "roughness") {
+                            input >> r >> g >> b;
+                            mat.setRoughness(r,g,b);
+                        }
+                        else if (command == "ao") {
+                            input >> r;
+                            mat.setAO(r);
+                        }
+                        else
+                            throw runtime_error("Material property is not recognized : " + command);
                         input >> command;
                     }
                     materials[name] = mat;
@@ -343,6 +362,14 @@ namespace sgraph {
                             input >> x;
                             light.setSpotAngle(x);
                         }
+                        // PBR color here
+                        else if (command == "color")
+                        {
+                            input >> r >> g >> b;
+                            light.setColor(r, g, b);
+                        }
+                        else
+                            throw runtime_error("Light property is not recognized : " + command);
                         input >> command;
                     }
                     lights[name] = light;

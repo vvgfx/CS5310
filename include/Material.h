@@ -14,6 +14,8 @@ namespace util
      * material), transparency (for transparent material) and refractive index (for
      * transparent material). For the latter ones, the user must make sure that
      * absorption + reflection + transparency = 1
+     * 
+     * Update : adding support for PBR representation (metallic, albedo, roughness and ambient occlusion(ao))
      */
 class Material
 {
@@ -24,6 +26,14 @@ class Material
             ambient = glm::vec4();
             diffuse = glm::vec4();
             specular = glm::vec4();
+
+            // PBR
+
+            albedo = glm::vec4();
+            metallic = glm::vec4();
+            roughness = glm::vec4();
+            ao = 0.0f;
+
             init();
         }
 
@@ -157,6 +167,75 @@ class Material
             refractive_index = r;
         }
 
+
+        // Adding PBR relevant getters and setters here.
+
+        glm::vec4 getAlbedo() const
+        {
+            return albedo;
+        }
+
+        void setAlbedo(glm::vec4& alb)
+        {
+            albedo = glm::vec4(alb);
+        }
+
+        void setAlbedo(float r, float g, float b)
+        {
+            albedo.x = r;
+            albedo.y = g;
+            albedo.z = b;
+            albedo.w = 1;
+        }
+
+
+        glm::vec4 getMetallic() const
+        {
+            return metallic;
+        }
+
+        void setMetallic(glm::vec4& metal)
+        {
+            metallic = glm::vec4(metal);
+        }
+
+        void setMetallic(float r, float g, float b)
+        {
+            metallic.x = r;
+            metallic.y = g;
+            metallic.z = b;
+            metallic.w = 1;
+        }
+
+
+        glm::vec4 getRoughness() const
+        {
+            return roughness;
+        }
+
+        void setRoughness(glm::vec4& rough)
+        {
+            roughness = glm::vec4(rough);
+        }
+
+        void setRoughness(float r, float g, float b)
+        {
+            roughness.x = r;
+            roughness.y = g;
+            roughness.z = b;
+            roughness.w = 1;
+        }
+
+        float getAO() const
+        {
+            return ao;
+        }
+
+        void setAO(float ambientOcclusion)
+        {
+            ao = ambientOcclusion;
+        }
+
     private:
         void init()
         {
@@ -168,6 +247,13 @@ class Material
             setAbsorption(1);
             setReflection(0);
             setTransparency(0);
+
+            // PBR
+            setAlbedo(0.0f, 0.0f, 0.0f);
+            setMetallic(0.0f, 0.0f, 0.0f);
+            setRoughness(0.0f, 0.0f, 0.0f);
+            setAO(0.0f);
+
         }
 
     private:
@@ -177,6 +263,12 @@ class Material
         glm::vec4 specular;
         float shininess;
         float absorption,reflection,transparency,refractive_index;
+
+        // PBR properties
+        glm::vec4 albedo;
+        glm::vec4 metallic;
+        glm::vec4 roughness;
+        float ao;
 };
 
 }

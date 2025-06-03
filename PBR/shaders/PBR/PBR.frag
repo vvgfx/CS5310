@@ -105,6 +105,7 @@ void main()
     float metallic  = texture(metallicMap, vec2(fTexCoord.s,fTexCoord.t)).r;
     float roughness = texture(roughnessMap, vec2(fTexCoord.s,fTexCoord.t)).r;
     float ao        = texture(aoMap, vec2(fTexCoord.s,fTexCoord.t)).r;
+    // float ao        = pow(texture(aoMap, vec2(fTexCoord.s,fTexCoord.t)).r, 2.2f);
 
     // END MATERIAL RETRIVAL -------------------------------------------------------------------------------------
 
@@ -154,7 +155,11 @@ void main()
 
     halfwayVec = normalize(viewVec + lightVec);
     float distance = length(light.position.xyz - fPosition.xyz); // distance should be the same regardless of what coordinate system beacuse it's just a magnitude (hopefully)
-    float attenuation = 1.0 / (distance * distance);
+    // float lightRadius = 50.0;  // Add this as a uniform
+    // float attenuation = 1.0 / (distance * distance);
+    float attenuation = 1.0 / (1.0 + 0.09 * distance + 0.032 * distance * distance);
+    // float attenuation = pow(clamp(1.0 - pow(distance / lightRadius, 4.0), 0.0, 1.0), 2.0) / (distance * distance + 1.0);  // trying alternate attenuation
+    // float attenuation = 1.0f/ distance;
     vec3 radiance = light.color * attenuation;
 
     vec3 F0 = vec3(0.04); 
@@ -174,13 +179,12 @@ void main()
     nDotL = max(dot(tNormal, lightVec), 0.0);        
     Lo += (kD * albedo / PI + specular) * radiance * nDotL;
 
-    ambient = vec3(0.3) * albedo * ao;
+    ambient = vec3(0.03) * albedo * ao;
     vec3 color = ambient + Lo; 
 
     // HDR tonemapping
-    color = color / (color + vec3(1.0));
+    // color = color / (color + vec3(1.0));
     // gamma correct
-    color = pow(color, vec3(1.0/2.2));  
-
+    // color = pow(color, vec3(1.0/2.2));  
     fColor = vec4(color, 1.0f);
 }

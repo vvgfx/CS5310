@@ -11,6 +11,8 @@ namespace util
          * The light source has various properties: position (location or direction),
          * colors (ambient, diffuse, specular)
          * direction in which it is pointing (if a spotlight), angle of the cone (if a spotlight)
+         * 
+         * Update: It now also takes a "color" parameter, for PBR support.
          */
   class Light
   {
@@ -24,6 +26,7 @@ namespace util
       position = glm::vec4(0, 0, 0, 1);
       spotDirection = glm::vec4(0, 0, 0, 0);
       spotCutoff = 0.0f;
+      color = glm::vec3(0, 0, 0);
     }
     Light(const Light& l)
     {
@@ -64,9 +67,15 @@ namespace util
     inline float getSpotCutoff() const;
     inline void setSpotAngle(float angle);
 
+    // PBR color methods
+    inline glm::vec3 getColor() const;
+    inline void setColor(float r, float g, float b);
+    inline void setColor(glm::vec3& color);
+
   private:
     glm::vec3 ambient, diffuse, specular;
     glm::vec4 position, spotDirection;
+    glm::vec3 color; // PBR color here. This represents color (with intensity?)
     float spotCutoff;
   };
 
@@ -155,5 +164,25 @@ namespace util
   {
     return spotCutoff;
   }
+
+  // PBR methods here
+
+  glm::vec3 Light::getColor() const
+  {
+    return color;
+  }
+
+  void Light::setColor(float r, float g, float b)
+  {
+    color.x = r;
+    color.y = g;
+    color.z = b;
+  }
+
+  void Light::setColor(glm::vec3& col)
+  {
+    color = glm::vec3(col);
+  }
+
 }
 #endif
