@@ -72,6 +72,7 @@ namespace pipeline
     void ShadowVolumePipeline::init(map<string, util::PolygonMesh<VertexAttrib>> &meshes, map<string, util::TextureImage *> &texMap, glm::mat4 &proj)
     {
         this->projection = proj;
+
         renderProgram.createProgram(string("shaders/shadow/phong-shadow.vert"),
                                     string("shaders/shadow/phong-shadow.frag"));
         renderProgram.enable();
@@ -123,6 +124,7 @@ namespace pipeline
         // scenegraph renderers for shadow volumes
         depthRenderer = new sgraph::DepthRenderer(modelview, objects, depthShaderLocations);
         ambientRenderer = new sgraph::AmbientRenderer(modelview, objects, ambientShaderLocations);
+
         initialized = true;
     }
 
@@ -132,14 +134,12 @@ namespace pipeline
             throw runtime_error("pipeline has not been initialized.");
 
         modelview.push(glm::mat4(1.0f));
+        modelview.top() = modelview.top() * viewMat;
         initLights(scenegraph); // lighting scenegraph traversal happens here. I've moved this to the first because the lights need to be initialized
         modelview.pop();
         // initShaderVars(); -> dont require this??
         
         #pragma region drawFrame
-        
-        modelview.push(glm::mat4(1.0f));
-        modelview.top() = modelview.top() * viewMat;
         glDepthFunc(GL_LEQUAL);
         glClearColor(0, 0, 0, 1);
         glEnable(GL_DEPTH_TEST);
