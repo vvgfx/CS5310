@@ -80,6 +80,10 @@ leaf one-sphere one-sphere instanceof sphere
 assign-material one-sphere sphere-material
 assign-texture one-sphere sphere-base
 assign-normal one-sphere sphere-normal
+assign-metallic one-sphere sphere-metallic
+assign-roughness one-sphere sphere-roughness
+assign-ao one-sphere sphere-ao
+
 
 add-child one-sphere s-scale
 add-child s-scale s-translate

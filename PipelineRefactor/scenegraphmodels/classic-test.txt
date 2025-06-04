@@ -39,11 +39,11 @@ end-light
 
 #textures
 image white textures/white.ppm
-image sphere-base textures/metal_albedo.ppm
-image sphere-normal textures/metal_normal.ppm
-image sphere-metallic textures/metal_metallic.ppm
-image sphere-roughness textures/metal_roughness.ppm
-image sphere-ao textures/metal_ao.ppm
+#image sphere-base textures/metal_albedo.ppm
+#image sphere-normal textures/metal_normal.ppm
+#image sphere-metallic textures/metal_metallic.ppm
+#image sphere-roughness textures/metal_roughness.ppm
+#image sphere-ao textures/metal_ao.ppm
 
 #the root
 group root root
@@ -78,12 +78,8 @@ translate s-translate s-translate 0 0 0
 scale s-scale s-scale 30 30 30
 leaf one-sphere one-sphere instanceof sphere 
 assign-material one-sphere sphere-material
-assign-texture one-sphere sphere-base
-assign-normal one-sphere sphere-normal
-assign-metallic one-sphere sphere-metallic
-assign-roughness one-sphere sphere-roughness
-assign-ao one-sphere sphere-ao
-
+#assign-texture one-sphere sphere-base
+#assign-normal one-sphere sphere-normal
 
 add-child one-sphere s-scale
 add-child s-scale s-translate

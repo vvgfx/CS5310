@@ -18,7 +18,6 @@
 #include "../sgraph/GLScenegraphRenderer.h"
 #include "../sgraph/LightRetriever.h"
 
-
 namespace pipeline
 {
     /**
@@ -31,9 +30,10 @@ namespace pipeline
     public:
         inline void initTextures(map<string, util::TextureImage *> &textureMap);
         inline void computeTangents(util::PolygonMesh<VertexAttrib> &tmesh);
-        inline void init(map<string, util::PolygonMesh<VertexAttrib>> &meshes, map<string, util::TextureImage *> texMap, glm::mat4 &projection);
+        inline void init(map<string, util::PolygonMesh<VertexAttrib>>& meshes, map<string, util::TextureImage *>& texMap, glm::mat4 &projection);
         inline void drawFrame(sgraph::IScenegraph *scenegraph, glm::mat4 &viewMat);
         inline void initLights(sgraph::IScenegraph *scenegraph);
+        inline void initShaderVars();
 
     private:
         util::ShaderProgram shaderProgram;
@@ -53,9 +53,9 @@ namespace pipeline
         double time;
     };
 
-    void ClassicPipeline::init( map<string, util::PolygonMesh<VertexAttrib>> &meshes, map<string, util::TextureImage *> texMap, glm::mat4 &projection)
+    void ClassicPipeline::init(map<string, util::PolygonMesh<VertexAttrib>>& meshes, map<string, util::TextureImage *>& texMap, glm::mat4 &proj)
     {
-        this->projection = projection;
+        this->projection = proj;
         shaderProgram.createProgram("shaders/phong-multiple.vert",
                                     "shaders/phong-multiple.frag");
         shaderProgram.enable();
@@ -97,6 +97,7 @@ namespace pipeline
         modelview.push(glm::mat4(1.0f));
         modelview.top() = modelview.top() * viewMat;
         initLights(scenegraph); // lighting scenegraph traversal happens here. I've moved this to the first because the lights need to be initialized
+        initShaderVars();
         modelview.pop();
 
         modelview.push(glm::mat4(1.0));
@@ -108,6 +109,7 @@ namespace pipeline
             pos = lightTransformations[i] * pos;
             glm::vec4 spotDirection = lights[i].getSpotDirection();
             spotDirection = lightTransformations[i] * spotDirection;
+            // cout<<"ambient: "<<lightLocations[i].ambient<<endl;
             // Set light colors
             glUniform3fv(lightLocations[i].ambient, 1, glm::value_ptr(lights[i].getAmbient()));
             glUniform3fv(lightLocations[i].diffuse, 1, glm::value_ptr(lights[i].getDiffuse()));
@@ -121,7 +123,7 @@ namespace pipeline
         glUniformMatrix4fv(shaderLocations.getLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
         scenegraph->getRoot()->accept(renderer);
-
+        // cout<<"Errors: "<<glGetError()<<endl;
         modelview.pop();
         glFlush();
         shaderProgram.disable();
@@ -272,6 +274,27 @@ namespace pipeline
         scenegraph->getRoot()->accept(lightRetriever);
         lights = lightsParser->getLights();
         lightTransformations = lightsParser->getLightTransformations();
+    }
+
+    void ClassicPipeline::initShaderVars()
+    {
+        // cout<<"setting lightlocations"<<endl;
+        lightLocations.clear();
+        for (int i = 0; i < lights.size(); i++)
+        {
+            LightLocation ll;
+            stringstream name;
+
+            name << "light[" << i << "]";
+            ll.ambient = shaderLocations.getLocation(name.str() + "" + ".ambient");
+            ll.diffuse = shaderLocations.getLocation(name.str() + ".diffuse");
+            ll.specular = shaderLocations.getLocation(name.str() + ".specular");
+            ll.position = shaderLocations.getLocation(name.str() + ".position");
+            // adding spotDirection and spotAngle.
+            ll.spotDirection = shaderLocations.getLocation(name.str() + ".spotDirection");
+            ll.spotAngle = shaderLocations.getLocation(name.str() + ".spotAngle");
+            lightLocations.push_back(ll);
+        }
     }
 
 }

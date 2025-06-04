@@ -74,6 +74,10 @@ void View::init(Callbacks *callbacks,map<string,util::PolygonMesh<VertexAttrib>>
     gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
     glfwSwapInterval(1);
 
+    initTextures(texMap);
+    int window_width,window_height;
+    glfwGetFramebufferSize(window,&window_width,&window_height);
+    projection = glm::perspective(glm::radians(60.0f),(float)window_width/window_height,0.1f,10000.0f);
     #pragma region Pipeline init
 
     pipeline.init(meshes, texMap, projection);
@@ -145,11 +149,10 @@ void View::init(Callbacks *callbacks,map<string,util::PolygonMesh<VertexAttrib>>
     //     objects[it->first] = obj;
     // }
     // cout<<"computed tangents!"<<endl;
-	int window_width,window_height;
-    glfwGetFramebufferSize(window,&window_width,&window_height);
+	
 
     //prepare the projection matrix for perspective projection
-	projection = glm::perspective(glm::radians(60.0f),(float)window_width/window_height,0.1f,10000.0f);
+	
     glViewport(0, 0, window_width,window_height);
 
     frames = 0;
