@@ -34,7 +34,7 @@ uniform int numLights;
 /* texture */
 uniform sampler2D image;
 uniform sampler2D normalImage;
-uniform bool PBR; // Using this because the "default" texture seems to have errors
+uniform bool bumpMapping; // Using this because the "default" texture seems to have errors
 out vec4 fColor;
 
 //This shader supports (and expects) bump mapping

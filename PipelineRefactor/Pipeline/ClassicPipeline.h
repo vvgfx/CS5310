@@ -17,6 +17,7 @@
 #include <TextureImage.h>
 #include "../sgraph/GLScenegraphRenderer.h"
 #include "../sgraph/LightRetriever.h"
+#include "TangentComputer.h"
 
 namespace pipeline
 {
