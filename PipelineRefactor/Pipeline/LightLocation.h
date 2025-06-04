@@ -1,3 +1,6 @@
+#ifndef _LIGHTLOCATION_H_
+#define _LIGHTLOCATION_H_
+
 namespace pipeline
 {
     /**
@@ -17,3 +20,5 @@ namespace pipeline
 
     };
 }
+
+#endif

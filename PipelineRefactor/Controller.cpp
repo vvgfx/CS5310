@@ -30,7 +30,7 @@ void Controller::initScenegraph() {
     //read in the file of commands
     ifstream inFile;
     if(textfile == "")
-        inFile = ifstream("scenegraphmodels/classic-test.txt");
+        inFile = ifstream("scenegraphmodels/shadow-volume-test.txt");
     else
         inFile = ifstream(textfile);
     //ifstream inFile("tryout.txt");

@@ -13,6 +13,7 @@ using namespace std;
 #include "sgraph/AmbientRenderer.h"
 #include "sgraph/PBRRenderer.h"
 #include "VertexAttrib.h"
+#include "Pipeline/ShadowVolumePipeline.h"
 
 
 View::View() {
@@ -37,7 +38,7 @@ void View::init(Callbacks *callbacks,map<string,util::PolygonMesh<VertexAttrib>>
     glfwWindowHint(GLFW_DEPTH_BITS, 24);   // For depth testing
     glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE);  // Double buffering
 
-    window = glfwCreateWindow(1280, 720, "Shadow Volumes and Bump Mapping", NULL, NULL);
+    window = glfwCreateWindow(1280, 720, "Software Renderer", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
@@ -79,8 +80,8 @@ void View::init(Callbacks *callbacks,map<string,util::PolygonMesh<VertexAttrib>>
     glfwGetFramebufferSize(window,&window_width,&window_height);
     projection = glm::perspective(glm::radians(60.0f),(float)window_width/window_height,0.1f,10000.0f);
     #pragma region Pipeline init
-
-    pipeline.init(meshes, texMap, projection);
+    pipeline = new pipeline::ShadowVolumePipeline();
+    reinterpret_cast<pipeline::ShadowVolumePipeline*>(pipeline)->init(meshes, texMap, projection);
     #pragma endregion
     // create the shader programs
 
@@ -377,7 +378,7 @@ void View::display(sgraph::IScenegraph *scenegraph)
 
     #pragma region pipeline
 
-    pipeline.drawFrame(scenegraph, viewMat);
+    pipeline->drawFrame(scenegraph, viewMat);
 
     // all the heavylifting happens here.
     // // shadow volumes are rendered using depth fail method.
