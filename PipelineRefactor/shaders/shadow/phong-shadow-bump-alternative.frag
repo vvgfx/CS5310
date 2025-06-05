@@ -75,6 +75,7 @@ void main()
         tNormal = vec3(0,0,1); // test - this works fine.
 
     tNormal = tbn * tNormal;
+    tNormal = normalize(tNormal);
     fColor = vec4(0,0,0,1);
 
     if (light.position.w!=0)

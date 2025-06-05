@@ -11,7 +11,6 @@ using namespace std;
 #include "sgraph/ShadowRenderer.h"
 #include "sgraph/DepthRenderer.h"
 #include "sgraph/AmbientRenderer.h"
-#include "sgraph/PBRRenderer.h"
 #include "VertexAttrib.h"
 #include "Pipeline/ShadowVolumePipeline.h"
 #include "Pipeline/ShadowVolumeBumpMappingPipeline.h"

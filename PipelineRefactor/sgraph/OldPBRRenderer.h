@@ -1,5 +1,5 @@
-#ifndef _PBRRENDERER_H_
-#define _PBRRENDERER_H_
+#ifndef _OLDPBRRENDERER_H_
+#define _OLDPBRRENDERER_H_
 
 #include "SGNodeVisitor.h"
 #include "GroupNode.h"
@@ -22,16 +22,16 @@ namespace sgraph {
      * Note that this Renderer requires all the materials required for a PBR workflow (albedoMap, normalMap, roughnessMap, metalicMap, ambientOcclusionMap)
      * 
      */
-    class PBRRenderer: public SGNodeVisitor {
+    class OldPBRRenderer: public SGNodeVisitor {
         public:
         /**
-         * @brief Construct a new PBRRenderer object
+         * @brief Construct a new OldPBRRenderer object
          * 
          * @param mv a reference to modelview stack that will be used while rendering
          * @param os the map of ObjectInstance objects
          * @param shaderLocations the shader locations for the program used to render
          */
-        PBRRenderer(stack<glm::mat4>& mv,map<string,util::ObjectInstance *>& os,util::ShaderLocationsVault& shaderLocations, map<string, unsigned int>& texIdMap) 
+        OldPBRRenderer(stack<glm::mat4>& mv,map<string,util::ObjectInstance *>& os,util::ShaderLocationsVault& shaderLocations, map<string, unsigned int>& texIdMap) 
             : modelview(mv)
             , objects(os)
             , textureIdMap(texIdMap) {

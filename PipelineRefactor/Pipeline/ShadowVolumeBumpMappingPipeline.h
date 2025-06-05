@@ -78,7 +78,7 @@ namespace pipeline
         this->projection = proj;
 
         renderProgram.createProgram(string("shaders/shadow/phong-shadow-bump.vert"),
-                                    string("shaders/shadow/phong-shadow-bump.frag"));
+                                    string("shaders/shadow/phong-shadow-bump-alternative.frag"));
         renderProgram.enable();
         renderShaderLocations = renderProgram.getAllShaderVariables();
         renderProgram.disable();

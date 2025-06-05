@@ -63,7 +63,7 @@ void main()
 
 
     // bump mapping texture lookup.
-    if(PBR)
+    if(bumpMapping)
     {
         tNormal = texture(normalImage,vec2(fTexCoord.s,fTexCoord.t)).rgb;
         tNormal = 2* tNormal - 1; // [0,1] to [-1,1]
