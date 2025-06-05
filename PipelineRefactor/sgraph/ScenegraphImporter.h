@@ -303,12 +303,12 @@ namespace sgraph {
                             mat.setAlbedo(r,g,b);
                         }
                         else if (command == "metallic") {
-                            input >> r >> g >> b;
-                            mat.setMetallic(r,g,b);
+                            input >> r;
+                            mat.setMetallic(r);
                         }
                         else if (command == "roughness") {
-                            input >> r >> g >> b;
-                            mat.setRoughness(r,g,b);
+                            input >> r;
+                            mat.setRoughness(r);
                         }
                         else if (command == "ao") {
                             input >> r;

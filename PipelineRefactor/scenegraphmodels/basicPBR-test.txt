@@ -1,0 +1,36 @@
+#all the instances
+instance sphere models/sphere.obj
+
+material sphere-material
+albedo 1.0 0.5 0.0
+metallic 0.5
+roughness 0.2
+ao 1.0
+end-material
+
+#lights
+light one-light
+color 350.0 350.0 350.0
+position 0 40 40
+end-light
+
+#the root
+group root root
+assign-light one-light root
+
+#sphere
+translate s-translate s-translate 0 0 0
+scale s-scale s-scale 30 30 30
+leaf one-sphere one-sphere instanceof sphere 
+assign-material one-sphere sphere-material
+
+
+add-child one-sphere s-scale
+add-child s-scale s-translate
+add-child s-translate root
+dynamic trackball trackball
+add-child root trackball
+
+
+assign-root trackball
+

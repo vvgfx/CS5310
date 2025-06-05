@@ -30,8 +30,8 @@ class Material
             // PBR
 
             albedo = glm::vec4();
-            metallic = glm::vec4();
-            roughness = glm::vec4();
+            metallic = 0.0f;
+            roughness = 0.0f;
             ao = 0.0f;
 
             init();
@@ -189,41 +189,24 @@ class Material
         }
 
 
-        glm::vec4 getMetallic() const
+        float getMetallic() const
         {
             return metallic;
         }
 
-        void setMetallic(glm::vec4& metal)
+        void setMetallic(float metal)
         {
-            metallic = glm::vec4(metal);
+            metallic = metal;
         }
 
-        void setMetallic(float r, float g, float b)
-        {
-            metallic.x = r;
-            metallic.y = g;
-            metallic.z = b;
-            metallic.w = 1;
-        }
-
-
-        glm::vec4 getRoughness() const
+        float getRoughness() const
         {
             return roughness;
         }
 
-        void setRoughness(glm::vec4& rough)
+        void setRoughness(float rough)
         {
-            roughness = glm::vec4(rough);
-        }
-
-        void setRoughness(float r, float g, float b)
-        {
-            roughness.x = r;
-            roughness.y = g;
-            roughness.z = b;
-            roughness.w = 1;
+            roughness = rough;
         }
 
         float getAO() const
@@ -250,8 +233,8 @@ class Material
 
             // PBR
             setAlbedo(0.0f, 0.0f, 0.0f);
-            setMetallic(0.0f, 0.0f, 0.0f);
-            setRoughness(0.0f, 0.0f, 0.0f);
+            setMetallic(0.0f);
+            setRoughness(0.0f);
             setAO(0.0f);
 
         }
@@ -266,8 +249,8 @@ class Material
 
         // PBR properties
         glm::vec4 albedo;
-        glm::vec4 metallic;
-        glm::vec4 roughness;
+        float metallic;
+        float roughness;
         float ao;
 };
 

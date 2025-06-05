@@ -1,5 +1,6 @@
+#version 330
+
 in vec4 fPosition;
-in vec4 fTexCoord;
 in vec3 fNormal;
 
 struct MaterialProperties
@@ -8,13 +9,15 @@ struct MaterialProperties
     float metallic;
     float roughness;
     float ao;
-}
+};
 
 struct LightProperties
 {
     vec4 position;
     vec3 color;
-}
+    vec3 spotDirection;   
+    float spotAngle;   
+};
 
 const int MAXLIGHTS = 10;
 const float PI = 3.14159265359;
@@ -66,17 +69,19 @@ vec3 FresnelSchlick(float cosTheta, vec3 F0)
     return F0 + (1.0 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
 }
 // ----------------------------------------------------------------------------
+
+/**
+* TODO: Implement spotlights later!
+*/
 void main()
 {
     vec3 viewVec, lightVec, halfwayVec;
-    vec3 tempNormal, tempTangent, tempBitangent;
+    vec3 tempNormal;
     float dist, attenuation;
     vec3 radiance, specular;
     float nDotL;
 
     tempNormal = normalize(fNormal); // view space
-    tempTangent = normalize(fTangent);  // view space
-    tempBitangent = normalize(fBiTangent); // view space
 
 
     viewVec = normalize(-fPosition.xyz); // view space
@@ -97,7 +102,7 @@ void main()
 
         halfwayVec = normalize(viewVec + lightVec); // view space
 
-        dist = length(light.position.xyz - fPosition.xyz);
+        dist = length(light[i].position.xyz - fPosition.xyz);
         attenuation = 1.0 / (dist * dist);
         radiance = light[i].color * attenuation;
 
@@ -113,7 +118,7 @@ void main()
 
         vec3 kS = F; // specular coefficient is equal to fresnel
         vec3 kD = vec3(1.0f) - kS;
-        kD *= 1.0 - metallic; 
+        kD *= 1.0 - material.metallic; 
 
         nDotL = max(dot(tempNormal, lightVec), 0.0f);
 
@@ -131,5 +136,6 @@ void main()
     // gamma correct
     color = pow(color, vec3(1.0/2.2)); 
 
-    fColor = vec4(color, 1.0);
+    // fColor = vec4(color, 1.0);
+    fColor = vec4(material.albedo, 1.0f);
 }
