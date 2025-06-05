@@ -48,6 +48,7 @@ namespace pipeline
         stack<glm::mat4> modelview;
         std::map<string, sgraph::TransformNode *> cachedNodes;
         vector<LightLocation> lightLocations;
+        glm::vec3 cameraPos;
         bool initialized = false;
         int frames;
         double time;
@@ -85,15 +86,23 @@ namespace pipeline
         if (!initialized)
             throw runtime_error("pipeline has not been initialized.");
 
+        // can't pass the view vec3 directly so doing this.
+        glm::mat4 inverseView = glm::inverse(viewMat);
+        cameraPos = glm::vec3(inverseView[3]);
+
         shaderProgram.enable();
         glClearColor(0, 0, 0, 1);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glEnable(GL_DEPTH_TEST);
         modelview.push(glm::mat4(1.0f));
-        modelview.top() = modelview.top() * viewMat; // This means all the lights will be in the view coordinate system.
+        // modelview.top() = modelview.top() * viewMat; // This means all the lights will be in the view coordinate system. - Commented out because all transformations are in the world coordinate system now
         initLights(scenegraph); // lighting scenegraph traversal happens here. I've moved this to the first because the lights need to be initialized
         initShaderVars();
         modelview.pop();
+
+        // passing the camera location to the fragment shader.
+        glUniform3fv(shaderLocations.getLocation("cameraPos"), 1, glm::value_ptr(cameraPos));
+        glUniformMatrix4fv(shaderLocations.getLocation("view"), 1, GL_FALSE, glm::value_ptr(viewMat)); // view transformation
 
         modelview.push(glm::mat4(1.0));
         modelview.top() = modelview.top() * viewMat;
@@ -101,7 +110,7 @@ namespace pipeline
         for (int i = 0; i < lights.size(); i++)
         {
             glm::vec4 pos = lights[i].getPosition();
-            pos = lightTransformations[i] * pos; // view coordinate system.
+            pos = lightTransformations[i] * pos; // world coordinate system.
             glm::vec4 spotDirection = lights[i].getSpotDirection();
             spotDirection = lightTransformations[i] * spotDirection;
             // Set light colors

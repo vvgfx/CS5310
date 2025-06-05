@@ -60,12 +60,12 @@ namespace sgraph {
         void visitLeafNode(LeafNode *leafNode) {
             //vertex first
             glm::mat4 normalmatrix = glm::inverse(glm::transpose((modelview.top())));
-            glUniformMatrix4fv(shaderLocations.getLocation("modelview"), 1, GL_FALSE, glm::value_ptr(modelview.top()));
+            glUniformMatrix4fv(shaderLocations.getLocation("model"), 1, GL_FALSE, glm::value_ptr(modelview.top())); // This contains only the model-to-world transformation
             glUniformMatrix4fv(shaderLocations.getLocation("normalmatrix"), 1, GL_FALSE, glm::value_ptr(normalmatrix));
             
             //fragment next
             util::Material leafMat = leafNode->getMaterial();
-            // Don't need any of this for the pbr workflow.
+            
             glUniform3fv(shaderLocations.getLocation("material.albedo"), 1, glm::value_ptr(leafMat.getAlbedo()));
             glUniform1f(shaderLocations.getLocation("material.metallic"), leafMat.getMetallic());
             glUniform1f(shaderLocations.getLocation("material.roughness"), leafMat.getRoughness());

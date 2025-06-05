@@ -25,6 +25,7 @@ const float PI = 3.14159265359;
 uniform int numLights;
 uniform LightProperties light[MAXLIGHTS];
 uniform MaterialProperties material;
+uniform vec3 cameraPos; // need this because I'm moving all calculations to the world space
 
 out vec4 fColor;
 
@@ -79,12 +80,13 @@ void main()
     vec3 tempNormal;
     float dist, attenuation;
     vec3 radiance, specular;
+    vec3 kS, kD;
     float nDotL;
 
-    tempNormal = normalize(fNormal); // view space
+    tempNormal = normalize(fNormal); // world space
 
 
-    viewVec = normalize(-fPosition.xyz); // view space
+    viewVec = normalize(cameraPos - fPosition.xyz); // world space
 
     vec3 F0 = vec3(0.04); 
     F0 = mix(F0, material.albedo, material.metallic);
@@ -94,16 +96,17 @@ void main()
     for(int i = 0; i < numLights; i++)
     {
         if (light[i].position.w!=0)
-            lightVec = normalize(light[i].position.xyz - fPosition.xyz); // both in view space
+            lightVec = normalize(light[i].position.xyz - fPosition.xyz); // both in world space
         else
             lightVec = normalize(-light[i].position.xyz);
 
         bool isSpot = light[i].spotAngle > 0.0;
 
-        halfwayVec = normalize(viewVec + lightVec); // view space
+        halfwayVec = normalize(viewVec + lightVec); // world space
 
         dist = length(light[i].position.xyz - fPosition.xyz);
         attenuation = 1.0 / (dist * dist);
+        // attenuation = 100.0 / (1.0 + 0.09 * dist + 0.032 * dist * dist);
         radiance = light[i].color * attenuation;
 
 
@@ -116,8 +119,8 @@ void main()
         float denominator = 4.0 * max(dot(tempNormal, viewVec), 0.0f) * max(dot(tempNormal, lightVec), 0.0f) + 0.001;
         specular = numerator/denominator;
 
-        vec3 kS = F; // specular coefficient is equal to fresnel
-        vec3 kD = vec3(1.0f) - kS;
+        kS = F; // specular coefficient is equal to fresnel
+        kD = vec3(1.0f) - kS;
         kD *= 1.0 - material.metallic; 
 
         nDotL = max(dot(tempNormal, lightVec), 0.0f);
@@ -136,6 +139,7 @@ void main()
     // gamma correct
     color = pow(color, vec3(1.0/2.2)); 
 
-    // fColor = vec4(color, 1.0);
-    fColor = vec4(material.albedo, 1.0f);
+    fColor = vec4(color, 1.0);
+    // fColor = vec4(dist/500);
+    // fColor = vec4(kD * material.albedo / PI  * 1000, 1.0f);
 }

@@ -43,6 +43,12 @@ class Material
             ambient = glm::vec4(mat.getAmbient());
             diffuse = glm::vec4(mat.getDiffuse());
             specular = glm::vec4(mat.getSpecular());
+            //PBR?? ( ASSIGNING IN A MAP CALLS THE COPY CONSTRUCTOR :))
+            albedo = glm::vec4(mat.getAlbedo());
+            this->setAO(mat.getAO());
+            this->setMetallic(mat.getMetallic());
+            this->setRoughness(mat.getRoughness());
+
             this->setShininess(mat.getShininess());
             this->setAbsorption(mat.getAbsorption());
             this->setReflection(mat.getReflection());
