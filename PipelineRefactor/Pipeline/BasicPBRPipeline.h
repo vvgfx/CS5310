@@ -105,7 +105,7 @@ namespace pipeline
         glUniformMatrix4fv(shaderLocations.getLocation("view"), 1, GL_FALSE, glm::value_ptr(viewMat)); // view transformation
 
         modelview.push(glm::mat4(1.0));
-        modelview.top() = modelview.top() * viewMat;
+        // modelview.top() = modelview.top() * viewMat; // -> needs to be in the world coordinate system!
         glUniform1i(shaderLocations.getLocation("numLights"), lights.size());
         for (int i = 0; i < lights.size(); i++)
         {
@@ -148,8 +148,8 @@ namespace pipeline
             stringstream name;
 
             name << "light[" << i << "]";
-            ll.ambient = shaderLocations.getLocation(name.str() + "" + ".position");
-            ll.diffuse = shaderLocations.getLocation(name.str() + ".color");
+            ll.position = shaderLocations.getLocation(name.str() + "" + ".position");
+            ll.color = shaderLocations.getLocation(name.str() + ".color");
             // adding spotDirection and spotAngle.
             ll.spotDirection = shaderLocations.getLocation(name.str() + ".spotDirection");
             ll.spotAngle = shaderLocations.getLocation(name.str() + ".spotAngle");

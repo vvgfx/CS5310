@@ -37,6 +37,9 @@ namespace util
       position = glm::vec4(l.position);
       spotDirection = glm::vec4(l.spotDirection);
       spotCutoff = l.spotCutoff;
+
+      // PBR stuff here!!!!!
+      color = glm::vec3(l.color);
     }
     ~Light()
     {

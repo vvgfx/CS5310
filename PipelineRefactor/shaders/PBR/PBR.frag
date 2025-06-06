@@ -2,7 +2,7 @@
 
 in vec4 fPosition;
 in vec3 fNormal;
-
+precision highp float;
 struct MaterialProperties
 {
     vec3 albedo;
@@ -82,6 +82,9 @@ void main()
     vec3 radiance, specular;
     vec3 kS, kD;
     float nDotL;
+    float NDF;
+    float G;
+    vec3 F;
 
     tempNormal = normalize(fNormal); // world space
 
@@ -105,15 +108,15 @@ void main()
         halfwayVec = normalize(viewVec + lightVec); // world space
 
         dist = length(light[i].position.xyz - fPosition.xyz);
-        attenuation = 1.0 / (dist * dist);
-        // attenuation = 100.0 / (1.0 + 0.09 * dist + 0.032 * dist * dist);
+        // attenuation = 1.0 / (dist * dist);
+        attenuation = 1.0 / (1.0 + 0.09 * dist + 0.032 * dist * dist);
         radiance = light[i].color * attenuation;
 
 
         // Cook torrance BRDF
-        float NDF = DistributionGGX(tempNormal, halfwayVec, material.roughness);
-        float G = GeometrySmith(tempNormal, viewVec, lightVec, material.roughness);
-        vec3 F = FresnelSchlick(clamp(dot(halfwayVec, viewVec), 0.0f, 1.0f), F0);
+        NDF = DistributionGGX(tempNormal, halfwayVec, material.roughness);
+        G = GeometrySmith(tempNormal, viewVec, lightVec, material.roughness);
+        F = FresnelSchlick(clamp(dot(halfwayVec, viewVec), 0.0f, 1.0f), F0);
 
         vec3 numerator = NDF * G * F;
         float denominator = 4.0 * max(dot(tempNormal, viewVec), 0.0f) * max(dot(tempNormal, lightVec), 0.0f) + 0.001;
@@ -140,6 +143,9 @@ void main()
     color = pow(color, vec3(1.0/2.2)); 
 
     fColor = vec4(color, 1.0);
-    // fColor = vec4(dist/500);
-    // fColor = vec4(kD * material.albedo / PI  * 1000, 1.0f);
+
+    // Debugging code here
+    
+    // specular = (NDF * G * F) / (4.0 * max(dot(tempNormal, viewVec), 0.0) * max(dot(tempNormal, lightVec), 0.0) + 0.001);
+    // fColor = vec4(light[0].color, 1.0);
 }
