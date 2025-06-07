@@ -30,7 +30,7 @@ namespace pipeline
     {
 
     public:
-        inline void init(map<string, util::PolygonMesh<VertexAttrib>>& meshes, glm::mat4 &projection);
+        inline void init(map<string, util::PolygonMesh<VertexAttrib>>& meshes, glm::mat4 &projection, map<string, unsigned int>& texMap);
         inline void drawFrame(sgraph::IScenegraph *scenegraph, glm::mat4 &viewMat);
         inline void initLights(sgraph::IScenegraph *scenegraph);
         inline void initShaderVars();
@@ -54,7 +54,7 @@ namespace pipeline
         double time;
     };
 
-    void TexturedPBRPipeline::init(map<string, util::PolygonMesh<VertexAttrib>>& meshes, glm::mat4 &proj)
+    void TexturedPBRPipeline::init(map<string, util::PolygonMesh<VertexAttrib>>& meshes, glm::mat4 &proj, map<string, unsigned int>& texMap)
     {
         this->projection = proj;
         shaderProgram.createProgram("shaders/PBR/TexturePBR.vert",
@@ -70,6 +70,8 @@ namespace pipeline
         shaderVarsToVertexAttribs["vTexCoord"] = "texcoord";
         shaderVarsToVertexAttribs["vTangent"] = "tangent";
 
+        textureIdMap = texMap;
+
         for (typename map<string, util::PolygonMesh<VertexAttrib>>::iterator it = meshes.begin();
              it != meshes.end();
              it++)
@@ -79,7 +81,7 @@ namespace pipeline
             obj->initPolygonMesh(shaderLocations, shaderVarsToVertexAttribs, it->second);
             objects[it->first] = obj;
         }
-        renderer = new sgraph::TexturedPBRRenderer(modelview, objects, shaderLocations);
+        renderer = new sgraph::TexturedPBRRenderer(modelview, objects, shaderLocations, textureIdMap);
         lightRetriever = new sgraph::LightRetriever(modelview);
         initialized = true;
     }

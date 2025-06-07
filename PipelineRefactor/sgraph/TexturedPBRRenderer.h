@@ -31,9 +31,10 @@ namespace sgraph {
          * @param os the map of ObjectInstance objects
          * @param shaderLocations the shader locations for the program used to render
          */
-        TexturedPBRRenderer(stack<glm::mat4>& mv,map<string,util::ObjectInstance *>& os,util::ShaderLocationsVault& shaderLocations) 
+        TexturedPBRRenderer(stack<glm::mat4>& mv,map<string,util::ObjectInstance *>& os,util::ShaderLocationsVault& shaderLocations, map<string, unsigned int>& texMap) 
             : modelview(mv)
-            , objects(os) {
+            , objects(os)
+            , textureIdMap(texMap) {
             this->shaderLocations = shaderLocations;
             for (map<string,util::ObjectInstance *>::iterator it=objects.begin();it!=objects.end();it++) {
                 cout << "Mesh with name: "<< it->first << endl;
@@ -172,7 +173,7 @@ namespace sgraph {
         stack<glm::mat4>& modelview;    
         util::ShaderLocationsVault shaderLocations;
         map<string,util::ObjectInstance *> objects;
-        map<string, unsigned int> textureIdMap;
+        map<string, unsigned int>& textureIdMap;
 
    };
 }

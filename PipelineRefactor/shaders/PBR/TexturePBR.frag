@@ -115,7 +115,7 @@ void main()
 
     // getting required values from the input textures
     // vec3 albedo     = pow(texture(albedoMap, vec2(fTexCoord.s,fTexCoord.t)).rgb, vec3(2.2)); // conversion from sRGB to linear space
-    vec3 albedo     = texture(albedoMap, vec2(fTexCoord.s,fTexCoord.t)).rgb;
+    vec3 albedo     = texture(albedoMap, fTexCoord.st).rgb;
     vec3 normal     = tempNormal;
     float metallic  = texture(metallicMap, vec2(fTexCoord.s,fTexCoord.t)).r;
     float roughness = texture(roughnessMap, vec2(fTexCoord.s,fTexCoord.t)).r;
@@ -183,10 +183,10 @@ void main()
     // gamma correct
     color = pow(color, vec3(1.0/2.2)); 
 
-    // fColor = vec4(color, 1.0);
+    fColor = vec4(color, 1.0);
 
     // Debugging code here
     
     // specular = (NDF * G * F) / (4.0 * max(dot(tempNormal, viewVec), 0.0) * max(dot(tempNormal, lightVec), 0.0) + 0.001);
-    fColor = vec4(albedo, 1.0);
+    // fColor = texture(albedoMap, fTexCoord.st);
 }
