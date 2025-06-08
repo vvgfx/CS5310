@@ -84,6 +84,8 @@ void View::init(Callbacks *callbacks,map<string,util::PolygonMesh<VertexAttrib>>
     #pragma region Pipeline init
     pipeline = new pipeline::TexturedPBRPipeline();
     reinterpret_cast<pipeline::TexturedPBRPipeline*>(pipeline)->init(meshes, projection, textureIdMap);
+    // pipeline = new pipeline::BasicPBRPipeline();
+    // reinterpret_cast<pipeline::BasicPBRPipeline*>(pipeline)->init(meshes, projection);
     #pragma endregion
 	
     glViewport(0, 0, window_width,window_height);

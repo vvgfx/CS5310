@@ -88,7 +88,7 @@ vec3 FresnelSchlick(float cosTheta, vec3 F0)
 void main()
 {
     vec3 viewVec, lightVec, halfwayVec;
-    vec3 tempNormal, tempTangent, tempBiTangent;
+    vec3 tempNormal, tempTangent, tempBiTangent, tNormal;
     float dist, attenuation;
     vec3 radiance, specular;
     vec3 kS, kD;
@@ -109,14 +109,14 @@ void main()
     viewVec = normalize(viewVec);
 
     // get normal coordinates in tangent space
-    tempNormal = texture(normalMap,vec2(fTexCoord.s,fTexCoord.t)).rgb;
-    tempNormal = 2* tempNormal - 1; // [0,1] to [-1,1]
-    tempNormal = normalize(tempNormal);
+    tNormal = texture(normalMap,vec2(fTexCoord.s,fTexCoord.t)).rgb;
+    tNormal = 2* tNormal - 1; // [0,1] to [-1,1]
+    tNormal = normalize(tNormal);
 
     // getting required values from the input textures
     // vec3 albedo     = pow(texture(albedoMap, vec2(fTexCoord.s,fTexCoord.t)).rgb, vec3(2.2)); // conversion from sRGB to linear space
     vec3 albedo     = texture(albedoMap, fTexCoord.st).rgb;
-    vec3 normal     = tempNormal;
+    vec3 normal     = tNormal;
     float metallic  = texture(metallicMap, vec2(fTexCoord.s,fTexCoord.t)).r;
     float roughness = texture(roughnessMap, vec2(fTexCoord.s,fTexCoord.t)).r;
     float ao        = texture(aoMap, vec2(fTexCoord.s,fTexCoord.t)).r; // check if you have to convert from sRGB to linear space as well.
@@ -155,19 +155,19 @@ void main()
 
 
         // Cook torrance BRDF
-        NDF = DistributionGGX(tempNormal, halfwayVec, roughness);
-        G = GeometrySmith(tempNormal, viewVec, lightVec, roughness);
+        NDF = DistributionGGX(normal, halfwayVec, roughness);
+        G = GeometrySmith(normal, viewVec, lightVec, roughness);
         F = FresnelSchlick(clamp(dot(halfwayVec, viewVec), 0.0f, 1.0f), F0);
 
         vec3 numerator = NDF * G * F;
-        float denominator = 4.0 * max(dot(tempNormal, viewVec), 0.0f) * max(dot(tempNormal, lightVec), 0.0f) + 0.001;
+        float denominator = 4.0 * max(dot(normal, viewVec), 0.0f) * max(dot(normal, lightVec), 0.0f) + 0.001;
         specular = numerator/denominator;
 
         kS = F; // specular coefficient is equal to fresnel
         kD = vec3(1.0f) - kS;
         kD *= 1.0 - metallic; 
 
-        nDotL = max(dot(tempNormal, lightVec), 0.0f);
+        nDotL = max(dot(normal, lightVec), 0.0f);
 
         Lo += (kD * albedo / PI + specular) * radiance * nDotL;
 
@@ -178,15 +178,19 @@ void main()
 
     vec3 color = ambient + Lo;
 
-    // HDR tonemapping
-    color = color / (color + vec3(1.0));
-    // gamma correct
-    color = pow(color, vec3(1.0/2.2)); 
+    // // HDR tonemapping
+    // color = color / (color + vec3(1.0));
+    // // gamma correct
+    // color = pow(color, vec3(1.0/2.2)); 
 
     fColor = vec4(color, 1.0);
 
     // Debugging code here
     
     // specular = (NDF * G * F) / (4.0 * max(dot(tempNormal, viewVec), 0.0) * max(dot(tempNormal, lightVec), 0.0) + 0.001);
-    // fColor = texture(albedoMap, fTexCoord.st);
+    // vec3 temptempnormal = texture(normalMap, fTexCoord.st).rgb;
+    // temptempnormal = temptempnormal * 2.0 - 1.0; // Convert from [0,1] to [-1,1]
+    // mat3 TBN = mat3(tempTangent, tempBiTangent, normalize(fNormal));
+    // vec3 finalNormal = normalize(TBN * temptempnormal);
+    // fColor = vec4(vec3(nDotL), 1.0f);
 }
