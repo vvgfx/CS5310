@@ -1,0 +1,58 @@
+#all the instances
+instance sphere models/sphere.obj
+
+material sphere-material
+ambient 0.1 0.0 0.0
+diffuse 0.1 0.0 0.0
+specular 0.1 0.0 0.0
+shininess 10
+albedo 0.95 0.0 0.0
+metallic 0.2
+roughness 0.2
+ao 1.0
+end-material
+
+#lights
+light one-light
+ambient 0.1 0.1 0.1
+diffuse 0.7 0.7 0.7
+specular 0.5 0.5 0.5
+color 250.0 250.0 250.0
+position 40 40 40
+end-light
+
+#textures
+image sphere-base textures/metal2_albedo.ppm
+image sphere-normal textures/metal2_normal.ppm
+image sphere-metallic textures/metal2_metallic.ppm
+image sphere-roughness textures/metal2_roughness.ppm
+image sphere-ao textures/metal2_ao.ppm
+
+group track2 track2
+#the root
+group root root
+assign-light one-light track2
+
+#sphere
+translate s-translate s-translate 0 0 0
+scale s-scale s-scale 30 30 30
+leaf one-sphere one-sphere instanceof sphere 
+assign-material one-sphere sphere-material
+assign-texture one-sphere sphere-base
+assign-normal one-sphere sphere-normal
+assign-metallic one-sphere sphere-metallic
+assign-roughness one-sphere sphere-roughness
+assign-ao one-sphere sphere-ao
+
+
+add-child one-sphere s-scale
+add-child s-scale s-translate
+add-child s-translate root
+dynamic trackball trackball
+add-child root trackball
+
+add-child trackball track2
+
+assign-root track2
+
+
