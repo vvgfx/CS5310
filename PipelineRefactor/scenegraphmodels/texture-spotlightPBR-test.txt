@@ -17,15 +17,26 @@ light one-light
 ambient 0.1 0.1 0.1
 diffuse 0.7 0.7 0.7
 specular 0.5 0.5 0.5
-color 250.0 250.0 250.0
+color 75.0 75.0 75.0
 position 0 10 0
 spot-direction 0 -1 0
 spot-angle 40
 end-light
 
+light two-light
+ambient 0.1 0.1 0.1
+diffuse 0.7 0.7 0.7
+specular 0.5 0.5 0.5
+color 50.0 50.0 50.0
+position 0 50 0
+#spot-direction 0 -1 0
+#spot-angle 40
+end-light
+
 #the root
 group root root
 assign-light one-light root
+assign-light two-light root
 
 #textures
 image box-base textures/metal2_albedo.ppm

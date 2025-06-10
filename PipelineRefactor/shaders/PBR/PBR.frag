@@ -98,6 +98,7 @@ void main()
     vec3 Lo = vec3(0.0f);
     float spotAttenuation = 1.0f;
     float angle;
+    vec3 lightContribution;
     for(int i = 0; i < numLights; i++)
     {
         if (light[i].position.w!=0)
@@ -105,12 +106,12 @@ void main()
         else
             lightVec = normalize(-light[i].position.xyz);
 
-        bool isSpot = light[i].spotAngleCosine > 0.0;
+        bool isSpot = light[i].spotAngleCosine < 0.95;
 
         // spot direction is already in the world co-ordinate space now.
 
         spotAttenuation = 1.0f; // no attenuation by default
-
+        angle = 1.0f;
         if(isSpot)
         {
             angle = dot(normalize(-lightVec), normalize(light[i].spotDirection));
@@ -140,8 +141,9 @@ void main()
         kD *= 1.0 - material.metallic; 
 
         nDotL = max(dot(tempNormal, lightVec), 0.0f);
-
-        Lo += (kD * material.albedo / PI + specular) * radiance * nDotL * spotAttenuation;
+        
+        lightContribution = (kD * material.albedo / PI + specular) * radiance * nDotL * spotAttenuation;
+        Lo += lightContribution;
 
     }
 
@@ -161,4 +163,5 @@ void main()
     
     // specular = (NDF * G * F) / (4.0 * max(dot(tempNormal, viewVec), 0.0) * max(dot(tempNormal, lightVec), 0.0) + 0.001);
     // fColor = vec4(vec3(light[0].spotDirection.x + 0.5, light[0].spotDirection.y + 0.5, light[0].spotDirection.z + 0.5), 1.0);
+    // fColor = vec4(lightContribution, 1.0);
 }

@@ -143,7 +143,7 @@ void main()
         // transform the lightVec to the tangent space
         lightVec = vec3(dot(lightVec,tempTangent),dot(lightVec,tempBiTangent),dot(lightVec,tempNormal));
 
-        bool isSpot = light[i].spotAngleCosine > 0.0;
+        bool isSpot = light[i].spotAngleCosine < 0.95;
 
         spotAttenuation = 1.0f; // no attenuation by default
 
