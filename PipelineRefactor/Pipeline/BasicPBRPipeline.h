@@ -121,7 +121,6 @@ namespace pipeline
             glUniform4fv(lightLocations[i].position, 1, glm::value_ptr(pos));
             // spotlight stuff here
             glUniform1f(lightLocations[i].spotAngle, cos(glm::radians(lights[i].getSpotCutoff())));
-            cout<<"spot direction value: "<<spotDirection.x << " , "<<spotDirection.y<< " , "<<spotDirection.z<< " , "<<spotDirection.w<<endl;
             glUniform3fv(lightLocations[i].spotDirection, 1, glm::value_ptr(spotDirection));
         }
 

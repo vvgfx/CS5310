@@ -27,11 +27,23 @@ end-light
 group root root
 assign-light one-light root
 
+#textures
+image box-base textures/metal2_albedo.ppm
+image box-normal textures/metal2_normal.ppm
+image box-metallic textures/metal2_metallic.ppm
+image box-roughness textures/metal2_roughness.ppm
+image box-ao textures/metal2_ao.ppm
+
 #box
 translate b-translate b-translate 0 -20 0
 scale b-scale b-scale 100 5 100
 leaf one-box one-box instanceof box 
 assign-material one-box box-material
+assign-texture one-box box-base
+assign-normal one-box box-normal
+assign-metallic one-box box-metallic
+assign-roughness one-box box-roughness
+assign-ao one-box box-ao
 
 add-child one-box b-scale
 add-child b-scale b-translate

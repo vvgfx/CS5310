@@ -21,7 +21,7 @@ struct LightProperties
     vec4 position;
     vec3 color;
     vec3 spotDirection;   
-    float spotAngle;   
+    float spotAngleCosine;   
 };
 
 const int MAXLIGHTS = 10;
@@ -129,6 +129,10 @@ void main()
 
     // reflectance equation
     vec3 Lo = vec3(0.0f);
+
+    // spotlight stuff
+    float spotAttenuation = 1.0f;
+    float angle;
     for(int i = 0; i < numLights; i++)
     {
         if (light[i].position.w!=0)
@@ -139,7 +143,16 @@ void main()
         // transform the lightVec to the tangent space
         lightVec = vec3(dot(lightVec,tempTangent),dot(lightVec,tempBiTangent),dot(lightVec,tempNormal));
 
-        bool isSpot = light[i].spotAngle > 0.0;
+        bool isSpot = light[i].spotAngleCosine > 0.0;
+
+        spotAttenuation = 1.0f; // no attenuation by default
+
+        if(isSpot)
+        {
+            vec3 spotDirTangent = vec3(dot(light[i].spotDirection,tempTangent),dot(light[i].spotDirection,tempBiTangent),dot(light[i].spotDirection,tempNormal));
+            angle = dot(normalize(-lightVec), normalize(spotDirTangent));
+            spotAttenuation = 1.0 - (1.0 - angle) * 1.0/(1.0 - light[i].spotAngleCosine);
+        }
 
         halfwayVec = normalize(viewVec + lightVec); // already in tangent space
 
@@ -169,7 +182,7 @@ void main()
 
         nDotL = max(dot(normal, lightVec), 0.0f);
 
-        Lo += (kD * albedo / PI + specular) * radiance * nDotL;
+        Lo += (kD * albedo / PI + specular) * radiance * nDotL * spotAttenuation;
 
     }
 

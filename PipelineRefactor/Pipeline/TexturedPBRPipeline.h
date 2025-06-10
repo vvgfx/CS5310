@@ -122,7 +122,7 @@ namespace pipeline
             glUniform3fv(lightLocations[i].color, 1, glm::value_ptr(lights[i].getColor()));
             glUniform4fv(lightLocations[i].position, 1, glm::value_ptr(pos));
             // spotlight stuff here
-            glUniform1f(lightLocations[i].spotAngle, lights[i].getSpotCutoff());
+            glUniform1f(lightLocations[i].spotAngle, cos(glm::radians(lights[i].getSpotCutoff())));
             glUniform3fv(lightLocations[i].spotDirection, 1, glm::value_ptr(spotDirection));
         }
 
@@ -157,7 +157,7 @@ namespace pipeline
             ll.color = shaderLocations.getLocation(name.str() + ".color");
             // adding spotDirection and spotAngle.
             ll.spotDirection = shaderLocations.getLocation(name.str() + ".spotDirection");
-            ll.spotAngle = shaderLocations.getLocation(name.str() + ".spotAngle");
+            ll.spotAngle = shaderLocations.getLocation(name.str() + ".spotAngleCosine");
             lightLocations.push_back(ll);
         }
     }

@@ -30,7 +30,7 @@ void Controller::initScenegraph() {
     //read in the file of commands
     ifstream inFile;
     if(textfile == "")
-        inFile = ifstream("scenegraphmodels/spotlightPBR-test.txt");
+        inFile = ifstream("scenegraphmodels/texture-spotlightPBR-test.txt");
     else
         inFile = ifstream(textfile);
     sgraph::ScenegraphImporter importer("textures/white.ppm");
