@@ -1,0 +1,44 @@
+#all the instances
+instance box models/box.obj
+
+material box-material
+ambient 0.1 0.0 0.0
+diffuse 0.1 0.0 0.0
+specular 0.1 0.0 0.0
+shininess 10
+albedo 0.95 0.0 0.0
+metallic 0.2
+roughness 0.5
+ao 1.0
+end-material
+
+#lights
+light one-light
+ambient 0.1 0.1 0.1
+diffuse 0.7 0.7 0.7
+specular 0.5 0.5 0.5
+color 350.0 350.0 350.0
+position 0 10 0
+spot-direction 0 -1 0
+spot-angle 40
+end-light
+
+#the root
+group root root
+assign-light one-light root
+
+#box
+translate b-translate b-translate 0 -20 0
+scale b-scale b-scale 100 5 100
+leaf one-box one-box instanceof box 
+assign-material one-box box-material
+
+add-child one-box b-scale
+add-child b-scale b-translate
+add-child b-translate root
+dynamic trackball trackball
+add-child root trackball
+
+
+assign-root trackball
+

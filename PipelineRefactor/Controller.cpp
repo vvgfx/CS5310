@@ -30,12 +30,10 @@ void Controller::initScenegraph() {
     //read in the file of commands
     ifstream inFile;
     if(textfile == "")
-        inFile = ifstream("scenegraphmodels/TexturedPBR-test.txt");
+        inFile = ifstream("scenegraphmodels/spotlightPBR-test.txt");
     else
         inFile = ifstream(textfile);
-    //ifstream inFile("tryout.txt");
-    // changed the constructor of scenegraphImporter as all leaf nodes require a default texture and a default normal
-    sgraph::ScenegraphImporter importer("textures/white.ppm", "textures/blank_normal.ppm");
+    sgraph::ScenegraphImporter importer("textures/white.ppm");
     
 
     IScenegraph *scenegraph = importer.parse(inFile);

@@ -16,7 +16,7 @@ struct LightProperties
     vec4 position;
     vec3 color;
     vec3 spotDirection;   
-    float spotAngle;   
+    float spotAngleCosine;   // this is the cosine, not the actual angle itself.
 };
 
 const int MAXLIGHTS = 10;
@@ -96,6 +96,8 @@ void main()
 
     // reflectance equation
     vec3 Lo = vec3(0.0f);
+    float spotAttenuation = 1.0f;
+    float angle;
     for(int i = 0; i < numLights; i++)
     {
         if (light[i].position.w!=0)
@@ -103,7 +105,18 @@ void main()
         else
             lightVec = normalize(-light[i].position.xyz);
 
-        bool isSpot = light[i].spotAngle > 0.0;
+        bool isSpot = light[i].spotAngleCosine > 0.0;
+
+        // spot direction is already in the world co-ordinate space now.
+
+        spotAttenuation = 1.0f; // no attenuation by default
+
+        if(isSpot)
+        {
+            angle = dot(normalize(-lightVec), normalize(light[i].spotDirection));
+            spotAttenuation = 1.0 - (1.0 - angle) * 1.0/(1.0 - light[i].spotAngleCosine);
+        }
+
 
         halfwayVec = normalize(viewVec + lightVec); // world space
 
@@ -128,7 +141,7 @@ void main()
 
         nDotL = max(dot(tempNormal, lightVec), 0.0f);
 
-        Lo += (kD * material.albedo / PI + specular) * radiance * nDotL;
+        Lo += (kD * material.albedo / PI + specular) * radiance * nDotL * spotAttenuation;
 
     }
 
@@ -138,14 +151,14 @@ void main()
     vec3 color = ambient + Lo;
 
     // HDR tonemapping
-    color = color / (color + vec3(1.0));
-    // gamma correct
-    color = pow(color, vec3(1.0/2.2)); 
+    // color = color / (color + vec3(1.0));
+    // // gamma correct
+    // color = pow(color, vec3(1.0/2.2)); 
 
     fColor = vec4(color, 1.0);
 
     // Debugging code here
     
     // specular = (NDF * G * F) / (4.0 * max(dot(tempNormal, viewVec), 0.0) * max(dot(tempNormal, lightVec), 0.0) + 0.001);
-    // fColor = vec4(light[0].color, 1.0);
+    // fColor = vec4(vec3(light[0].spotDirection.x + 0.5, light[0].spotDirection.y + 0.5, light[0].spotDirection.z + 0.5), 1.0);
 }

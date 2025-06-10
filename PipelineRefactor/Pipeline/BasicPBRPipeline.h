@@ -18,6 +18,7 @@
 #include "../sgraph/BasicPBRRenderer.h"
 #include "../sgraph/LightRetriever.h"
 #include "TangentComputer.h"
+#include <iostream>
 
 namespace pipeline
 {
@@ -25,6 +26,8 @@ namespace pipeline
      * An implementation the pipeline interface. This pipeline features lights (directional and spotlights), textures and PBR workflow.
      * Note that this pipeline REQUIRES PBR materials to be defined to work properly, and does NOT support ANY texture.
      * To use this pipeline, initalize it using init() and draw a single frame using drawFrame()
+     * 
+     * Note: This pipeline does all the PBR calculations in the world space.
      */
     class BasicPBRPipeline : public IPipeline
     {
@@ -112,12 +115,13 @@ namespace pipeline
             glm::vec4 pos = lights[i].getPosition();
             pos = lightTransformations[i] * pos; // world coordinate system.
             glm::vec4 spotDirection = lights[i].getSpotDirection();
-            spotDirection = lightTransformations[i] * spotDirection;
+            spotDirection = lightTransformations[i] * spotDirection; // world coordinate system.
             // Set light colors
             glUniform3fv(lightLocations[i].color, 1, glm::value_ptr(lights[i].getColor()));
             glUniform4fv(lightLocations[i].position, 1, glm::value_ptr(pos));
             // spotlight stuff here
-            glUniform1f(lightLocations[i].spotAngle, lights[i].getSpotCutoff());
+            glUniform1f(lightLocations[i].spotAngle, cos(glm::radians(lights[i].getSpotCutoff())));
+            cout<<"spot direction value: "<<spotDirection.x << " , "<<spotDirection.y<< " , "<<spotDirection.z<< " , "<<spotDirection.w<<endl;
             glUniform3fv(lightLocations[i].spotDirection, 1, glm::value_ptr(spotDirection));
         }
 
@@ -152,7 +156,8 @@ namespace pipeline
             ll.color = shaderLocations.getLocation(name.str() + ".color");
             // adding spotDirection and spotAngle.
             ll.spotDirection = shaderLocations.getLocation(name.str() + ".spotDirection");
-            ll.spotAngle = shaderLocations.getLocation(name.str() + ".spotAngle");
+            // cout<<"spot direction location: "<<ll.spotDirection<<endl;
+            ll.spotAngle = shaderLocations.getLocation(name.str() + ".spotAngleCosine");
             lightLocations.push_back(ll);
         }
     }
