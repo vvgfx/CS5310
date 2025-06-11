@@ -19,7 +19,7 @@ diffuse 0.7 0.7 0.7
 specular 0.5 0.5 0.5
 color 250.0 250.0 250.0
 position 40 40 40
-spot-direction -0.5 -1 0
+spot-direction -0.5 -1 -0.25
 spot-angle 20
 end-light
 

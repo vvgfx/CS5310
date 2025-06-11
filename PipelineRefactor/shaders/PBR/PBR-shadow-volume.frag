@@ -1,6 +1,6 @@
 #version 330
 
-
+// THIS IS FROM BEFORE THE PIPELINE CHANGE. IT'S NOT USED ANYWHERE AND DOES NOT WORK
 struct LightProperties
 {
     // vec3 ambient;
