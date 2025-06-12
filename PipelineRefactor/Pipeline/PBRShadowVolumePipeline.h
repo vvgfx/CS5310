@@ -161,6 +161,7 @@ namespace pipeline
         glDisable(GL_STENCIL_TEST);       // need to disable the stencil test for the ambient pass because all objects require ambient lighting.
         ambientPass(scenegraph, viewMat); // ambient pass for all objects.
         // Note to self: In order to do postprocessing, I might need to write the output to a different framebuffer and then read that as a texture to my post-processing pass
+        // cout<<"Errors :"<<glGetError()<<endl;
     }
 
     void PBRShadowVolumePipeline::initLights(sgraph::IScenegraph *scenegraph)
@@ -254,18 +255,8 @@ namespace pipeline
         glStencilFunc(GL_EQUAL, 0x0, 0xFF);                      // draw only if stencil value is 0
         glStencilOpSeparate(GL_BACK, GL_KEEP, GL_KEEP, GL_KEEP); // do not write to the stencil buffer.
 
-        // glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT); // clearing all the buffers in the main method now.
-
-        // glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
-        // glEnable(GL_CULL_FACE);
-        // glCullFace(GL_FRONT_FACE);
-
         modelview.push(glm::mat4(1.0));
-        modelview.top() = modelview.top() * viewMat; // this should return the same behavior now.
-        // lighting setup now happens at display(). This is because the lights are required for the stencil shadow pass
-        //  which runs before the renderObject pass.
-
-        glUniform1i(renderShaderLocations.getLocation("numLights"), lights.size());
+        modelview.top() = modelview.top() * viewMat;
 
         // send the data for the ith light
         glm::vec4 pos = lights[lightIndex].getPosition();
@@ -275,13 +266,11 @@ namespace pipeline
         glm::vec4 spotDirection = lights[lightIndex].getSpotDirection();
         spotDirection = lightTransformations[lightIndex] * spotDirection;
         // Set light colors
-        // TODO : Update this code for PBR instead of phong.
-        glUniform3fv(renderShaderLocations.getLocation("light.ambient"), 1, glm::value_ptr(lights[lightIndex].getAmbient()));
-        glUniform3fv(renderShaderLocations.getLocation("light.diffuse"), 1, glm::value_ptr(lights[lightIndex].getDiffuse()));
-        glUniform3fv(renderShaderLocations.getLocation("light.specular"), 1, glm::value_ptr(lights[lightIndex].getSpecular()));
+        // TODO : Update this code for PBR instead of phong. - Done
+        glUniform3fv(renderShaderLocations.getLocation("light.color"), 1, glm::value_ptr(lights[lightIndex].getColor()));
         glUniform4fv(renderShaderLocations.getLocation("light.position"), 1, glm::value_ptr(pos));
         // spotlight stuff here
-        glUniform1f(renderShaderLocations.getLocation("light.spotAngle"), lights[lightIndex].getSpotCutoff());
+        glUniform1f(renderShaderLocations.getLocation("light.spotAngleCosine"), cos(glm::radians(lights[lightIndex].getSpotCutoff())));
         glUniform3fv(renderShaderLocations.getLocation("light.spotDirection"), 1, glm::value_ptr(spotDirection));
 
         // send projection matrix to GPU
@@ -290,9 +279,6 @@ namespace pipeline
         // draw scene graph here
         scenegraph->getRoot()->accept(renderer);
 
-        // glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
-        // glEnable(GL_CULL_FACE);
-        // glCullFace(GL_FRONT_FACE);
         modelview.pop();
         renderProgram.disable();
     }

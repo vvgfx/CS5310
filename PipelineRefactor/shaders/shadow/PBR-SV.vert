@@ -4,8 +4,7 @@ in vec4 vPosition;
 in vec4 vNormal;
 
 uniform mat4 projection;
-uniform mat4 model;
-uniform mat4 view;
+uniform mat4 modelview;
 uniform mat4 normalmatrix;
 
 
@@ -16,11 +15,11 @@ void main()
 {
 
     //gl_Position stuff
-    fPosition = model * vec4(vPosition.xyzw); // moving this to world space instead of view space
-    gl_Position = projection * view * fPosition;
+    fPosition = modelview * vec4(vPosition.xyzw); // view space
+    gl_Position = projection * fPosition;
 
     //normal transformation stuff
-    vec4 tNormal =  normalmatrix * vNormal; // now this should also be in the world space!
+    vec4 tNormal =  normalmatrix * vNormal; // now this should also be in the view space!
     fNormal = normalize(tNormal.xyz);
 
 }

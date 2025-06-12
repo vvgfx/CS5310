@@ -19,13 +19,11 @@ struct LightProperties
     float spotAngleCosine; // this is the cosine, not the actual angle itself.
 };
 
-const int MAXLIGHTS = 10;
 const float PI = 3.14159265359;
 
-uniform int numLights;
 uniform LightProperties light;
 uniform MaterialProperties material;
-uniform vec3 cameraPos; // need this because I'm moving all calculations to the world space
+// uniform vec3 cameraPos; // should no longer need this because all calculations are in the view space now, so cameraPos = (0,0,0)
 
 out vec4 fColor;
 
@@ -71,9 +69,6 @@ vec3 FresnelSchlick(float cosTheta, vec3 F0)
 }
 // ----------------------------------------------------------------------------
 
-/**
-* TODO: Implement spotlights later!
-*/
 void main()
 {
     vec3 viewVec, lightVec, halfwayVec;
@@ -86,9 +81,9 @@ void main()
     float G;
     vec3 F;
 
-    tempNormal = normalize(fNormal); // world space
+    tempNormal = normalize(fNormal); // view space
 
-    viewVec = normalize(cameraPos - fPosition.xyz); // world space
+    viewVec = normalize(-fPosition.xyz); // view space
 
     vec3 F0 = vec3(0.04);
     F0 = mix(F0, material.albedo, material.metallic);
@@ -100,13 +95,13 @@ void main()
     vec3 lightContribution;
 
     if (light.position.w != 0)
-        lightVec = normalize(light.position.xyz - fPosition.xyz); // both in world space
+        lightVec = normalize(light.position.xyz - fPosition.xyz); // both in view space
     else
         lightVec = normalize(-light.position.xyz);
 
     bool isSpot = light.spotAngleCosine < 0.95;
 
-    // spot direction is already in the world co-ordinate space now.
+    // spot direction is already in the view co-ordinate space now.
 
     spotAttenuation = 1.0f; // no attenuation by default
     angle = 1.0f;

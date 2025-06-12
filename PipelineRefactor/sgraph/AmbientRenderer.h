@@ -65,7 +65,8 @@ namespace sgraph
         {
             glUniformMatrix4fv(shaderLocations.getLocation("modelview"), 1, GL_FALSE, glm::value_ptr(modelview.top()));
             util::Material leafMat = leafNode->getMaterial();
-            glUniform4fv(shaderLocations.getLocation("vColor"), 1, glm::value_ptr(leafMat.getAmbient()));
+            glUniform3fv(shaderLocations.getLocation("albedo"), 1, glm::value_ptr(leafMat.getAlbedo()));
+            glUniform1f(shaderLocations.getLocation("ao"), leafMat.getAO());
             objects[leafNode->getInstanceOf()]->draw();
         }
 

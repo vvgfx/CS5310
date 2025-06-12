@@ -71,9 +71,6 @@ vec3 FresnelSchlick(float cosTheta, vec3 F0)
 }
 // ----------------------------------------------------------------------------
 
-/**
-* TODO: Implement spotlights later!
-*/
 void main()
 {
     vec3 viewVec, lightVec, halfwayVec;
