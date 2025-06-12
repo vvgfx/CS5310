@@ -38,6 +38,12 @@ image box-metallic textures/metal2_metallic.ppm
 image box-roughness textures/metal2_roughness.ppm
 image box-ao textures/metal2_ao.ppm
 
+image ground-base textures/ground_albedo.ppm
+image ground-normal textures/ground_normal.ppm
+image ground-metallic textures/ground_metallic.ppm
+image ground-roughness textures/ground_roughness.ppm
+image ground-ao textures/ground_ao.ppm
+
 image sphere-base textures/metal_albedo.ppm
 image sphere-normal textures/metal_normal.ppm
 image sphere-metallic textures/metal_metallic.ppm
@@ -69,11 +75,11 @@ translate b2-translate b2-translate 0 -25 0
 scale b2-scale b2-scale 80 5 80
 leaf two-box two-box instanceof box 
 assign-material two-box box-material
-assign-texture two-box box-base
-assign-normal two-box box-normal
-assign-metallic two-box box-metallic
-assign-roughness two-box box-roughness
-assign-ao two-box box-ao
+assign-texture two-box ground-base
+assign-normal two-box ground-normal
+assign-metallic two-box ground-metallic
+assign-roughness two-box ground-roughness
+assign-ao two-box ground-ao
 
 add-child two-box b2-scale
 add-child b2-scale b2-translate
