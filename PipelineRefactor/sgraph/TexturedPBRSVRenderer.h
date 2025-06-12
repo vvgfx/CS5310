@@ -1,5 +1,5 @@
-#ifndef _PBRSHADOWVOLRENDERER_H_
-#define _PBRSHADOWVOLRENDERER_H_
+#ifndef _TEXTUREDPBRSVRENDERER_H_
+#define _TEXTUREDPBRSVRENDERER_H_
 
 #include "SGNodeVisitor.h"
 #include "GroupNode.h"
@@ -19,21 +19,22 @@ using namespace std;
 namespace sgraph {
     /**
      * This visitor implements drawing the scene graph using OpenGL.
-     * Note that this Renderer requires all the material properties required for PBR workflow (material's albedo, metallic, roughness, Ambient Occlusion(ao))
+     * Note that this Renderer requires all the materials required for a PBR workflow (albedoMap, normalMap, roughnessMap, metalicMap, ambientOcclusionMap)
      * 
      */
-    class PBRShadowVolRenderer: public SGNodeVisitor {
+    class TexturedPBRSVRenderer: public SGNodeVisitor {
         public:
         /**
-         * @brief Construct a new PBRShadowVolRenderer object
+         * @brief Construct a new TexturedPBRSVRenderer object
          * 
          * @param mv a reference to modelview stack that will be used while rendering
          * @param os the map of ObjectInstance objects
          * @param shaderLocations the shader locations for the program used to render
          */
-        PBRShadowVolRenderer(stack<glm::mat4>& mv,map<string,util::ObjectInstance *>& os,util::ShaderLocationsVault& shaderLocations) 
+        TexturedPBRSVRenderer(stack<glm::mat4>& mv,map<string,util::ObjectInstance *>& os,util::ShaderLocationsVault& shaderLocations,map<string, unsigned int>& texMap) 
             : modelview(mv)
-            , objects(os) {
+            , objects(os)
+            , textureIdMap(texMap) {
             this->shaderLocations = shaderLocations;
             for (map<string,util::ObjectInstance *>::iterator it=objects.begin();it!=objects.end();it++) {
                 cout << "Mesh with name: "<< it->first << endl;
@@ -62,6 +63,7 @@ namespace sgraph {
             glm::mat4 normalmatrix = glm::inverse(glm::transpose((modelview.top())));
             glUniformMatrix4fv(shaderLocations.getLocation("modelview"), 1, GL_FALSE, glm::value_ptr(modelview.top())); // This contains only the model-to-world transformation
             glUniformMatrix4fv(shaderLocations.getLocation("normalmatrix"), 1, GL_FALSE, glm::value_ptr(normalmatrix));
+            glUniformMatrix4fv(shaderLocations.getLocation("texturematrix"), 1, GL_FALSE, glm::value_ptr(leafNode->getTextureTransform()));
             
             //fragment next
             util::Material leafMat = leafNode->getMaterial();
@@ -71,57 +73,53 @@ namespace sgraph {
             glUniform1f(shaderLocations.getLocation("material.roughness"), leafMat.getRoughness());
             glUniform1f(shaderLocations.getLocation("material.ao"), leafMat.getAO());
 
-            // Texture look-ups are not supported in this Renderer. Only the albedo material is used.
             //texture stuff here!
             // albedo first
-            // glUniformMatrix4fv(shaderLocations.getLocation("texturematrix"), 1, GL_FALSE, glm::value_ptr(leafNode->getTextureTransform()));
-            // string albedoMapName = leafNode->getTextureMap();
-            // if (!albedoMapName.empty() && textureIdMap.find(albedoMapName) != textureIdMap.end()) {
-            //     unsigned int texID = textureIdMap[albedoMapName];
-            //     glActiveTexture(GL_TEXTURE0);
-            //     glBindTexture(GL_TEXTURE_2D, texID);
-            //     glUniform1i(shaderLocations.getLocation("albedoMap"), 0);
-            // }
+            string albedoMapName = leafNode->getTextureMap();
+            if (!albedoMapName.empty() && textureIdMap.find(albedoMapName) != textureIdMap.end()) {
+                unsigned int texID = textureIdMap[albedoMapName];
+                glActiveTexture(GL_TEXTURE0);
+                glBindTexture(GL_TEXTURE_2D, texID);
+                glUniform1i(shaderLocations.getLocation("albedoMap"), 0);
+            }
             
             
-            //similarly, do the same for normal textures!
-            //setting normal textures as texture 1
-            // string normalMapName = leafNode->getNormalMap();
-            // bool isPBR = leafNode->getPBRBool();
-            // glUniform1i(shaderLocations.getLocation("PBR"), isPBR);
-            // if (isPBR && !normalMapName.empty() && textureIdMap.find(normalMapName) != textureIdMap.end()) {
-            //     unsigned int texID = textureIdMap[normalMapName];
-            //     glActiveTexture(GL_TEXTURE1);
-            //     glBindTexture(GL_TEXTURE_2D, texID);
-            //     glUniform1i(shaderLocations.getLocation("normalMap"), 1);
-            // }
+            // similarly, do the same for normal textures!
+            // setting normal textures as texture 1
+            string normalMapName = leafNode->getNormalMap();
+            if (!normalMapName.empty() && textureIdMap.find(normalMapName) != textureIdMap.end()) {
+                unsigned int texID = textureIdMap[normalMapName];
+                glActiveTexture(GL_TEXTURE1);
+                glBindTexture(GL_TEXTURE_2D, texID);
+                glUniform1i(shaderLocations.getLocation("normalMap"), 1);
+            }
 
-            // //roughness is texture 2
-            // string roughnessMapName = leafNode->getRoughnessMap();
-            // if (isPBR && !roughnessMapName.empty() && textureIdMap.find(roughnessMapName) != textureIdMap.end()) {
-            //     unsigned int texID = textureIdMap[roughnessMapName];
-            //     glActiveTexture(GL_TEXTURE2);
-            //     glBindTexture(GL_TEXTURE_2D, texID);
-            //     glUniform1i(shaderLocations.getLocation("roughnessMap"), 2);
-            // }
+            //roughness is texture 2
+            string roughnessMapName = leafNode->getRoughnessMap();
+            if (!roughnessMapName.empty() && textureIdMap.find(roughnessMapName) != textureIdMap.end()) {
+                unsigned int texID = textureIdMap[roughnessMapName];
+                glActiveTexture(GL_TEXTURE2);
+                glBindTexture(GL_TEXTURE_2D, texID);
+                glUniform1i(shaderLocations.getLocation("roughnessMap"), 2);
+            }
 
-            // //metallic is texture 3
-            // string metallicMapName = leafNode->getMetallicMap();
-            // if (isPBR && !metallicMapName.empty() && textureIdMap.find(metallicMapName) != textureIdMap.end()) {
-            //     unsigned int texID = textureIdMap[metallicMapName];
-            //     glActiveTexture(GL_TEXTURE3);
-            //     glBindTexture(GL_TEXTURE_2D, texID);
-            //     glUniform1i(shaderLocations.getLocation("metallicMap"), 3);
-            // }
+            //metallic is texture 3
+            string metallicMapName = leafNode->getMetallicMap();
+            if (!metallicMapName.empty() && textureIdMap.find(metallicMapName) != textureIdMap.end()) {
+                unsigned int texID = textureIdMap[metallicMapName];
+                glActiveTexture(GL_TEXTURE3);
+                glBindTexture(GL_TEXTURE_2D, texID);
+                glUniform1i(shaderLocations.getLocation("metallicMap"), 3);
+            }
             
-            // //ambient occlusion is texture 4
-            // string aoMapName = leafNode->getAOMap();
-            // if (isPBR && !aoMapName.empty() && textureIdMap.find(aoMapName) != textureIdMap.end()) {
-            //     unsigned int texID = textureIdMap[aoMapName];
-            //     glActiveTexture(GL_TEXTURE4);
-            //     glBindTexture(GL_TEXTURE_2D, texID);
-            //     glUniform1i(shaderLocations.getLocation("aoMap"), 4);
-            // }
+            //ambient occlusion is texture 4
+            string aoMapName = leafNode->getAOMap();
+            if (!aoMapName.empty() && textureIdMap.find(aoMapName) != textureIdMap.end()) {
+                unsigned int texID = textureIdMap[aoMapName];
+                glActiveTexture(GL_TEXTURE4);
+                glBindTexture(GL_TEXTURE_2D, texID);
+                glUniform1i(shaderLocations.getLocation("aoMap"), 4);
+            }
 
             objects[leafNode->getInstanceOf()]->draw();
         }
@@ -175,8 +173,8 @@ namespace sgraph {
         stack<glm::mat4>& modelview;    
         util::ShaderLocationsVault shaderLocations;
         map<string,util::ObjectInstance *> objects;
-        map<string, unsigned int> textureIdMap;
-
+        map<string, unsigned int>& textureIdMap;
+        
    };
 }
 
