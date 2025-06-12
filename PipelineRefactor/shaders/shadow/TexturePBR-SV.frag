@@ -190,5 +190,6 @@ void main()
     // temptempnormal = temptempnormal * 2.0 - 1.0; // Convert from [0,1] to [-1,1]
     // mat3 TBN = mat3(tempTangent, tempBiTangent, normalize(fNormal));
     // vec3 finalNormal = normalize(TBN * temptempnormal);
-    // fColor = vec4(vec3(nDotL), 1.0f);
+    // fColor = vec4(finalNormal, 1.0f);
+    // fColor = vec4(texture(albedoMap, fTexCoord.st).rgb, 1.0f);
 }

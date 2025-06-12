@@ -34,7 +34,7 @@ namespace pipeline
     {
 
     public:
-        inline void init(map<string, util::PolygonMesh<VertexAttrib>> &meshes, glm::mat4 &projection);
+        inline void init(map<string, util::PolygonMesh<VertexAttrib>> &meshes, glm::mat4 &projection, map<string, unsigned int>& texMap);
         inline void drawFrame(sgraph::IScenegraph *scenegraph, glm::mat4 &viewMat);
         inline void initLights(sgraph::IScenegraph *scenegraph);
         inline void depthPass(sgraph::IScenegraph *scenegraph, glm::mat4 &viewMat);
@@ -73,10 +73,11 @@ namespace pipeline
         double time;
     };
 
-    void TexturedPBRSVPipeline::init(map<string, util::PolygonMesh<VertexAttrib>> &meshes, glm::mat4 &proj)
+    void TexturedPBRSVPipeline::init(map<string, util::PolygonMesh<VertexAttrib>> &meshes, glm::mat4 &proj, map<string, unsigned int>& texMap)
     {
         this->projection = proj;
 
+        textureIdMap = texMap;
         // Render program initialization
         renderProgram.createProgram("shaders/shadow/TexturePBR-SV.vert",
                                     "shaders/shadow/TexturePBR-SV.frag");
@@ -92,8 +93,8 @@ namespace pipeline
         depthProgram.disable();
 
         // Ambient program initialization
-        ambientProgram.createProgram("shaders/shadow/PBR-ambient.vert",
-                                     "shaders/shadow/PBR-ambient.frag");
+        ambientProgram.createProgram("shaders/shadow/Texture-PBR-ambient.vert",
+                                     "shaders/shadow/Texture-PBR-ambient.frag");
         ambientProgram.enable();
         ambientShaderLocations = ambientProgram.getAllShaderVariables();
         ambientProgram.disable();
@@ -118,6 +119,7 @@ namespace pipeline
              it++)
         {
             util::ObjectInstance *obj = new util::ObjectInstance(it->first);
+            TangentComputer::computeTangents(it->second);
             obj->initPolygonMesh(renderShaderLocations, shaderVarsToVertexAttribs, it->second);
             objects[it->first] = obj;
         }

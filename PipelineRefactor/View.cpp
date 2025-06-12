@@ -87,7 +87,7 @@ void View::init(Callbacks *callbacks,map<string,util::PolygonMesh<VertexAttrib>>
     // pipeline = new pipeline::PBRShadowVolumePipeline();
     // reinterpret_cast<pipeline::PBRShadowVolumePipeline*>(pipeline)->init(meshes, projection);
     pipeline = new pipeline::TexturedPBRSVPipeline();
-    reinterpret_cast<pipeline::TexturedPBRSVPipeline*>(pipeline)->init(meshes, projection);
+    reinterpret_cast<pipeline::TexturedPBRSVPipeline*>(pipeline)->init(meshes, projection, textureIdMap);
     // pipeline = new pipeline::TexturedPBRPipeline();
     // reinterpret_cast<pipeline::TexturedPBRPipeline*>(pipeline)->init(meshes, projection, textureIdMap);
     // pipeline = new pipeline::BasicPBRPipeline();
