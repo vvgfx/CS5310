@@ -31,6 +31,10 @@ namespace pipeline
          */
         // virtual void init()=0; // Maybe this is too specific and doesnt need to be in the base class?
 
+        /**
+         * Update the projection matrix. This is called when the window is resized.
+         */
+        virtual void updateProjection(glm::mat4& newProjection)=0;
     };
 
 }

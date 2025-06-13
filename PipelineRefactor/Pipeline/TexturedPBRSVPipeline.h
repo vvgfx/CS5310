@@ -41,6 +41,7 @@ namespace pipeline
         inline void shadowStencilPass(sgraph::IScenegraph *scenegraph, glm::mat4 &viewMat, int lightIndex);
         inline void renderObjectPass(sgraph::IScenegraph *scenegraph, glm::mat4 &viewMat, int lightIndex);
         inline void ambientPass(sgraph::IScenegraph *scenegraph, glm::mat4 &viewMat);
+        inline void updateProjection(glm::mat4& newProjection);
 
     private:
         util::ShaderProgram renderProgram;
@@ -285,6 +286,10 @@ namespace pipeline
 
         modelview.pop();
         renderProgram.disable();
+    }
+    void TexturedPBRSVPipeline::updateProjection(glm::mat4& newProjection)
+    {
+        projection = glm::mat4(newProjection);
     }
 }
 

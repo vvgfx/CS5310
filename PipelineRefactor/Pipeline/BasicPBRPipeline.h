@@ -37,6 +37,7 @@ namespace pipeline
         inline void drawFrame(sgraph::IScenegraph *scenegraph, glm::mat4 &viewMat);
         inline void initLights(sgraph::IScenegraph *scenegraph);
         inline void initShaderVars();
+        inline void updateProjection(glm::mat4& newProjection);
 
     private:
         util::ShaderProgram shaderProgram;
@@ -159,6 +160,11 @@ namespace pipeline
             ll.spotAngle = shaderLocations.getLocation(name.str() + ".spotAngleCosine");
             lightLocations.push_back(ll);
         }
+    }
+
+    void BasicPBRPipeline::updateProjection(glm::mat4& newProjection)
+    {
+        projection = glm::mat4(newProjection);
     }
 
 }
