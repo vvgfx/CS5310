@@ -1,21 +1,21 @@
-## This Repo contains all the work I've done as part of exploring computer graphics.
+## This Repo contains a rendering engine.
 
-It contains a base software renderer with the following features:
+It has the following features:
 - Text parser - 3d worlds can be built by creating a text file and passing it as an argument to the program. Sample text files are provided in the scenegraphmodels folder
 - Hierarchial scenegraphs - Tree representation of the 3d world. This is by parsing text files. These files can be passed as an argument to the program.
 - Dynamic transformation - Simple transformations at runtime such as rotations, translations and scales can be done wrt time and some samples are provided in the included text file.
+- Physically based rendering - PBR workflow based on Epic Game's "Real Shading in Unreal Engine 4" SIGGRAPH paper.
 
 
-Each folder contains different features I've implemented on top of the base software renderer. Some of them are:
+Each pipeline contains different features I've implemented on top of the base software renderer. Some of them are:
 - Shadow volumes - Each object casts shadows. This is done by stencil shadow volumes with blending between different light sources.
 - Normal maps - Support for normal maps using bump-mapping.
 
 ### To-do list:
 
-- Physically based shading.
 - Importance sampling for image based lighting.
 - MSAA.
-- Deferred rendering.
+- Deferred rendering / clustered forward rendering.
 
 (This is not exhaustive)
 
