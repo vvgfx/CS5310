@@ -26,6 +26,9 @@ Each pipeline contains different features I've implemented on top of the base so
 - Make utility
 
 
+### Author's blog post
+https://vv-22.github.io/rendering-with-opengl
+
 
 
 ### References:
