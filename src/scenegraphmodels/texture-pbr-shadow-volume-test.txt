@@ -32,11 +32,11 @@ spot-angle 20
 end-light
 
 #textures
-image box-base textures/metal2_albedo.ppm
-image box-normal textures/metal2_normal.ppm
-image box-metallic textures/metal2_metallic.ppm
-image box-roughness textures/metal2_roughness.ppm
-image box-ao textures/metal2_ao.ppm
+image sphere-base textures/metal2_albedo.ppm
+image sphere-normal textures/metal2_normal.ppm
+image sphere-metallic textures/metal2_metallic.ppm
+image sphere-roughness textures/metal2_roughness.ppm
+image sphere-ao textures/metal2_ao.ppm
 
 image ground-base textures/ground_albedo.ppm
 image ground-normal textures/ground_normal.ppm
@@ -44,11 +44,11 @@ image ground-metallic textures/ground_metallic.ppm
 image ground-roughness textures/ground_roughness.ppm
 image ground-ao textures/ground_ao.ppm
 
-image sphere-base textures/metal_albedo.ppm
-image sphere-normal textures/metal_normal.ppm
-image sphere-metallic textures/metal_metallic.ppm
-image sphere-roughness textures/metal_roughness.ppm
-image sphere-ao textures/metal_ao.ppm
+image box-base textures/metal_albedo.ppm
+image box-normal textures/metal_normal.ppm
+image box-metallic textures/metal_metallic.ppm
+image box-roughness textures/metal_roughness.ppm
+image box-ao textures/metal_ao.ppm
 
 #the root
 group root root

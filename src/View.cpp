@@ -42,7 +42,7 @@ void View::init(Callbacks *callbacks,map<string,util::PolygonMesh<VertexAttrib>>
     glfwWindowHint(GLFW_DEPTH_BITS, 24);   // For depth testing
     glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE);  // Double buffering
 
-    window = glfwCreateWindow(1280, 720, "Software Renderer", NULL, NULL);
+    window = glfwCreateWindow(1280, 720, "Rendering Engine", NULL, NULL);
     if (!window)
     {
         glfwTerminate();

@@ -89,6 +89,13 @@ namespace sgraph {
      */
     virtual vector<util::Light> getLights()=0;
 
+    protected:
+    /**
+     * The name given to this node
+     * 
+     * Note: Moving this to the parent because I expect all Nodes to have a name now.
+     */
+    string name;
 };
 }
 

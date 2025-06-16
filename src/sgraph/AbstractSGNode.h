@@ -15,11 +15,8 @@ namespace sgraph
  * \author Amit Shesh
  */
   class AbstractSGNode : public SGNode {
-    /**
-     * The name given to this node
-     */
+    
   protected:
-    string name;
     /**
      * The parent of this node. Each node except the root has a parent. The root's parent is null
      */
