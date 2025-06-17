@@ -61,7 +61,7 @@ public:
         
     };
     
-    private: 
+    protected: 
     void initLightShaderVars();
     void rotate();
     void computeTangents(util::PolygonMesh<VertexAttrib>& mesh);

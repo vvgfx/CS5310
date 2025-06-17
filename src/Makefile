@@ -1,9 +1,9 @@
-OBJS = Scenegraphs.o View.o Controller.o Model.o
+OBJS = RenderingEngine.o View.o Controller.o Model.o GUIView.o
 INCLUDES = -I../include
 LIBS = -L../lib
 LDFLAGS = -lglad -lglfw3
 CFLAGS = -g -std=c++11
-PROGRAM = Pipeline
+PROGRAM = Rendering_Engine
 
 
 ifeq ($(OS),Windows_NT)     # is Windows_NT on XP, 2000, 7, Vista, 10...
@@ -15,11 +15,11 @@ else ifeq ($(shell uname -s),Darwin)     # is MACOSX
 	COMPILER = clang++
 endif
 
-Pipeline: $(OBJS)
+Rendering_Engine: $(OBJS)
 	$(COMPILER) -o $(PROGRAM) $(OBJS) $(LIBS) $(LDFLAGS)
 
-Scenegraphs.o: Scenegraphs.cpp
-	$(COMPILER) $(INCLUDES) $(CFLAGS) -c Scenegraphs.cpp
+RenderingEngine.o: RenderingEngine.cpp
+	$(COMPILER) $(INCLUDES) $(CFLAGS) -c RenderingEngine.cpp
 
 View.o: View.cpp View.h
 	$(COMPILER) $(INCLUDES) $(CFLAGS) -c View.cpp	
@@ -29,6 +29,9 @@ Controller.o: Controller.cpp Controller.h
 
 Model.o: Model.cpp Model.h
 	$(COMPILER) $(INCLUDES) $(CFLAGS) -c Model.cpp		
+
+GUIView.o: GUIView.cpp GUIView.h
+	$(COMPILER) $(INCLUDES) $(CFLAGS) -c GUIView.cpp		
 	
 RM = rm	-f
 ifeq ($(OS),Windows_NT)     # is Windows_NT on XP, 2000, 7, Vista, 10...
