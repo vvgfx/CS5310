@@ -6,21 +6,23 @@
 #include "GUIView.h"
 #include "Model.h"
 #include "Controller.h"
+#include "GUIController.h"
 #include <iostream>
 
 int main(int argc,char *argv[]) {
     std::vector<std::string> args(argv, argv + argc);
-    // cout<<"reached here: "<<argc<<endl;
-    Model model;
-    GUIView view;
+    Model* model = new Model();
+    GUIView* view = new GUIView();
     if(argc == 1)
     {
-        Controller controller(model,view, "");
+        GUIController controller(model,view, "");
+        controller.initScenegraph();
         controller.run();
     }
     else
     {
-        Controller controller(model,view, args[1]);
+        GUIController controller(model,view, args[1]);
+        controller.initScenegraph();
         controller.run();
     }
 

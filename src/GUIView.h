@@ -27,29 +27,29 @@ class GUIView : public View
 public:
     GUIView();
     ~GUIView();
-    void init(Callbacks* callbacks,map<string,util::PolygonMesh<VertexAttrib>>& meshes, map<string, util::TextureImage*> textureMap);
-    void Resize();
-    void display(sgraph::IScenegraph *scenegraph);
-    bool shouldWindowClose();
-    void closeWindow();
-    void updateTrackball(float deltaX, float deltaY);
-    void resetTrackball();
-    void initScenegraphNodes(sgraph::IScenegraph *scenegraph);
-    void changePropellerSpeed(int num);
-    void rotatePropeller(string nodename, float time);
-    void startRotation();
-    void moveDrone(int direction);
-    void setDroneOrientation(glm::mat4 resetMatrix);
-    void rotateDrone(int yawDir, int pitchDir);
-    void changeCameraType(int type);
-    void initLights(sgraph::IScenegraph *scenegraph);
-    void switchShaders();
-    void initTextures(map<string, util::TextureImage*>& textureMap);
+    void init(Callbacks* callbacks,map<string,util::PolygonMesh<VertexAttrib>>& meshes, map<string, util::TextureImage*> textureMap) override;
+    void Resize() override;
+    void display(sgraph::IScenegraph *scenegraph) override;
+    bool shouldWindowClose() override;
+    void closeWindow() override;
+    void updateTrackball(float deltaX, float deltaY) override;
+    void resetTrackball() override;
+    void initScenegraphNodes(sgraph::IScenegraph *scenegraph) override;
+    void changePropellerSpeed(int num) override;
+    void rotatePropeller(string nodename, float time) override;
+    void startRotation() override;
+    void moveDrone(int direction) override;
+    void setDroneOrientation(glm::mat4 resetMatrix) override;
+    void rotateDrone(int yawDir, int pitchDir) override;
+    void changeCameraType(int type) override;
+    void initLights(sgraph::IScenegraph *scenegraph) override;
+    void switchShaders() override;
+    void initTextures(map<string, util::TextureImage*>& textureMap) override;
     
     protected: 
-    void initLightShaderVars();
-    void rotate();
-    void computeTangents(util::PolygonMesh<VertexAttrib>& mesh);
+    void initLightShaderVars() override;
+    void rotate() override;
+    void computeTangents(util::PolygonMesh<VertexAttrib>& mesh) override;
 };
 
 #endif

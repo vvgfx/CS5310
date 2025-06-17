@@ -30,6 +30,7 @@ View::~View(){
 
 void View::init(Callbacks *callbacks,map<string,util::PolygonMesh<VertexAttrib>>& meshes, map<string, util::TextureImage*> texMap)
 {
+    cout<<"Parent view init"<<endl;
     if (!glfwInit())
         exit(EXIT_FAILURE);
 
@@ -84,10 +85,10 @@ void View::init(Callbacks *callbacks,map<string,util::PolygonMesh<VertexAttrib>>
     glfwGetFramebufferSize(window,&window_width,&window_height);
     projection = glm::perspective(glm::radians(60.0f),(float)window_width/window_height,0.1f,10000.0f);
     #pragma region Pipeline init
-    // pipeline = new pipeline::PBRShadowVolumePipeline();
-    // reinterpret_cast<pipeline::PBRShadowVolumePipeline*>(pipeline)->init(meshes, projection);
-    pipeline = new pipeline::TexturedPBRSVPipeline();
-    reinterpret_cast<pipeline::TexturedPBRSVPipeline*>(pipeline)->init(meshes, projection, textureIdMap);
+    pipeline = new pipeline::PBRShadowVolumePipeline();
+    reinterpret_cast<pipeline::PBRShadowVolumePipeline*>(pipeline)->init(meshes, projection);
+    // pipeline = new pipeline::TexturedPBRSVPipeline();
+    // reinterpret_cast<pipeline::TexturedPBRSVPipeline*>(pipeline)->init(meshes, projection, textureIdMap);
     // pipeline = new pipeline::TexturedPBRPipeline();
     // reinterpret_cast<pipeline::TexturedPBRPipeline*>(pipeline)->init(meshes, projection, textureIdMap);
     // pipeline = new pipeline::BasicPBRPipeline();

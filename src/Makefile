@@ -1,4 +1,4 @@
-OBJS = RenderingEngine.o View.o Controller.o Model.o GUIView.o
+OBJS = RenderingEngine.o View.o Controller.o Model.o GUIView.o GUIController.o
 INCLUDES = -I../include
 LIBS = -L../lib
 LDFLAGS = -lglad -lglfw3
@@ -26,6 +26,9 @@ View.o: View.cpp View.h
 
 Controller.o: Controller.cpp Controller.h
 	$(COMPILER) $(INCLUDES) $(CFLAGS) -c Controller.cpp	
+
+GUIController.o: GUIController.cpp GUIController.h
+	$(COMPILER) $(INCLUDES) $(CFLAGS) -c GUIController.cpp	
 
 Model.o: Model.cpp Model.h
 	$(COMPILER) $(INCLUDES) $(CFLAGS) -c Model.cpp		

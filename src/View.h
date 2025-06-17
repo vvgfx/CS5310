@@ -26,24 +26,24 @@ class View
 public:
     View();
     ~View();
-    void init(Callbacks* callbacks,map<string,util::PolygonMesh<VertexAttrib>>& meshes, map<string, util::TextureImage*> textureMap);
-    void Resize();
-    void display(sgraph::IScenegraph *scenegraph);
-    bool shouldWindowClose();
-    void closeWindow();
-    void updateTrackball(float deltaX, float deltaY);
-    void resetTrackball();
-    void initScenegraphNodes(sgraph::IScenegraph *scenegraph);
-    void changePropellerSpeed(int num);
-    void rotatePropeller(string nodename, float time);
-    void startRotation();
-    void moveDrone(int direction);
-    void setDroneOrientation(glm::mat4 resetMatrix);
-    void rotateDrone(int yawDir, int pitchDir);
-    void changeCameraType(int type);
-    void initLights(sgraph::IScenegraph *scenegraph);
-    void switchShaders();
-    void initTextures(map<string, util::TextureImage*>& textureMap);
+    virtual void init(Callbacks* callbacks,map<string,util::PolygonMesh<VertexAttrib>>& meshes, map<string, util::TextureImage*> textureMap);
+    virtual void Resize();
+    virtual void display(sgraph::IScenegraph *scenegraph);
+    virtual bool shouldWindowClose();
+    virtual void closeWindow();
+    virtual void updateTrackball(float deltaX, float deltaY);
+    virtual void resetTrackball();
+    virtual void initScenegraphNodes(sgraph::IScenegraph *scenegraph);
+    virtual void changePropellerSpeed(int num);
+    virtual void rotatePropeller(string nodename, float time);
+    virtual void startRotation();
+    virtual void moveDrone(int direction);
+    virtual void setDroneOrientation(glm::mat4 resetMatrix);
+    virtual void rotateDrone(int yawDir, int pitchDir);
+    virtual void changeCameraType(int type);
+    virtual void initLights(sgraph::IScenegraph *scenegraph);
+    virtual void switchShaders();
+    virtual void initTextures(map<string, util::TextureImage*>& textureMap);
     float xDelta, yDelta, zDelta;
     
     //This class saves the shader locations of all the light inputs.
@@ -62,9 +62,9 @@ public:
     };
     
     protected: 
-    void initLightShaderVars();
-    void rotate();
-    void computeTangents(util::PolygonMesh<VertexAttrib>& mesh);
+    virtual void initLightShaderVars();
+    virtual void rotate();
+    virtual void computeTangents(util::PolygonMesh<VertexAttrib>& mesh);
     GLFWwindow* window;
     pipeline::IPipeline* pipeline;
     util::ShaderProgram renderProgram;

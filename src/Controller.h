@@ -8,7 +8,7 @@
 class Controller: public Callbacks
 {
 public:
-    Controller(Model& m,View& v, string textFile);
+    Controller(Model* m,View* v, string textFile);
     ~Controller();
     void run();
 
@@ -18,10 +18,11 @@ public:
     virtual void error_callback(int error, const char* description);
     virtual void onMouseInput(int button, int action, int mods);
     virtual void onCursorMove(double newXPos, double newYPos);
-private:
-    void initScenegraph();
-    View view;
-    Model model;
+    virtual void initScenegraph();
+
+protected:
+    View* view;
+    Model* model;
     bool mousePressed = false;
     double oldXPos, oldYPos, newXPos, newYPos;
     string textfile;
