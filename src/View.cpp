@@ -78,7 +78,7 @@ void View::init(Callbacks *callbacks,map<string,util::PolygonMesh<VertexAttrib>>
 
     glfwMakeContextCurrent(window);
     gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
-    glfwSwapInterval(1);
+    glfwSwapInterval(1); // VSync!!!
 
     initTextures(texMap);
     int window_width,window_height;

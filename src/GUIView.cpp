@@ -19,6 +19,16 @@ using namespace std;
 #include "Pipeline/PBRShadowVolumePipeline.h"
 #include "Pipeline/TexturedPBRSVPipeline.h"
 
+
+#ifndef IMGUI_DEFINE_MATH_OPERATORS
+#define IMGUI_DEFINE_MATH_OPERATORS
+#endif // IMGUI_DEFINE_MATH_OPERATORS
+
+// Imgui required files.
+#include "imgui.h"
+#include "backends/imgui_impl_glfw.h"
+#include "backends/imgui_impl_opengl3.h"
+
 GUIView::GUIView()
 {
 }
@@ -29,8 +39,17 @@ GUIView::~GUIView()
 
 void GUIView::init(Callbacks *callbacks, map<string, util::PolygonMesh<VertexAttrib>> &meshes, map<string, util::TextureImage *> texMap)
 {
-    cout<<"GUI View init"<<endl;
     View::init(callbacks, meshes, texMap);
+    cout<<"Setting up ImGUI initialization"<<endl;
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO();
+    (void)io; // suppress compiler warnings
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // enable keyboard navigation
+
+    ImGui::StyleColorsDark(); // dark mode
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplOpenGL3_Init("#version 330");
 }
 
 void GUIView::initTextures(map<string, util::TextureImage *> &textureMap)
@@ -60,7 +79,76 @@ void GUIView::resetTrackball()
 
 void GUIView::display(sgraph::IScenegraph *scenegraph)
 {
-    View::display(scenegraph);
+    #pragma region lightSetup
+    // setting up the view matrices beforehand because all render calculations are going to be on the view coordinate system.
+
+    glm::mat4 viewMat(1.0f);
+    if(cameraType == 1)
+        viewMat = viewMat * glm::lookAt(glm::vec3(0.0f, 0.0f, 100.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    else if(cameraType == 2)
+        viewMat = viewMat * glm::lookAt(glm::vec3(0.0f, 150.0f, 300.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    else if(cameraType == 3)
+    {
+            //Drone camera. Need to find a point that is forward(for the lookAt), find the drone co-ordinates(for the eye) and the up-direction for the up-axis
+            //drone co-ordinates seem simple enough. I can just use the transform matrix with a translation of 20 in the z-axis
+            //target = same as eye, the translation must be higher, so 25?
+            //for the up-axis, I can convert the y axis to vec4, pre-multiply by the transformation matrix, then convert back to vec3.
+            //This seems super hacky though, is there an alternate way that's easier?
+            
+            glm::mat4 droneTransformMatrix = dynamic_cast<sgraph::DynamicTransform*>(cachedNodes["drone-movement"])->getTransformMatrix();
+            glm::vec3 droneEye = droneTransformMatrix * glm::vec4(0.0f, 0.0f, 20.0f, 1.0f); // setting 1 as the homogenous coordinate
+            // Implicit typecasts work!!!!
+            glm::vec3 droneLookAt = droneTransformMatrix * glm::vec4(0.0f, 0.0f, 25.0f, 1.0f);
+            glm::vec3 droneUp = droneTransformMatrix * glm::vec4(0.0f, 1.0f, 0.0f, 0.0f);//homogenous coordinate is 0.0f as the vector is an axis, not a point.
+            
+            viewMat = viewMat * glm::lookAt(droneEye, droneLookAt, droneUp);        
+    }
+    #pragma endregion
+
+
+    #pragma region pipeline
+
+    pipeline->drawFrame(scenegraph, viewMat);
+
+    #pragma endregion
+    
+
+    // Draw GUI here
+
+    ImGUIView();
+
+    
+    
+    
+    glFlush();
+    glfwSwapBuffers(window);
+    glfwPollEvents();
+    frames++;
+    double currenttime = glfwGetTime();
+    if ((currenttime-time)>1.0) {
+        printf("Framerate: %2.0f\r",frames/(currenttime-time));
+        frames = 0;
+        time = currenttime;
+    }
+}
+
+void GUIView::ImGUIView()
+{
+    ImGuiIO& io = ImGui::GetIO(); (void)io; // change this later
+
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+
+    ImGui::Begin("GUI Test!");
+
+    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+    ImGui::End();
+
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    
+
 }
 
 void GUIView::initLights(sgraph::IScenegraph *scenegraph)
@@ -85,6 +173,9 @@ void GUIView::switchShaders()
 
 void GUIView::closeWindow()
 {
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
     View::closeWindow();
 }
 

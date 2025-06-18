@@ -59,8 +59,6 @@ void GUIController::run()
     //Save the nodes required for transformation when running!
     view->initScenegraphNodes(scenegraph);
     //Set the initial orientation of the drone!
-    glm::mat4 droneOrientation  = glm::translate(glm::mat4(1.0f), glm::vec3(-100.0f, 100.0f, 150.0f));
-    view->setDroneOrientation(droneOrientation);
     while (!view->shouldWindowClose()) {
         view->display(scenegraph);
     }

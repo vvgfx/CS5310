@@ -45,6 +45,7 @@ public:
     void initLights(sgraph::IScenegraph *scenegraph) override;
     void switchShaders() override;
     void initTextures(map<string, util::TextureImage*>& textureMap) override;
+    void ImGUIView();
     
     protected: 
     void initLightShaderVars() override;
