@@ -32,7 +32,8 @@ namespace sgraph
          *
          * @param mv a reference to modelview stack that will be used to convert light to the view co-ordinate system
          */
-        NodeDetailsRenderer() {   
+        NodeDetailsRenderer()
+        {
         }
 
         /**
@@ -42,19 +43,24 @@ namespace sgraph
          */
         void visitGroupNode(GroupNode *groupNode)
         {
-            ImGui::Text("Group Node");
-            
+            if (ImGui::CollapsingHeader("Group Node", ImGuiTreeNodeFlags_DefaultOpen))
+            {
+            }
+            drawLightHeader(groupNode);
         }
 
         /**
          * @brief get lights attached to this leaf(if any)
-         * 
+         *
          *
          * @param leafNode
          */
         void visitLeafNode(LeafNode *leafNode)
         {
-            ImGui::Text("Leaf Node");
+            if (ImGui::CollapsingHeader("Leaf Node", ImGuiTreeNodeFlags_DefaultOpen))
+            {
+            }
+            drawLightHeader(leafNode);
         }
 
         /**
@@ -64,7 +70,10 @@ namespace sgraph
          */
         void visitParentNode(ParentSGNode *parentNode)
         {
-           ImGui::Text("Parent Node");
+            if (ImGui::CollapsingHeader("Parent Node", ImGuiTreeNodeFlags_DefaultOpen))
+            {
+            }
+            drawLightHeader(parentNode);
         }
 
         /**
@@ -74,7 +83,10 @@ namespace sgraph
          */
         void visitTransformNode(TransformNode *transformNode)
         {
-            ImGui::Text("Transform Node");
+            if (ImGui::CollapsingHeader("Transform Node", ImGuiTreeNodeFlags_DefaultOpen))
+            {
+            }
+            drawLightHeader(transformNode);
         }
 
         /**
@@ -86,11 +98,13 @@ namespace sgraph
          */
         void visitScaleTransform(ScaleTransform *scaleNode)
         {
-            ImGui::Text("Scale Node");
-
-            glm::vec3 scale = scaleNode->getScale();
-            float vec3f[3] = {scale.x , scale.y, scale.z};
-            bool changed = ImGui::DragFloat3("Scale", vec3f);
+            if (ImGui::CollapsingHeader("Scale Node", ImGuiTreeNodeFlags_DefaultOpen))
+            {
+                glm::vec3 scale = scaleNode->getScale();
+                float vec3f[3] = {scale.x, scale.y, scale.z};
+                bool changed = ImGui::DragFloat3("Scale", vec3f);
+            }
+            drawLightHeader(scaleNode);
         }
 
         /**
@@ -102,32 +116,73 @@ namespace sgraph
          */
         void visitTranslateTransform(TranslateTransform *translateNode)
         {
-            ImGui::Text("Translate Node");
-
-            glm::vec3 translate = translateNode->getTranslate();
-            float vec3f[3] = {translate.x , translate.y, translate.z};
-            bool changed = ImGui::DragFloat3("Translation", vec3f);
+            if (ImGui::CollapsingHeader("Translate Node", ImGuiTreeNodeFlags_DefaultOpen))
+            {
+                glm::vec3 translate = translateNode->getTranslate();
+                float vec3f[3] = {translate.x, translate.y, translate.z};
+                bool changed = ImGui::DragFloat3("Translate", vec3f);
+            }
+            drawLightHeader(translateNode);
         }
 
         void visitRotateTransform(RotateTransform *rotateNode)
         {
-            ImGui::Text("Rotate Node");
+            if (ImGui::CollapsingHeader("Rotate Node", ImGuiTreeNodeFlags_DefaultOpen))
+            {
 
-
-            glm::vec3 rotation = rotateNode->getRotationAxis();
-            float angle = glm::degrees(rotateNode->getAngleInRadians());
-            float vec3f[3] = {rotation.x , rotation.y, rotation.z};
-            bool changed = ImGui::DragFloat3("Rotation", vec3f);
-            ImGui::InputFloat("Value", &angle, 0.1f, 1.0f);
+                glm::vec3 rotation = rotateNode->getRotationAxis();
+                float angle = glm::degrees(rotateNode->getAngleInRadians());
+                float vec3f[3] = {rotation.x, rotation.y, rotation.z};
+                bool changed = ImGui::DragFloat3("Rotate", vec3f);
+                ImGui::InputFloat("Value", &angle, 0.1f, 1.0f);
+            }
+            drawLightHeader(rotateNode);
         }
 
         void visitDynamicTransform(DynamicTransform *dynamicTransformNode)
         {
-            ImGui::Text("Dynamic Node");
+            if (ImGui::CollapsingHeader("Dynamic Node", ImGuiTreeNodeFlags_DefaultOpen))
+            {
+            }
+            drawLightHeader(dynamicTransformNode);
+        }
+
+        void drawLightHeader(SGNode *node)
+        {
+            if (ImGui::CollapsingHeader("Lights", ImGuiTreeNodeFlags_DefaultOpen))
+            {
+                vector<util::Light> lights = node->getLights(); // Reference to avoid copy
+
+                for (int i = 0; i < lights.size(); i++)
+                {
+                    ImGui::PushID(i); // Use index as unique ID instead of string labels
+
+                    // Work directly with light data - no intermediate variables
+                    glm::vec3 color = lights[i].getColor();
+                    glm::vec4 spotDirection = lights[i].getSpotDirection();
+                    glm::vec4 position = lights[i].getPosition();
+                    float spotAngle = lights[i].getSpotCutoff();
+
+                    // Use direct references and simple labels
+                    if (ImGui::DragFloat3("Color", &color.x))
+                    {}
+
+                    if (ImGui::DragFloat3("Spot Direction", &spotDirection.x))
+                    {}
+
+                    if (ImGui::DragFloat3("Position", &position.x))
+                    {}
+
+                    if (ImGui::InputFloat("Angle", &spotAngle))
+                    {}
+
+                    ImGui::PopID();
+                    ImGui::Separator();
+                }
+            }
         }
 
     private:
-
     };
 }
 
