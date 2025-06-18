@@ -11,6 +11,8 @@ using namespace std;
 #include "sgraph/ShadowRenderer.h"
 #include "sgraph/DepthRenderer.h"
 #include "sgraph/AmbientRenderer.h"
+#include "sgraph/ScenegraphGUIRenderer.h"
+#include "sgraph/NodeDetailsRenderer.h"
 #include "VertexAttrib.h"
 #include "Pipeline/ShadowVolumePipeline.h"
 #include "Pipeline/ShadowVolumeBumpMappingPipeline.h"
@@ -18,11 +20,6 @@ using namespace std;
 #include "Pipeline/TexturedPBRPipeline.h"
 #include "Pipeline/PBRShadowVolumePipeline.h"
 #include "Pipeline/TexturedPBRSVPipeline.h"
-
-
-#ifndef IMGUI_DEFINE_MATH_OPERATORS
-#define IMGUI_DEFINE_MATH_OPERATORS
-#endif // IMGUI_DEFINE_MATH_OPERATORS
 
 // Imgui required files.
 #include "imgui.h"
@@ -50,6 +47,9 @@ void GUIView::init(Callbacks *callbacks, map<string, util::PolygonMesh<VertexAtt
     ImGui::StyleColorsDark(); // dark mode
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 330");
+
+    GuiVisitor = new sgraph::ScenegraphGUIRenderer();
+    NodeRenderer = new sgraph::NodeDetailsRenderer();
 }
 
 void GUIView::initTextures(map<string, util::TextureImage *> &textureMap)
@@ -115,7 +115,7 @@ void GUIView::display(sgraph::IScenegraph *scenegraph)
 
     // Draw GUI here
 
-    ImGUIView();
+    ImGUIView(scenegraph);
 
     
     
@@ -132,7 +132,7 @@ void GUIView::display(sgraph::IScenegraph *scenegraph)
     }
 }
 
-void GUIView::ImGUIView()
+void GUIView::ImGUIView(sgraph::IScenegraph *scenegraph)
 {
     ImGuiIO& io = ImGui::GetIO(); (void)io; // change this later
 
@@ -144,10 +144,30 @@ void GUIView::ImGUIView()
 
     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
     ImGui::End();
+    GUIScenegraph(scenegraph);
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-    
+}
+
+void GUIView::GUIScenegraph(sgraph::IScenegraph *scenegraph)
+{
+
+    // Draw the scenegraph on the left
+    ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
+    ImGui::SetNextWindowSize(ImVec2(ImGui::GetIO().DisplaySize.x / 8 , ImGui::GetIO().DisplaySize.y), ImGuiCond_Always);
+    ImGui::Begin("Scenegraph");
+    scenegraph->getRoot()->accept(GuiVisitor);
+    ImGui::End();
+
+    // Draw the Node details on the right
+    sgraph::SGNode* selectedNode = reinterpret_cast<sgraph::ScenegraphGUIRenderer*>(GuiVisitor)->getSelectedNode();
+    ImGui::SetNextWindowPos(ImVec2(ImGui::GetIO().DisplaySize.x  * 5 / 6, 0), ImGuiCond_Always);
+    ImGui::SetNextWindowSize(ImVec2(ImGui::GetIO().DisplaySize.x / 6 , ImGui::GetIO().DisplaySize.y), ImGuiCond_Always);
+    ImGui::Begin("Node Details");
+    if(selectedNode)
+    selectedNode->accept(NodeRenderer);
+    ImGui::End();
 
 }
 

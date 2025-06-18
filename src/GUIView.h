@@ -45,12 +45,15 @@ public:
     void initLights(sgraph::IScenegraph *scenegraph) override;
     void switchShaders() override;
     void initTextures(map<string, util::TextureImage*>& textureMap) override;
-    void ImGUIView();
+    void ImGUIView(sgraph::IScenegraph *scenegraph);
+    void GUIScenegraph(sgraph::IScenegraph *scenegraph);
     
     protected: 
     void initLightShaderVars() override;
     void rotate() override;
     void computeTangents(util::PolygonMesh<VertexAttrib>& mesh) override;
+    sgraph::SGNodeVisitor* GuiVisitor;
+    sgraph::SGNodeVisitor* NodeRenderer;
 };
 
 #endif

@@ -130,7 +130,7 @@ void Controller::onkey(int key, int scancode, int action, int mods)
 
 void Controller::onMouseInput(int button, int action, int mods)
 {
-    if(button != GLFW_MOUSE_BUTTON_LEFT)
+    if(button != GLFW_MOUSE_BUTTON_RIGHT)
         return;
     mousePressed = action == GLFW_PRESS;
     string mouseStatus = mousePressed ? "mouse pressed!" : "mouse released!";
