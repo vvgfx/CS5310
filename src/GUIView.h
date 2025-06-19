@@ -19,6 +19,8 @@
 // #include "TextureImage.h"
 // #include <stack>
 // #include "Pipeline/ClassicPipeline.h"
+#include "sgraph/Command/ICommand.h"
+#include "GUIController.h"
 using namespace std;
 
 
@@ -45,8 +47,12 @@ public:
     void initLights(sgraph::IScenegraph *scenegraph) override;
     void switchShaders() override;
     void initTextures(map<string, util::TextureImage*>& textureMap) override;
+
+    // GUI stuff
     void ImGUIView(sgraph::IScenegraph *scenegraph);
     void GUIScenegraph(sgraph::IScenegraph *scenegraph);
+    void addToCommandQueue(command::ICommand* command);
+    void setControllerReference(GUIController* controller); // Ask for solutions next time :)
     
     protected: 
     void initLightShaderVars() override;
@@ -54,6 +60,8 @@ public:
     void computeTangents(util::PolygonMesh<VertexAttrib>& mesh) override;
     sgraph::SGNodeVisitor* GuiVisitor;
     sgraph::SGNodeVisitor* NodeRenderer;
+
+    GUIController* controller;
 };
 
 #endif

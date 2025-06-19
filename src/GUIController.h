@@ -4,6 +4,7 @@
 #include "View.h"
 #include "Model.h"
 #include "Controller.h"
+#include "sgraph/Command/ICommand.h"
 
 class GUIController : public Controller
 {
@@ -19,6 +20,8 @@ public:
     virtual void onMouseInput(int button, int action, int mods);
     virtual void onCursorMove(double newXPos, double newYPos);
     void initScenegraph() override;
+
+    virtual void addToCommandQueue(command::ICommand* command);
 
 protected:
 };

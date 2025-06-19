@@ -9,6 +9,8 @@
 #include "ScaleTransform.h"
 #include "TranslateTransform.h"
 #include "DynamicTransform.h"
+#include "Command/ScaleCommand.h"
+#include "../GUIView.h"
 #include <ShaderProgram.h>
 #include <ShaderLocationsVault.h>
 #include "ObjectInstance.h"
@@ -32,7 +34,7 @@ namespace sgraph
          *
          * @param mv a reference to modelview stack that will be used to convert light to the view co-ordinate system
          */
-        NodeDetailsRenderer()
+        NodeDetailsRenderer(GUIView* v) : view(v)
         {
         }
 
@@ -102,7 +104,13 @@ namespace sgraph
             {
                 glm::vec3 scale = scaleNode->getScale();
                 float vec3f[3] = {scale.x, scale.y, scale.z};
-                bool changed = ImGui::DragFloat3("Scale", vec3f);
+                if(ImGui::DragFloat3("Scale", vec3f))
+                {
+                    // this runs only when a value is changed
+                    cout<<"value changed in NodeDetailsRenderer"<<endl;
+                    command::ScaleCommand* scaleCommand = new command::ScaleCommand(scaleNode->getName(), vec3f[0], vec3f[1], vec3f[2]);
+                    view->addToCommandQueue(scaleCommand);
+                }
             }
             drawLightHeader(scaleNode);
         }
@@ -151,19 +159,15 @@ namespace sgraph
         {
             if (ImGui::CollapsingHeader("Lights", ImGuiTreeNodeFlags_DefaultOpen))
             {
-                vector<util::Light> lights = node->getLights(); // Reference to avoid copy
+                vector<util::Light> lights = node->getLights();
 
                 for (int i = 0; i < lights.size(); i++)
                 {
-                    ImGui::PushID(i); // Use index as unique ID instead of string labels
-
-                    // Work directly with light data - no intermediate variables
+                    ImGui::PushID(i); // Using index as unique ID
                     glm::vec3 color = lights[i].getColor();
                     glm::vec4 spotDirection = lights[i].getSpotDirection();
                     glm::vec4 position = lights[i].getPosition();
                     float spotAngle = lights[i].getSpotCutoff();
-
-                    // Use direct references and simple labels
                     if (ImGui::DragFloat3("Color", &color.x))
                     {}
 
@@ -183,6 +187,8 @@ namespace sgraph
         }
 
     private:
+
+    GUIView* view;
     };
 }
 

@@ -140,6 +140,12 @@ namespace sgraph {
                 return this->textureMap;
             }
 
+
+            map<string, SGNode*> getNodeMap()
+            {
+                return this->nodes;
+            }
+
             // map<string, util::TextureImage*> getNormalMap()
             // {
             //     return this->normalMap;

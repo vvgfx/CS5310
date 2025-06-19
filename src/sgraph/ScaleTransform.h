@@ -43,6 +43,15 @@ namespace sgraph {
             return glm::vec3(sx,sy,sz);
         }
 
+        void updateScale(float sx, float sy, float sz)
+        {
+            this->sx = sx;
+            this->sy = sy;
+            this->sz = sz;
+            glm::mat4 transform = glm::scale(glm::mat4(1.0),glm::vec3(sx,sy,sz));
+            setTransform(transform);
+        }
+
     };
 }
 

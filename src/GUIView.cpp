@@ -49,7 +49,7 @@ void GUIView::init(Callbacks *callbacks, map<string, util::PolygonMesh<VertexAtt
     ImGui_ImplOpenGL3_Init("#version 330");
 
     GuiVisitor = new sgraph::ScenegraphGUIRenderer();
-    NodeRenderer = new sgraph::NodeDetailsRenderer();
+    NodeRenderer = new sgraph::NodeDetailsRenderer(this);
 }
 
 void GUIView::initTextures(map<string, util::TextureImage *> &textureMap)
@@ -253,4 +253,14 @@ void GUIView::rotateDrone(int yawDir, int pitchDir)
 void GUIView::changeCameraType(int cameraType)
 {
     // not supported
+}
+
+void GUIView::addToCommandQueue(command::ICommand* command)
+{
+    controller->addToCommandQueue(command);
+}
+
+void GUIView::setControllerReference(GUIController* controller)
+{
+    this->controller = controller;
 }

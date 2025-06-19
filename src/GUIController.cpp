@@ -14,6 +14,7 @@ using namespace std;
 #include "sgraph/ScenegraphExporter.h"
 #include "sgraph/ScenegraphImporter.h"
 #include "sgraph/ScenegraphDrawer.h"
+#include "GUIView.h"
 
 GUIController::GUIController(Model* m,View* v, string textfile) :
     Controller(m,v, textfile) {
@@ -38,6 +39,11 @@ void GUIController::initScenegraph() {
     map<string, util::TextureImage*> textureMap = importer.getTextureMap();
     model->saveTextureMap(textureMap);
 
+    map<string, sgraph::SGNode*> nodes = importer.getNodeMap();
+    model->saveNodes(nodes);
+
+    // ugly code, can fix later??
+    reinterpret_cast<GUIView*>(view)->setControllerReference(this);
 
     cout <<"Scenegraph made in GUIController" << endl;   
     sgraph::ScenegraphDrawer* drawer = new sgraph::ScenegraphDrawer();
@@ -60,6 +66,7 @@ void GUIController::run()
     view->initScenegraphNodes(scenegraph);
     //Set the initial orientation of the drone!
     while (!view->shouldWindowClose()) {
+        model->clearCommandQueue();
         view->display(scenegraph);
     }
     view->closeWindow();
@@ -94,4 +101,10 @@ void GUIController::dispose()
 void GUIController::error_callback(int error, const char* description)
 {
     fprintf(stderr, "Error: %s\n", description);
+}
+
+void GUIController::addToCommandQueue(command::ICommand* command)
+{
+    cout<<"controller adding to command queue"<<endl;
+    model->addToCommandQueue(command);
 }
