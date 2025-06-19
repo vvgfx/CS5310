@@ -10,6 +10,8 @@
 #include "TranslateTransform.h"
 #include "DynamicTransform.h"
 #include "Command/ScaleCommand.h"
+#include "Command/TranslateCommand.h"
+#include "Command/RotateCommand.h"
 #include "../GUIView.h"
 #include <ShaderProgram.h>
 #include <ShaderLocationsVault.h>
@@ -128,7 +130,13 @@ namespace sgraph
             {
                 glm::vec3 translate = translateNode->getTranslate();
                 float vec3f[3] = {translate.x, translate.y, translate.z};
-                bool changed = ImGui::DragFloat3("Translate", vec3f);
+                if(ImGui::DragFloat3("Translate", vec3f))
+                {
+                    // runs when value is changed
+                    cout<<"value changed in NodeDetailsRenderer"<<endl;
+                    command::TranslateCommand* translateCommand = new command::TranslateCommand(translateNode->getName(), vec3f[0], vec3f[1], vec3f[2]);
+                    view->addToCommandQueue(translateCommand);
+                }
             }
             drawLightHeader(translateNode);
         }
@@ -142,7 +150,12 @@ namespace sgraph
                 float angle = glm::degrees(rotateNode->getAngleInRadians());
                 float vec3f[3] = {rotation.x, rotation.y, rotation.z};
                 bool changed = ImGui::DragFloat3("Rotate", vec3f);
-                ImGui::InputFloat("Value", &angle, 0.1f, 1.0f);
+                bool rotChanged = ImGui::InputFloat("Value", &angle, 0.1f, 1.0f);
+                if(changed || rotChanged)
+                {
+                    command::RotateCommand* rotCommand = new command::RotateCommand(rotateNode->getName(), vec3f[0], vec3f[1], vec3f[2], glm::radians(angle));
+                    view->addToCommandQueue(rotCommand);
+                }
             }
             drawLightHeader(rotateNode);
         }
