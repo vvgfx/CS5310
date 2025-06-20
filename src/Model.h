@@ -6,7 +6,7 @@
 #include "sgraph/IScenegraph.h"
 #include <map>
 #include "TextureImage.h"
-#include "sgraph/Command/ICommand.h"
+#include "sgraph/Commands/ICommand.h"
 #include <queue>
 using namespace std;
 

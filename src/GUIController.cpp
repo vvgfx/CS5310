@@ -103,8 +103,8 @@ void GUIController::error_callback(int error, const char* description)
     fprintf(stderr, "Error: %s\n", description);
 }
 
-void GUIController::addToCommandQueue(command::ICommand* command)
+void GUIController::receiveJob(job::IJob* job)
 {
-    cout<<"controller adding to command queue"<<endl;
-    model->addToCommandQueue(command);
+    cout<<"received job in controller"<<endl;
+    job->execute(model);
 }

@@ -5,21 +5,7 @@
 #define GLFW_INCLUDE_NONE
 #endif
 #include "View.h"
-// #include <glad/glad.h>
-// #include <GLFW/glfw3.h>
-// #include <cstdio>
-// #include <ShaderGeoProgram.h> // This is for silhouettes/shadow volumes/anything that requires geometry shaders.
-// #include <ShaderProgram.h> // This is for normal rendering
-// #include "sgraph/SGNodeVisitor.h"
-// #include "ObjectInstance.h"
-// #include "PolygonMesh.h"
-// #include "VertexAttrib.h"
-// #include "Callbacks.h"
-// #include "sgraph/IScenegraph.h"
-// #include "TextureImage.h"
-// #include <stack>
-// #include "Pipeline/ClassicPipeline.h"
-#include "sgraph/Command/ICommand.h"
+#include "sgraph/Jobs/IJob.h"
 #include "GUIController.h"
 using namespace std;
 
@@ -51,7 +37,7 @@ public:
     // GUI stuff
     void ImGUIView(sgraph::IScenegraph *scenegraph);
     void GUIScenegraph(sgraph::IScenegraph *scenegraph);
-    void addToCommandQueue(command::ICommand* command);
+    void getViewJob(job::IJob* job);
     void setControllerReference(GUIController* controller); // Ask for solutions next time :)
     
     protected: 

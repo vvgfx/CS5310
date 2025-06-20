@@ -255,9 +255,9 @@ void GUIView::changeCameraType(int cameraType)
     // not supported
 }
 
-void GUIView::addToCommandQueue(command::ICommand* command)
+void GUIView::getViewJob(job::IJob* job)
 {
-    controller->addToCommandQueue(command);
+    controller->receiveJob(job);
 }
 
 void GUIView::setControllerReference(GUIController* controller)

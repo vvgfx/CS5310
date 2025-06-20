@@ -1,5 +1,4 @@
 #include "Model.h"
-#include "sgraph/Command/ICommand.h"
 #include "sgraph/SGNode.h"
 #include <GLFW/glfw3.h>
 #include <iostream>

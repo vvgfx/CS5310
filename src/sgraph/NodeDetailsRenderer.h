@@ -9,9 +9,7 @@
 #include "ScaleTransform.h"
 #include "TranslateTransform.h"
 #include "DynamicTransform.h"
-#include "Command/ScaleCommand.h"
-#include "Command/TranslateCommand.h"
-#include "Command/RotateCommand.h"
+#include "Jobs/ScaleJob.h"
 #include "../GUIView.h"
 #include <ShaderProgram.h>
 #include <ShaderLocationsVault.h>
@@ -36,7 +34,7 @@ namespace sgraph
          *
          * @param mv a reference to modelview stack that will be used to convert light to the view co-ordinate system
          */
-        NodeDetailsRenderer(GUIView* v) : view(v)
+        NodeDetailsRenderer(GUIView *v) : view(v)
         {
         }
 
@@ -106,12 +104,14 @@ namespace sgraph
             {
                 glm::vec3 scale = scaleNode->getScale();
                 float vec3f[3] = {scale.x, scale.y, scale.z};
-                if(ImGui::DragFloat3("Scale", vec3f))
+                if (ImGui::DragFloat3("Scale", vec3f))
                 {
                     // this runs only when a value is changed
-                    cout<<"value changed in NodeDetailsRenderer"<<endl;
-                    command::ScaleCommand* scaleCommand = new command::ScaleCommand(scaleNode->getName(), vec3f[0], vec3f[1], vec3f[2]);
-                    view->addToCommandQueue(scaleCommand);
+                    cout << "value changed in NodeDetailsRenderer" << endl;
+                    // command::ScaleCommand *scaleCommand = new command::ScaleCommand(scaleNode->getName(), vec3f[0], vec3f[1], vec3f[2]);
+                    // view->addToCommandQueue(scaleCommand);
+                    job::ScaleJob *scaleJob = new job::ScaleJob(scaleNode->getName(), vec3f[0], vec3f[1], vec3f[2]);
+                    view->getViewJob(scaleJob);
                 }
             }
             drawLightHeader(scaleNode);
@@ -130,12 +130,12 @@ namespace sgraph
             {
                 glm::vec3 translate = translateNode->getTranslate();
                 float vec3f[3] = {translate.x, translate.y, translate.z};
-                if(ImGui::DragFloat3("Translate", vec3f))
+                if (ImGui::DragFloat3("Translate", vec3f))
                 {
                     // runs when value is changed
-                    cout<<"value changed in NodeDetailsRenderer"<<endl;
-                    command::TranslateCommand* translateCommand = new command::TranslateCommand(translateNode->getName(), vec3f[0], vec3f[1], vec3f[2]);
-                    view->addToCommandQueue(translateCommand);
+                    // cout << "value changed in NodeDetailsRenderer" << endl;
+                    // command::TranslateCommand *translateCommand = new command::TranslateCommand(translateNode->getName(), vec3f[0], vec3f[1], vec3f[2]);
+                    // view->addToCommandQueue(translateCommand);
                 }
             }
             drawLightHeader(translateNode);
@@ -151,10 +151,10 @@ namespace sgraph
                 float vec3f[3] = {rotation.x, rotation.y, rotation.z};
                 bool changed = ImGui::DragFloat3("Rotate", vec3f);
                 bool rotChanged = ImGui::InputFloat("Value", &angle, 0.1f, 1.0f);
-                if(changed || rotChanged)
+                if (changed || rotChanged)
                 {
-                    command::RotateCommand* rotCommand = new command::RotateCommand(rotateNode->getName(), vec3f[0], vec3f[1], vec3f[2], glm::radians(angle));
-                    view->addToCommandQueue(rotCommand);
+                    // command::RotateCommand *rotCommand = new command::RotateCommand(rotateNode->getName(), vec3f[0], vec3f[1], vec3f[2], glm::radians(angle));
+                    // view->addToCommandQueue(rotCommand);
                 }
             }
             drawLightHeader(rotateNode);
@@ -182,16 +182,20 @@ namespace sgraph
                     glm::vec4 position = lights[i].getPosition();
                     float spotAngle = lights[i].getSpotCutoff();
                     if (ImGui::DragFloat3("Color", &color.x))
-                    {}
+                    {
+                    }
 
                     if (ImGui::DragFloat3("Spot Direction", &spotDirection.x))
-                    {}
+                    {
+                    }
 
                     if (ImGui::DragFloat3("Position", &position.x))
-                    {}
+                    {
+                    }
 
                     if (ImGui::InputFloat("Angle", &spotAngle))
-                    {}
+                    {
+                    }
 
                     ImGui::PopID();
                     ImGui::Separator();
@@ -199,10 +203,33 @@ namespace sgraph
             }
         }
 
-    private:
+        void parentNodeContextMenu()
+        {
+            if (ImGui::BeginPopupContextItem())
+            {
+                if(ImGui::MenuItem("Delete Node"))
+                {
+                    
+                }
+                if (ImGui::MenuItem("Add Child - Rotate"))
+                { 
 
-    GUIView* view;
-    };
-}
+                }
+                if (ImGui::MenuItem("Add Child - Scale"))
+                { 
+
+                }
+                if (ImGui::MenuItem("Add Child - Translate"))
+                { 
+
+                }
+                ImGui::EndPopup();
+            }
+        }
+
+        private:
+            GUIView *view;
+        };
+    }
 
 #endif
