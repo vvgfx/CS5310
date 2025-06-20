@@ -1,5 +1,5 @@
-#ifndef _SCALEJOB_H_
-#define _SCALEJOB_H_
+#ifndef _UPDATESCALEJOB_H_
+#define _UPDATESCALEJOB_H_
 
 #include <string>
 #include "../../Model.h"
@@ -16,10 +16,10 @@ namespace job
      *
      * Note: This is a part of the controller.
      */
-    class ScaleJob : public IJob
+    class UpdateScaleJob : public IJob
     {
     public:
-        ScaleJob(string nodeName, float sx, float sy, float sz)
+        UpdateScaleJob(string nodeName, float sx, float sy, float sz)
         {
             this->nodeName = nodeName;
             this->sx = sx;

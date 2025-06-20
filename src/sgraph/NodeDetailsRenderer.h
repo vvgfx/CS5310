@@ -9,7 +9,9 @@
 #include "ScaleTransform.h"
 #include "TranslateTransform.h"
 #include "DynamicTransform.h"
-#include "Jobs/ScaleJob.h"
+#include "Jobs/UpdateScaleJob.h"
+#include "Jobs/UpdateTranslateJob.h"
+#include "Jobs/UpdateRotateJob.h"
 #include "../GUIView.h"
 #include <ShaderProgram.h>
 #include <ShaderLocationsVault.h>
@@ -110,7 +112,7 @@ namespace sgraph
                     cout << "value changed in NodeDetailsRenderer" << endl;
                     // command::ScaleCommand *scaleCommand = new command::ScaleCommand(scaleNode->getName(), vec3f[0], vec3f[1], vec3f[2]);
                     // view->addToCommandQueue(scaleCommand);
-                    job::ScaleJob *scaleJob = new job::ScaleJob(scaleNode->getName(), vec3f[0], vec3f[1], vec3f[2]);
+                    job::UpdateScaleJob *scaleJob = new job::UpdateScaleJob(scaleNode->getName(), vec3f[0], vec3f[1], vec3f[2]);
                     view->getViewJob(scaleJob);
                 }
             }
@@ -134,8 +136,9 @@ namespace sgraph
                 {
                     // runs when value is changed
                     // cout << "value changed in NodeDetailsRenderer" << endl;
-                    // command::TranslateCommand *translateCommand = new command::TranslateCommand(translateNode->getName(), vec3f[0], vec3f[1], vec3f[2]);
-                    // view->addToCommandQueue(translateCommand);
+                    job::UpdateTranslateJob *translateJob = new job::UpdateTranslateJob(translateNode->getName(), vec3f[0], vec3f[1], vec3f[2]);
+                    view->getViewJob(translateJob);
+                    
                 }
             }
             drawLightHeader(translateNode);
@@ -153,8 +156,8 @@ namespace sgraph
                 bool rotChanged = ImGui::InputFloat("Value", &angle, 0.1f, 1.0f);
                 if (changed || rotChanged)
                 {
-                    // command::RotateCommand *rotCommand = new command::RotateCommand(rotateNode->getName(), vec3f[0], vec3f[1], vec3f[2], glm::radians(angle));
-                    // view->addToCommandQueue(rotCommand);
+                    job::UpdateRotateJob *rotateJob = new job::UpdateRotateJob(rotateNode->getName(), vec3f[0], vec3f[1], vec3f[2], angle);
+                    view->getViewJob(rotateJob);
                 }
             }
             drawLightHeader(rotateNode);
