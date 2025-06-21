@@ -48,7 +48,7 @@ void GUIView::init(Callbacks *callbacks, map<string, util::PolygonMesh<VertexAtt
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 330");
 
-    GuiVisitor = new sgraph::ScenegraphGUIRenderer();
+    GuiVisitor = new sgraph::ScenegraphGUIRenderer(this);
     NodeRenderer = new sgraph::NodeDetailsRenderer(this);
 }
 
@@ -167,8 +167,44 @@ void GUIView::GUIScenegraph(sgraph::IScenegraph *scenegraph)
     ImGui::Begin("Node Details");
     if(selectedNode)
     selectedNode->accept(NodeRenderer);
+
+    // These are for the popups. At any point, I expect only one at most to have a popup
     ImGui::End();
 
+    showPopups();
+
+}
+
+void GUIView::showPopups()
+{
+    sgraph::ScenegraphGUIRenderer* sgRenderer = reinterpret_cast<sgraph::ScenegraphGUIRenderer*>(GuiVisitor);
+    sgraph::SGNode* deleteNode = sgRenderer->getDeleteNode();
+    if(deleteNode!= nullptr)
+    {
+        ImGui::OpenPopup("Delete Node?");
+
+        ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+        ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+
+        if(ImGui::BeginPopupModal("Delete Node?"))
+        {
+            ImGui::Text("This node will be deleted.\nThis operation cannot be undone!");
+            ImGui::Separator();
+            if (ImGui::Button("Yes")) 
+            {
+                ImGui::CloseCurrentPopup();
+                sgRenderer->resetDeleteNode();
+            }
+            ImGui::SetItemDefaultFocus();
+            ImGui::SameLine();
+            if (ImGui::Button("No")) 
+            {
+                ImGui::CloseCurrentPopup();
+                sgRenderer->resetDeleteNode();
+            }
+            ImGui::EndPopup();
+        }
+    }
 }
 
 void GUIView::initLights(sgraph::IScenegraph *scenegraph)

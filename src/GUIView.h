@@ -39,6 +39,7 @@ public:
     void GUIScenegraph(sgraph::IScenegraph *scenegraph);
     void getViewJob(job::IJob* job);
     void setControllerReference(GUIController* controller); // Ask for solutions next time :)
+    void showPopups();
     
     protected: 
     void initLightShaderVars() override;

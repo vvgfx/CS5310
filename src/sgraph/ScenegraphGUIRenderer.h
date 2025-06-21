@@ -16,6 +16,9 @@
 #include "Imgui.h"
 #include <stack>
 #include <iostream>
+#include "Jobs/InsertTranslateJob.h"
+#include "Jobs/InsertRotateJob.h"
+#include "Jobs/InsertScaleJob.h"
 using namespace std;
 
 namespace sgraph
@@ -32,8 +35,11 @@ namespace sgraph
          *
          * @param mv a reference to modelview stack that will be used to convert light to the view co-ordinate system
          */
-        ScenegraphGUIRenderer() {   
+        ScenegraphGUIRenderer(GUIView *v) : view(v) {   
             selectedNode = nullptr;
+            deleteNode = nullptr;
+            addChildNode = nullptr;
+            nodeType = "";
         }
 
         /**
@@ -75,6 +81,7 @@ namespace sgraph
             bool nodeOpen = ImGui::TreeNodeEx(parentNode->getName().c_str(), flags);
             if (ImGui::IsItemClicked())
                 selectedNode = parentNode;
+            RightClickMenu(true, parentNode);
             if(nodeOpen)
             {
                 if (parentNode->getChildren().size() > 0)
@@ -149,9 +156,73 @@ namespace sgraph
             return selectedNode;
         }
 
+        
+        /**
+         * This method draws the right click menu for all scenegraph nodes
+         */
+        void RightClickMenu(bool AddChildEnabled, SGNode* node)
+        {
+            // ImGui::PushID(&nodeName);
+            if(ImGui::BeginPopupContextItem())
+            {
+                if (ImGui::BeginMenu("Add Child", AddChildEnabled))
+                {
+                    if(ImGui::MenuItem("Translate"))
+                    {
+                        view->getViewJob(new job::InsertTranslateJob(node->getName() + "-translate", 0.0, 0.0, 0.0));
+                        nodeType = "Translate";
+                    }
+                    if(ImGui::MenuItem("Rotate"))
+                    {
+                        view->getViewJob(new job::InserteRotateJob(node->getName() + "-rotate", 0.0, 0.0, 0.0, 0.0));
+                        nodeType = "Rotate";
+                    }
+                    if(ImGui::MenuItem("Scale"))
+                    {
+                        view->getViewJob(new job::InsertScaleJob(node->getName() + "-scale", 0.0, 0.0, 0.0));
+                        nodeType = "Scale";
+                    }
+                    ImGui::EndMenu();
+                }
+                if(ImGui::MenuItem("Delete Node"))
+                {
+                    deleteNode = node;
+                }
+                ImGui::EndPopup();
+            }
+            // ImGui::PopID();
+        }
+
+
+        SGNode* getDeleteNode()
+        {
+            return deleteNode;
+        }
+
+        SGNode* getAddChildNode()
+        {
+            return addChildNode;
+        }
+
+        void resetDeleteNode()
+        {
+            deleteNode = nullptr;
+        }
+
+        void resetAddChildNode()
+        {
+            addChildNode = nullptr;
+            nodeType = "";
+        }
+
+
     private:
 
         SGNode* selectedNode;
+        GUIView* view;
+        SGNode* deleteNode;
+        SGNode* addChildNode;
+        string nodeType;
     };
 }
 
