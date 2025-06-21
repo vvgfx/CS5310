@@ -32,6 +32,7 @@ using namespace std;
 
 GUIView::GUIView()
 {
+    resetPopupVars();
 }
 
 GUIView::~GUIView()
@@ -240,7 +241,7 @@ void GUIView::showPopups()
                 ImGui::Separator();
                 if (ImGui::Button("Confirm")) 
                 {
-                    job::InsertTranslateJob* translateJob = new job::InsertTranslateJob(childNodeName, newTranslation.x, newTranslation.y, newTranslation.z);
+                    job::InsertTranslateJob* translateJob = new job::InsertTranslateJob( sgRenderer->getAddChildNode()->getName() , childNodeName, newTranslation.x, newTranslation.y, newTranslation.z);
                     getViewJob(translateJob);
                     ImGui::CloseCurrentPopup();
                     sgRenderer->resetAddChildNode();
@@ -280,7 +281,7 @@ void GUIView::showPopups()
                 ImGui::Separator();
                 if (ImGui::Button("Confirm")) 
                 {
-                    job::InserteRotateJob* rotateJob = new job::InserteRotateJob(childNodeName, newRotation.x, newRotation.y, newRotation.z, newRot);
+                    job::InserteRotateJob* rotateJob = new job::InserteRotateJob(sgRenderer->getAddChildNode()->getName(), childNodeName, newRotation.x, newRotation.y, newRotation.z, newRot);
                     getViewJob(rotateJob);
                     ImGui::CloseCurrentPopup();
                     sgRenderer->resetAddChildNode();
@@ -319,7 +320,7 @@ void GUIView::showPopups()
                 ImGui::Separator();
                 if (ImGui::Button("Confirm")) 
                 {
-                    job::InsertScaleJob* scaleJob = new job::InsertScaleJob(childNodeName, newScale.x, newScale.y, newScale.z);
+                    job::InsertScaleJob* scaleJob = new job::InsertScaleJob(sgRenderer->getAddChildNode()->getName(), childNodeName, newScale.x, newScale.y, newScale.z);
                     getViewJob(scaleJob);
                     ImGui::CloseCurrentPopup();
                     sgRenderer->resetAddChildNode();
@@ -348,7 +349,7 @@ void GUIView::showPopups()
                 ImGui::Separator();
                 if (ImGui::Button("Confirm")) 
                 {
-                    job::InsertGroupJob* groupJob = new job::InsertGroupJob(childNodeName);
+                    job::InsertGroupJob* groupJob = new job::InsertGroupJob(sgRenderer->getAddChildNode()->getName(), childNodeName);
                     getViewJob(groupJob);
                     ImGui::CloseCurrentPopup();
                     sgRenderer->resetAddChildNode();

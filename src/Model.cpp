@@ -47,6 +47,7 @@ void Model::clearCommandQueue()
         if(nodes.find(nodeName) != nodes.end())
         {
             // node exists in hierarchy
+            cout<<"Found node name"<<endl;
             nodes[nodeName]->accept(command);
         }
         commandQueue.pop();

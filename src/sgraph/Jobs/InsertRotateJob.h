@@ -19,9 +19,10 @@ namespace job
     class InserteRotateJob : public IJob
     {
     public:
-        InserteRotateJob(string nodeName, float rx, float ry, float rz, float rAngleDegrees)
+        InserteRotateJob(string nodeName, string newNodeName, float rx, float ry, float rz, float rAngleDegrees)
         {
             this->nodeName = nodeName;
+            this->newNodeName = newNodeName;
             this->rx = rx;
             this->ry = ry;
             this->rz = rz;
@@ -30,13 +31,14 @@ namespace job
 
         virtual void execute(Model *m)
         {
-            command::InsertRotateCommand* rotateCommand = new command::InsertRotateCommand(nodeName, rx, ry, rz, ra, m->getScenegraph());
+            command::InsertRotateCommand* rotateCommand = new command::InsertRotateCommand(nodeName, newNodeName, rx, ry, rz, ra, m->getScenegraph());
             cout<<"Adding to command queue in job"<<endl;
             m->addToCommandQueue(rotateCommand);
         }
 
     private:
         float rx, ry, rz, ra;
+        string newNodeName;
     };
 }
 

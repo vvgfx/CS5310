@@ -28,13 +28,15 @@ namespace command
          * @brief Construct a new InsertRotateCommand object
          *
          * @param name Name of the node this command should effect
+         * @param newNodeName Name of the new node.
          * @param rx rotation in x-axis
          * @param ry rotation in y-axis
          * @param rz rotation in z-axis
          */
-        InsertRotateCommand(string name, float rx, float ry, float rz, float rAngleRadians, sgraph::IScenegraph* scenegraph)
+        InsertRotateCommand(string name, string newNodeName, float rx, float ry, float rz, float rAngleRadians, sgraph::IScenegraph* scenegraph)
         {
             this->nodeName = name;
+            this->newNodeName = newNodeName;
             this->rx = rx;
             this->ry = ry;
             this->rz = rz;
@@ -107,13 +109,14 @@ namespace command
         void addChildren(sgraph::ParentSGNode* parentNode)
         {
             
-            sgraph::RotateTransform* rotateNode = new sgraph::RotateTransform(rAngleRadians, rx, ry, rz, nodeName, sgraph);
+            sgraph::RotateTransform* rotateNode = new sgraph::RotateTransform(rAngleRadians, rx, ry, rz, newNodeName, sgraph);
             parentNode->addChild(rotateNode);
         }
 
     private:
         float rx, ry, rz, rAngleRadians;
         sgraph::IScenegraph* sgraph;
+        string newNodeName;
     };
 }
 

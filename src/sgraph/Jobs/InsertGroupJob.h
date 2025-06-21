@@ -19,9 +19,10 @@ namespace job
     class InsertGroupJob : public IJob
     {
     public:
-        InsertGroupJob(string nodeName)
+        InsertGroupJob(string nodeName, string newNodeName)
         {
             this->nodeName = nodeName;
+            this->newNodeName = newNodeName;
             this->tx = tx;
             this->ty = ty;
             this->tz = tz;
@@ -29,13 +30,14 @@ namespace job
 
         virtual void execute(Model *m)
         {
-            command::InsertGroupCommand* groupCommand = new command::InsertGroupCommand(nodeName, m->getScenegraph());
+            command::InsertGroupCommand* groupCommand = new command::InsertGroupCommand(nodeName, newNodeName, m->getScenegraph());
             cout<<"Adding to command queue in job"<<endl;
             m->addToCommandQueue(groupCommand);
         }
 
     private:
         float tx, ty, tz;
+        string newNodeName;
     };
 }
 

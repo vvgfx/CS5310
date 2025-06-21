@@ -28,13 +28,15 @@ namespace command
          * @brief Construct a new InsertTranslateCommand object
          *
          * @param name Name of the node this command should effect
+         * @param newNodeName Name of the new node.
          * @param tx translation in x-axis
          * @param ty translation in y-axis
          * @param tz translation in z-axis
          */
-        InsertTranslateCommand(string name, float tx, float ty, float tz, sgraph::IScenegraph* scenegraph)
+        InsertTranslateCommand(string name, string newNodeName, float tx, float ty, float tz, sgraph::IScenegraph* scenegraph)
         {
             this->nodeName = name;
+            this->newNodeName = newNodeName;
             this->tx = tx;
             this->ty = ty;
             this->tz = tz;
@@ -106,13 +108,14 @@ namespace command
         void addChildren(sgraph::ParentSGNode* parentNode)
         {
             
-            sgraph::TranslateTransform* translateNode = new sgraph::TranslateTransform(tx, ty, tz, nodeName, sgraph);
+            sgraph::TranslateTransform* translateNode = new sgraph::TranslateTransform(tx, ty, tz, newNodeName, sgraph);
             parentNode->addChild(translateNode);
         }
 
     private:
         float tx, ty, tz;
         sgraph::IScenegraph* sgraph;
+        string newNodeName;
     };
 }
 

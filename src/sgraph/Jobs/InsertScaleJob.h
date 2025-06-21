@@ -19,9 +19,10 @@ namespace job
     class InsertScaleJob : public IJob
     {
     public:
-        InsertScaleJob(string nodeName, float sx, float sy, float sz)
+        InsertScaleJob(string nodeName, string newNodeName, float sx, float sy, float sz)
         {
             this->nodeName = nodeName;
+            this->newNodeName = newNodeName;
             this->sx = sx;
             this->sy = sy;
             this->sz = sz;
@@ -29,13 +30,14 @@ namespace job
 
         virtual void execute(Model *m)
         {
-            command::InsertScaleCommand* scaleCommand = new command::InsertScaleCommand(nodeName, sx, sy, sz, m->getScenegraph());
+            command::InsertScaleCommand* scaleCommand = new command::InsertScaleCommand(nodeName, newNodeName, sx, sy, sz, m->getScenegraph());
             cout<<"Adding to command queue in job"<<endl;
             m->addToCommandQueue(scaleCommand);
         }
 
     private:
         float sx, sy, sz;
+        string newNodeName;
     };
 }
 

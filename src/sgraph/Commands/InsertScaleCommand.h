@@ -28,13 +28,15 @@ namespace command
          * @brief Construct a new InsertScaleCommand object
          *
          * @param name Name of the node this command should effect
+         * @param newNodeName Name of the new node.
          * @param sx scale in x-axis
          * @param sy scale in y-axis
          * @param sz scale in z-axis
          */
-        InsertScaleCommand(string name, float sx, float sy, float sz, sgraph::IScenegraph* scenegraph)
+        InsertScaleCommand(string name, string newNodeName, float sx, float sy, float sz, sgraph::IScenegraph* scenegraph)
         {
             this->nodeName = name;
+            this->newNodeName = newNodeName;
             this->sx = sx;
             this->sy = sy;
             this->sz = sz;
@@ -106,13 +108,14 @@ namespace command
         void addChildren(sgraph::ParentSGNode* parentNode)
         {
             
-            sgraph::ScaleTransform* scaleNode = new sgraph::ScaleTransform(sx, sy, sz, nodeName, sgraph);
+            sgraph::ScaleTransform* scaleNode = new sgraph::ScaleTransform(sx, sy, sz, newNodeName, sgraph);
             parentNode->addChild(scaleNode);
         }
 
     private:
         float sx, sy, sz;
         sgraph::IScenegraph* sgraph;
+        string newNodeName;
     };
 }
 

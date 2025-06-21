@@ -29,9 +29,10 @@ namespace command
          *
          * @param name Name of the node this command should effect
          */
-        InsertGroupCommand(string name, sgraph::IScenegraph* scenegraph)
+        InsertGroupCommand(string name, string newNodeName, sgraph::IScenegraph* scenegraph)
         {
             this->nodeName = name;
+            this->newNodeName = newNodeName;
             sgraph = scenegraph;
         }
 
@@ -42,6 +43,7 @@ namespace command
          */
         void visitGroupNode(sgraph::GroupNode *groupNode)
         {
+            cout<<"Adding group node in command"<<endl;
             addChildren(groupNode);
         }
 
@@ -99,13 +101,14 @@ namespace command
          */
         void addChildren(sgraph::ParentSGNode* parentNode)
         {
-            
-            sgraph::GroupNode* groupNode = new sgraph::GroupNode(nodeName, sgraph);
+            cout<<"adding child"<<endl;
+            sgraph::GroupNode* groupNode = new sgraph::GroupNode(newNodeName, sgraph);
             parentNode->addChild(groupNode);
         }
 
     private:
         sgraph::IScenegraph* sgraph;
+        string newNodeName;
     };
 }
 

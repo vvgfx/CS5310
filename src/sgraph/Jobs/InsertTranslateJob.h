@@ -19,9 +19,10 @@ namespace job
     class InsertTranslateJob : public IJob
     {
     public:
-        InsertTranslateJob(string nodeName, float tx, float ty, float tz)
+        InsertTranslateJob(string nodeName, string newNodeName, float tx, float ty, float tz)
         {
             this->nodeName = nodeName;
+            this->newNodeName = newNodeName;
             this->tx = tx;
             this->ty = ty;
             this->tz = tz;
@@ -29,13 +30,14 @@ namespace job
 
         virtual void execute(Model *m)
         {
-            command::InsertTranslateCommand* translateCommand = new command::InsertTranslateCommand(nodeName, tx, ty, tz, m->getScenegraph());
+            command::InsertTranslateCommand* translateCommand = new command::InsertTranslateCommand(nodeName, newNodeName, tx, ty, tz, m->getScenegraph());
             cout<<"Adding to command queue in job"<<endl;
             m->addToCommandQueue(translateCommand);
         }
 
     private:
         float tx, ty, tz;
+        string newNodeName;
     };
 }
 
