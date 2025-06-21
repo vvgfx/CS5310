@@ -20,6 +20,10 @@ using namespace std;
 #include "Pipeline/TexturedPBRPipeline.h"
 #include "Pipeline/PBRShadowVolumePipeline.h"
 #include "Pipeline/TexturedPBRSVPipeline.h"
+#include "sgraph/Jobs/InsertGroupJob.h"
+#include "sgraph/Jobs/InsertRotateJob.h"
+#include "sgraph/Jobs/InsertTranslateJob.h"
+#include "sgraph/Jobs/InsertScaleJob.h"
 
 // Imgui required files.
 #include "imgui.h"
@@ -236,6 +240,8 @@ void GUIView::showPopups()
                 ImGui::Separator();
                 if (ImGui::Button("Confirm")) 
                 {
+                    job::InsertTranslateJob* translateJob = new job::InsertTranslateJob(childNodeName, newTranslation.x, newTranslation.y, newTranslation.z);
+                    getViewJob(translateJob);
                     ImGui::CloseCurrentPopup();
                     sgRenderer->resetAddChildNode();
                     resetPopupVars();
@@ -274,6 +280,8 @@ void GUIView::showPopups()
                 ImGui::Separator();
                 if (ImGui::Button("Confirm")) 
                 {
+                    job::InserteRotateJob* rotateJob = new job::InserteRotateJob(childNodeName, newRotation.x, newRotation.y, newRotation.z, newRot);
+                    getViewJob(rotateJob);
                     ImGui::CloseCurrentPopup();
                     sgRenderer->resetAddChildNode();
                     resetPopupVars();
@@ -289,7 +297,7 @@ void GUIView::showPopups()
                 ImGui::EndPopup();
             }
         }
-        if(childType == "Scale")
+        else if(childType == "Scale")
         {
             ImGui::OpenPopup("Add Scale Node");
 
@@ -311,6 +319,37 @@ void GUIView::showPopups()
                 ImGui::Separator();
                 if (ImGui::Button("Confirm")) 
                 {
+                    job::InsertScaleJob* scaleJob = new job::InsertScaleJob(childNodeName, newScale.x, newScale.y, newScale.z);
+                    getViewJob(scaleJob);
+                    ImGui::CloseCurrentPopup();
+                    sgRenderer->resetAddChildNode();
+                    resetPopupVars();
+                }
+                ImGui::SetItemDefaultFocus();
+                ImGui::SameLine();
+                if (ImGui::Button("Cancel")) 
+                {
+                    ImGui::CloseCurrentPopup();
+                    sgRenderer->resetAddChildNode();
+                    resetPopupVars();
+                }
+                ImGui::EndPopup();
+            }
+        }
+        else if(childType == "Group")
+        {
+            ImGui::OpenPopup("Add Group Node");
+
+            ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+            ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+            if(ImGui::BeginPopupModal("Add Group Node"))
+            {
+                ImGui::InputText("Node name", childNodeName, 32);
+                ImGui::Separator();
+                if (ImGui::Button("Confirm")) 
+                {
+                    job::InsertGroupJob* groupJob = new job::InsertGroupJob(childNodeName);
+                    getViewJob(groupJob);
                     ImGui::CloseCurrentPopup();
                     sgRenderer->resetAddChildNode();
                     resetPopupVars();

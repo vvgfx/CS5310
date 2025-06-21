@@ -49,7 +49,7 @@ namespace sgraph
          */
         void visitGroupNode(GroupNode *groupNode)
         {
-            visitParentNode(groupNode);
+            visitParentNode(groupNode, true);
         }
 
         /**
@@ -74,14 +74,13 @@ namespace sgraph
          *
          * @param parentNode
          */
-        void visitParentNode(ParentSGNode *parentNode)
+        void visitParentNode(ParentSGNode *parentNode, bool enabledFlag)
         {
-            // cout<<"Visiting node: "<<parentNode->getName()<<endl;
             ImGuiTreeNodeFlags flags = (selectedNode == parentNode) ? ImGuiTreeNodeFlags_Selected : 0;
             bool nodeOpen = ImGui::TreeNodeEx(parentNode->getName().c_str(), flags);
             if (ImGui::IsItemClicked())
                 selectedNode = parentNode;
-            RightClickMenu(true, parentNode);
+            RightClickMenu(enabledFlag, parentNode);
             if(nodeOpen)
             {
                 if (parentNode->getChildren().size() > 0)
@@ -103,7 +102,7 @@ namespace sgraph
          */
         void visitTransformNode(TransformNode *transformNode)
         {
-            visitParentNode(transformNode);
+            visitParentNode(transformNode, !(transformNode->getChildren().size() > 0));
         }
 
         /**
@@ -113,7 +112,7 @@ namespace sgraph
          */
         void visitScaleTransform(ScaleTransform *scaleNode)
         {
-            visitParentNode(scaleNode);
+            visitParentNode(scaleNode, !(scaleNode->getChildren().size() > 0));
         }
 
         /**
@@ -123,7 +122,7 @@ namespace sgraph
          */
         void visitTranslateTransform(TranslateTransform *translateNode)
         {
-            visitParentNode(translateNode);
+            visitParentNode(translateNode, !(translateNode->getChildren().size() > 0));
         }
 
 
@@ -134,7 +133,7 @@ namespace sgraph
          */
         void visitRotateTransform(RotateTransform *rotateNode)
         {
-            visitParentNode(rotateNode);
+            visitParentNode(rotateNode, !(rotateNode->getChildren().size() > 0));
         }
 
         /**
@@ -144,7 +143,7 @@ namespace sgraph
          */
         void visitDynamicTransform(DynamicTransform *dynamicTransformNode)
         {
-            visitParentNode(dynamicTransformNode);
+            visitParentNode(dynamicTransformNode, !(dynamicTransformNode->getChildren().size() > 0));
         }
 
         /**
@@ -166,6 +165,11 @@ namespace sgraph
             {
                 if (ImGui::BeginMenu("Add Child", AddChildEnabled))
                 {
+                    if(ImGui::MenuItem("Group"))
+                    {
+                        addChildNode = node;
+                        nodeType = "Group";
+                    }
                     if(ImGui::MenuItem("Translate"))
                     {
                         addChildNode = node;
