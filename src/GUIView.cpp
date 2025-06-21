@@ -175,6 +175,9 @@ void GUIView::GUIScenegraph(sgraph::IScenegraph *scenegraph)
 
 }
 
+/**
+ * This is ugly. Is there an alternative to this method?
+ */
 void GUIView::showPopups()
 {
     sgraph::ScenegraphGUIRenderer* sgRenderer = reinterpret_cast<sgraph::ScenegraphGUIRenderer*>(GuiVisitor);
@@ -205,6 +208,134 @@ void GUIView::showPopups()
             ImGui::EndPopup();
         }
     }
+
+    sgraph::SGNode* addChildNode = sgRenderer->getAddChildNode();
+    if(addChildNode != nullptr)
+    {
+        // show popup for add child
+        string childType = sgRenderer->getNodeType();
+        if(childType == "Translate")
+        {
+            ImGui::OpenPopup("Add Translate Node");
+
+            ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+            ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+            
+
+            if(ImGui::BeginPopupModal("Add Translate Node"))
+            {
+                ImGui::InputText("Node name", childNodeName, 32);
+                float translateFloat3f[3] = {newTranslation.x, newTranslation.y, newTranslation.z};
+                bool translateChanged = ImGui::DragFloat3("Translate", translateFloat3f);
+                if (translateChanged)
+                {
+                    newTranslation.x = translateFloat3f[0];
+                    newTranslation.y = translateFloat3f[1];
+                    newTranslation.z = translateFloat3f[2];
+                }
+                ImGui::Separator();
+                if (ImGui::Button("Confirm")) 
+                {
+                    ImGui::CloseCurrentPopup();
+                    sgRenderer->resetAddChildNode();
+                    resetPopupVars();
+                }
+                ImGui::SetItemDefaultFocus();
+                ImGui::SameLine();
+                if (ImGui::Button("Cancel")) 
+                {
+                    ImGui::CloseCurrentPopup();
+                    sgRenderer->resetAddChildNode();
+                    resetPopupVars();
+                }
+                ImGui::EndPopup();
+            }
+        }
+        else if(childType == "Rotate")
+        {
+            ImGui::OpenPopup("Add Rotate Node");
+
+            ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+            ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+            
+
+            if(ImGui::BeginPopupModal("Add Rotate Node"))
+            {
+                ImGui::InputText("Node name", childNodeName, 32);
+                float newRotation3f[3] = {newRotation.x, newRotation.y, newRotation.z};
+                bool rotateChanged = ImGui::DragFloat3("Axis", newRotation3f);
+                bool rotChanged = ImGui::InputFloat("Rotation", &newRot, 0.1f, 1.0f);
+                if (rotateChanged)
+                {
+                    newRotation.x = newRotation3f[0];
+                    newRotation.y = newRotation3f[1];
+                    newRotation.z = newRotation3f[2];
+                }
+                ImGui::Separator();
+                if (ImGui::Button("Confirm")) 
+                {
+                    ImGui::CloseCurrentPopup();
+                    sgRenderer->resetAddChildNode();
+                    resetPopupVars();
+                }
+                ImGui::SetItemDefaultFocus();
+                ImGui::SameLine();
+                if (ImGui::Button("Cancel")) 
+                {
+                    ImGui::CloseCurrentPopup();
+                    sgRenderer->resetAddChildNode();
+                    resetPopupVars();
+                }
+                ImGui::EndPopup();
+            }
+        }
+        if(childType == "Scale")
+        {
+            ImGui::OpenPopup("Add Scale Node");
+
+            ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+            ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+            
+
+            if(ImGui::BeginPopupModal("Add Scale Node"))
+            {
+                ImGui::InputText("Node name", childNodeName, 32);
+                float scaleFloat3f[3] = {newScale.x, newScale.y, newScale.z};
+                bool scaleChanged = ImGui::DragFloat3("Scale", scaleFloat3f);
+                if (scaleChanged)
+                {
+                    newScale.x = scaleFloat3f[0];
+                    newScale.y = scaleFloat3f[1];
+                    newScale.z = scaleFloat3f[2];
+                }
+                ImGui::Separator();
+                if (ImGui::Button("Confirm")) 
+                {
+                    ImGui::CloseCurrentPopup();
+                    sgRenderer->resetAddChildNode();
+                    resetPopupVars();
+                }
+                ImGui::SetItemDefaultFocus();
+                ImGui::SameLine();
+                if (ImGui::Button("Cancel")) 
+                {
+                    ImGui::CloseCurrentPopup();
+                    sgRenderer->resetAddChildNode();
+                    resetPopupVars();
+                }
+                ImGui::EndPopup();
+            }
+        }
+    }
+}
+
+void GUIView::resetPopupVars()
+{
+    strcpy(childNodeName, ""); // reset char array
+    newTranslation = glm::vec3(0.0f);
+    newRotation = glm::vec3(0.0f);
+    newScale = glm::vec3(0.0f);
+    newRot = 0.0f;
 }
 
 void GUIView::initLights(sgraph::IScenegraph *scenegraph)

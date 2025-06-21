@@ -42,6 +42,7 @@ public:
     void showPopups();
     
     protected: 
+    void resetPopupVars();
     void initLightShaderVars() override;
     void rotate() override;
     void computeTangents(util::PolygonMesh<VertexAttrib>& mesh) override;
@@ -49,6 +50,13 @@ public:
     sgraph::SGNodeVisitor* NodeRenderer;
 
     GUIController* controller;
+
+    // Popups
+    char childNodeName[32];
+    glm::vec3 newTranslation;
+    glm::vec3 newRotation;
+    glm::vec3 newScale;
+    float newRot;
 };
 
 #endif

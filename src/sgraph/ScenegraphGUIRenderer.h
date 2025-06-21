@@ -162,24 +162,23 @@ namespace sgraph
          */
         void RightClickMenu(bool AddChildEnabled, SGNode* node)
         {
-            // ImGui::PushID(&nodeName);
             if(ImGui::BeginPopupContextItem())
             {
                 if (ImGui::BeginMenu("Add Child", AddChildEnabled))
                 {
                     if(ImGui::MenuItem("Translate"))
                     {
-                        view->getViewJob(new job::InsertTranslateJob(node->getName() + "-translate", 0.0, 0.0, 0.0));
+                        addChildNode = node;
                         nodeType = "Translate";
                     }
                     if(ImGui::MenuItem("Rotate"))
                     {
-                        view->getViewJob(new job::InserteRotateJob(node->getName() + "-rotate", 0.0, 0.0, 0.0, 0.0));
+                        addChildNode = node;
                         nodeType = "Rotate";
                     }
                     if(ImGui::MenuItem("Scale"))
                     {
-                        view->getViewJob(new job::InsertScaleJob(node->getName() + "-scale", 0.0, 0.0, 0.0));
+                        addChildNode = node;
                         nodeType = "Scale";
                     }
                     ImGui::EndMenu();
@@ -190,7 +189,6 @@ namespace sgraph
                 }
                 ImGui::EndPopup();
             }
-            // ImGui::PopID();
         }
 
 
@@ -202,6 +200,16 @@ namespace sgraph
         SGNode* getAddChildNode()
         {
             return addChildNode;
+        }
+
+        string getNodeType()
+        {
+            return nodeType;
+        }
+
+        void resetNodeType()
+        {
+            nodeType = "";
         }
 
         void resetDeleteNode()

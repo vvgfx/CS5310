@@ -206,30 +206,6 @@ namespace sgraph
             }
         }
 
-        void parentNodeContextMenu()
-        {
-            if (ImGui::BeginPopupContextItem())
-            {
-                if(ImGui::MenuItem("Delete Node"))
-                {
-                    
-                }
-                if (ImGui::MenuItem("Add Child - Rotate"))
-                { 
-
-                }
-                if (ImGui::MenuItem("Add Child - Scale"))
-                { 
-
-                }
-                if (ImGui::MenuItem("Add Child - Translate"))
-                { 
-
-                }
-                ImGui::EndPopup();
-            }
-        }
-
         private:
             GUIView *view;
         };
