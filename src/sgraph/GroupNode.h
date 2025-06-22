@@ -15,7 +15,7 @@ namespace sgraph
  * of other nodes. It can have an arbitrary number of children. Its children can be nodes of any type
  * \author Amit Shesh
  */
-  class GroupNode:public ParentSGNode {
+  class GroupNode : public ParentSGNode {
 
   protected:
     ParentSGNode *copyNode() {
