@@ -24,6 +24,7 @@ using namespace std;
 #include "sgraph/Jobs/InsertRotateJob.h"
 #include "sgraph/Jobs/InsertTranslateJob.h"
 #include "sgraph/Jobs/InsertScaleJob.h"
+#include "sgraph/Jobs/InsertLeafJob.h"
 
 // Imgui required files.
 #include "imgui.h"
@@ -366,6 +367,49 @@ void GUIView::showPopups()
                 ImGui::EndPopup();
             }
         }
+        else if(childType == "Leaf")
+        {
+            ImGui::OpenPopup("Add Leaf Node");
+
+            ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+            ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+            if(ImGui::BeginPopupModal("Add Leaf Node"))
+            {
+                ImGui::InputText("Node name", childNodeName, 32);
+                ImGui::InputText("Object instance", objectInstanceName, 32);
+
+                float albedoFloat3f[3] = {leafAlbedo.x, leafAlbedo.y, leafAlbedo.z};
+                if(ImGui::DragFloat3("Albedo", albedoFloat3f, 0.01f, 0.0f, 1.0f))
+                {
+                    leafAlbedo.x = albedoFloat3f[0];
+                    leafAlbedo.y = albedoFloat3f[1];
+                    leafAlbedo.z = albedoFloat3f[2];
+                }
+
+                bool metallicChanged = ImGui::InputFloat("Metallic", &materialMetallic, 0.1f, 1.0f);
+                bool roughnessChanged = ImGui::InputFloat("Roughness", &materialRoughness, 0.1f, 1.0f);
+                bool aoChanged = ImGui::InputFloat("Ambient Occlusion", &materialAO, 0.1f, 1.0f);
+                
+                ImGui::Separator();
+                if (ImGui::Button("Confirm")) 
+                {
+                    job::InsertLeafJob* leafJob = new job::InsertLeafJob(sgRenderer->getAddChildNode()->getName(), childNodeName, leafAlbedo, materialMetallic, materialRoughness, materialAO, objectInstanceName, ""); //passing texture as empty
+                    getViewJob(leafJob);
+                    ImGui::CloseCurrentPopup();
+                    sgRenderer->resetAddChildNode();
+                    resetPopupVars();
+                }
+                ImGui::SetItemDefaultFocus();
+                ImGui::SameLine();
+                if (ImGui::Button("Cancel")) 
+                {
+                    ImGui::CloseCurrentPopup();
+                    sgRenderer->resetAddChildNode();
+                    resetPopupVars();
+                }
+                ImGui::EndPopup();
+            }
+        }
     }
 }
 
@@ -376,6 +420,13 @@ void GUIView::resetPopupVars()
     newRotation = glm::vec3(0.0f);
     newScale = glm::vec3(0.0f);
     newRot = 0.0f;
+
+    strcpy(objectInstanceName, ""); // reset char array
+    strcpy(materialName, ""); // reset char array
+    leafAlbedo = glm::vec3(0.0f);
+    materialMetallic = 0.0f;
+    materialRoughness = 0.0f;
+    materialAO = 0.0f;
 }
 
 void GUIView::initLights(sgraph::IScenegraph *scenegraph)

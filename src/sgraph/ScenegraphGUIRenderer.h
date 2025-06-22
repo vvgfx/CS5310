@@ -185,6 +185,11 @@ namespace sgraph
                         addChildNode = node;
                         nodeType = "Scale";
                     }
+                    if(ImGui::MenuItem("Leaf"))
+                    {
+                        addChildNode = node;
+                        nodeType = "Leaf";
+                    }
                     ImGui::EndMenu();
                 }
                 if(ImGui::MenuItem("Delete Node"))

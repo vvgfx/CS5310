@@ -57,6 +57,14 @@ public:
     glm::vec3 newRotation;
     glm::vec3 newScale;
     float newRot;
+
+
+    char objectInstanceName[32];
+    char materialName[32];
+    glm::vec3 leafAlbedo;
+    float materialMetallic;
+    float materialRoughness;
+    float materialAO;
 };
 
 #endif
