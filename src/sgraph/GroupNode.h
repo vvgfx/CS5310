@@ -83,6 +83,9 @@ namespace sgraph
     void addChild(SGNode *child) {
       children.push_back(child);
       child->setParent(this);
+
+      if(scenegraph)
+        scenegraph->addNode(child->getName(), child);
     }
 
     

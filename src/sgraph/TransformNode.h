@@ -48,6 +48,8 @@ namespace sgraph
         throw runtime_error("Transform node already has a child");
       this->children.push_back(child);
       child->setParent(this);
+      if(scenegraph)
+        scenegraph->addNode(child->getName(), child);
     }
 
     

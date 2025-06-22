@@ -37,6 +37,7 @@ namespace sgraph {
                 string command;
                 string inputWithOutCommentsString = stripComments(input);
                 istringstream inputWithOutComments(inputWithOutCommentsString);
+                IScenegraph *scenegraph = new Scenegraph();
                 while (inputWithOutComments >> command) {
                     cout << "Read " << command << endl;
                     if (command == "instance") {
@@ -60,7 +61,7 @@ namespace sgraph {
                     }
                     else if (command == "dynamic")
                     {
-                        parseDynamic(inputWithOutComments);
+                        parseDynamic(inputWithOutComments, scenegraph);
                     }
                     else if (command == "image")
                     {
@@ -87,22 +88,22 @@ namespace sgraph {
                         parseAssignAO(inputWithOutComments);
                     }
                     else if (command == "group") {
-                        parseGroup(inputWithOutComments);
+                        parseGroup(inputWithOutComments,scenegraph);
                     }
                     else if (command == "leaf") {
-                        parseLeaf(inputWithOutComments);
+                        parseLeaf(inputWithOutComments, scenegraph);
                     }
                     else if (command == "material") {
                         parseMaterial(inputWithOutComments);
                     }
                     else if (command == "scale") {
-                        parseScale(inputWithOutComments);
+                        parseScale(inputWithOutComments, scenegraph);
                     }
                     else if (command == "rotate") {
-                        parseRotate(inputWithOutComments);
+                        parseRotate(inputWithOutComments, scenegraph);
                     }
                     else if (command == "translate") {
-                        parseTranslate(inputWithOutComments);
+                        parseTranslate(inputWithOutComments, scenegraph);
                     }
                     else if (command == "copy") {
                         parseCopy(inputWithOutComments);
@@ -124,7 +125,6 @@ namespace sgraph {
                     }
                 }
                 if (root!=NULL) {
-                    IScenegraph *scenegraph = new Scenegraph();
                     scenegraph->makeScenegraph(root);
                     scenegraph->setMeshes(meshes);
                     scenegraph->setMeshPaths(meshPaths);
@@ -211,25 +211,25 @@ namespace sgraph {
                         leafNode->setTextureMap(textureName);
                 }
 
-                virtual void parseDynamic(istream& input)
+                virtual void parseDynamic(istream& input, IScenegraph *scenegraph)
                 {
                     string varname, name;
                     input >> varname >> name;
                     cout << "Read " << varname << " " << name << endl;
-                    SGNode *dynamic = new DynamicTransform(glm::mat4(1.0), name, NULL);
+                    SGNode *dynamic = new DynamicTransform(glm::mat4(1.0), name, scenegraph);
                     nodes[varname] = dynamic;
                 }
 
-                virtual void parseGroup(istream& input) {
+                virtual void parseGroup(istream& input, IScenegraph *scenegraph) {
                     string varname,name;
                     input >> varname >> name;
                     
                     cout << "Read " << varname << " " << name << endl;
-                    SGNode *group = new GroupNode(name,NULL);
+                    SGNode *group = new GroupNode(name,scenegraph);
                     nodes[varname] = group;
                 }
 
-                virtual void parseLeaf(istream& input) {
+                virtual void parseLeaf(istream& input, IScenegraph *scenegraph) {
                     string varname,name,command,instanceof;
                     input >> varname >> name;
                     cout << "Read " << varname << " " << name << endl;
@@ -237,35 +237,35 @@ namespace sgraph {
                     if (command == "instanceof") {
                         input >> instanceof;
                     }
-                    SGNode *leaf = new LeafNode(instanceof,name,NULL, "default"); // changed this to remove "default" and "default-normal" hardcode from leafNode.
+                    SGNode *leaf = new LeafNode(instanceof,name,scenegraph, "default"); // changed this to remove "default" and "default-normal" hardcode from leafNode.
                     LeafNode* leafInstance = dynamic_cast<LeafNode*>(leaf);
                     nodes[varname] = leaf;
                 } 
 
-                virtual void parseScale(istream& input) {
+                virtual void parseScale(istream& input, IScenegraph *scenegraph) {
                     string varname,name;
                     input >> varname >> name;
                     float sx,sy,sz;
                     input >> sx >> sy >> sz;
-                    SGNode *scaleNode = new ScaleTransform(sx,sy,sz,name,NULL);
+                    SGNode *scaleNode = new ScaleTransform(sx,sy,sz,name,scenegraph);
                     nodes[varname] = scaleNode;
                 }
 
-                virtual void parseTranslate(istream& input) {
+                virtual void parseTranslate(istream& input, IScenegraph *scenegraph) {
                     string varname,name;
                     input >> varname >> name;
                     float tx,ty,tz;
                     input >> tx >> ty >> tz;
-                    SGNode *translateNode = new TranslateTransform(tx,ty,tz,name,NULL);
+                    SGNode *translateNode = new TranslateTransform(tx,ty,tz,name,scenegraph);
                     nodes[varname] = translateNode;         
                 }
 
-                virtual void parseRotate(istream& input) {
+                virtual void parseRotate(istream& input, IScenegraph *scenegraph) {
                     string varname,name;
                     input >> varname >> name;
                     float angleInDegrees,ax,ay,az;
                     input >> angleInDegrees >> ax >> ay >> az;
-                    SGNode *rotateNode = new RotateTransform(glm::radians(angleInDegrees),ax,ay,az,name,NULL);
+                    SGNode *rotateNode = new RotateTransform(glm::radians(angleInDegrees),ax,ay,az,name,scenegraph);
                     nodes[varname] = rotateNode;         
                 }
 

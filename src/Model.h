@@ -21,14 +21,12 @@ public:
     map<string, util::TextureImage*> getTextureMap();
     
     // command queue stuff
-    void saveNodes(map<string,sgraph::SGNode *>& nodes);
     void addToCommandQueue(command::ICommand* command);
     void clearCommandQueue();
 
 private:
     
     sgraph::IScenegraph *scenegraph;
-    map<string,sgraph::SGNode *> nodes;
     map<string, util::TextureImage*> textureMap;
 
     queue<command::ICommand*> commandQueue;

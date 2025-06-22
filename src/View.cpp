@@ -386,11 +386,11 @@ void View::initScenegraphNodes(sgraph::IScenegraph *scenegraph)
 
     for(const auto& nodeName: savedNodes)
     {
-        if(nodes.find(nodeName) != nodes.end())
+        if(nodes->find(nodeName) != nodes->end())
         {
             // The node is present, save it!
             cout<<"Found : "<<nodeName<<endl; //It's finding the nodes now.
-            cachedNodes[nodeName] = dynamic_cast<sgraph::TransformNode*>(nodes[nodeName]); // Can't cast to abstract class, so need to cast to pointer 
+            cachedNodes[nodeName] = dynamic_cast<sgraph::TransformNode*>((*nodes)[nodeName]); // Can't cast to abstract class, so need to cast to pointer 
         }
     }
 }

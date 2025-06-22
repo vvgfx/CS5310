@@ -39,9 +39,6 @@ void GUIController::initScenegraph() {
     map<string, util::TextureImage*> textureMap = importer.getTextureMap();
     model->saveTextureMap(textureMap);
 
-    map<string, sgraph::SGNode*> nodes = importer.getNodeMap();
-    model->saveNodes(nodes);
-
     // ugly code, can fix later??
     reinterpret_cast<GUIView*>(view)->setControllerReference(this);
 

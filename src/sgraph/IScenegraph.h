@@ -59,7 +59,7 @@ namespace sgraph
      * This function is useful in case all meshes of one scene graph have to be added to another
      * in an attempt to merge two scene graphs
      */
-        virtual map<string,SGNode *> getNodes()=0;
+        virtual map<string,SGNode *>* getNodes()=0;
         virtual void dispose()=0;
 
       /**

@@ -80,8 +80,8 @@ namespace sgraph {
 
 
 
-    map<string, SGNode *> getNodes() {
-      return nodes;
+    map<string, SGNode *>* getNodes() {
+      return &nodes;
     }
 
     void setMeshes(map<string,util::PolygonMesh<VertexAttrib> >& meshes) {

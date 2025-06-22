@@ -44,18 +44,14 @@ void Model::clearCommandQueue()
         cout<<"model queue is not empty "<<endl;
         command::ICommand* command = commandQueue.front();
         string nodeName = command->getNodeName();
-        if(nodes.find(nodeName) != nodes.end())
+        map<string, sgraph::SGNode *>* nodes = scenegraph->getNodes();
+        cout<<"Node test 2:"<<nodes->size()<<endl;
+        if(nodes->find(nodeName) != nodes->end())
         {
             // node exists in hierarchy
-            nodes[nodeName]->accept(command);
+            (*nodes)[nodeName]->accept(command);
         }
         commandQueue.pop();
     }
 }
 
-
-void Model::saveNodes(map<string,sgraph::SGNode *>& nodeMap)
-{
-    cout<<"Saving nodes"<<endl;
-    this->nodes = nodeMap;
-}
