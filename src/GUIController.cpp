@@ -9,6 +9,7 @@
 #include "ObjImporter.h"
 using namespace sgraph;
 #include <iostream>
+#include <thread>
 using namespace std;
 
 #include "sgraph/ScenegraphExporter.h"
@@ -103,5 +104,11 @@ void GUIController::error_callback(int error, const char* description)
 void GUIController::receiveJob(job::IJob* job)
 {
     cout<<"received job in controller"<<endl;
-    job->execute(model);
+    // job->execute(model);
+    thread t([this, job]()
+    {
+        job->execute(model);
+    });
+    t.detach();
+    
 }

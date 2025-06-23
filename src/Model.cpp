@@ -2,6 +2,8 @@
 #include "sgraph/SGNode.h"
 #include <GLFW/glfw3.h>
 #include <iostream>
+#include <thread>
+#include <mutex>
 
 Model::Model() {
 
@@ -34,24 +36,30 @@ map<string, util::TextureImage*> Model::getTextureMap()
 void Model::addToCommandQueue(command::ICommand* command)
 {
     cout<<"Adding to command queue"<<endl;
-    commandQueue.push(command);
+    m.lock();
+    backQueue.push(command);
+    m.unlock();
 }
 
 void Model::clearCommandQueue()
 {
-    while(!commandQueue.empty())
+    if(backQueue.empty())
+        return;
+    m.lock();
+    std::swap(backQueue, frontQueue);
+    m.unlock();
+    while(!frontQueue.empty())
     {
-        cout<<"model queue is not empty "<<endl;
-        command::ICommand* command = commandQueue.front();
+        cout<<"model queue is not empty : "<<frontQueue.size()<<endl;
+        command::ICommand* command = frontQueue.front();
         string nodeName = command->getNodeName();
         map<string, sgraph::SGNode *>* nodes = scenegraph->getNodes();
-        cout<<"Node test 2:"<<nodes->size()<<endl;
         if(nodes->find(nodeName) != nodes->end())
         {
             // node exists in hierarchy
             (*nodes)[nodeName]->accept(command);
         }
-        commandQueue.pop();
+        frontQueue.pop();
     }
 }
 

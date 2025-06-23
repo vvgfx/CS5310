@@ -8,6 +8,7 @@
 #include "TextureImage.h"
 #include "sgraph/Commands/ICommand.h"
 #include <queue>
+#include <mutex>
 using namespace std;
 
 class Model 
@@ -29,7 +30,9 @@ private:
     sgraph::IScenegraph *scenegraph;
     map<string, util::TextureImage*> textureMap;
 
-    queue<command::ICommand*> commandQueue;
+    queue<command::ICommand*> frontQueue;
+    queue<command::ICommand*> backQueue;
+    mutex m;
 
 };
 #endif
