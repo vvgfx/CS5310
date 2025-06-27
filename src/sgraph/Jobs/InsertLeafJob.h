@@ -20,8 +20,8 @@ namespace job
     {
     public:
         InsertLeafJob(string nodeName, string newNodeName, glm::vec3 albedoVal, float metallicVal, float roughnessVal, float aoVal, string instanceOf, string texName)
-        : albedo(albedoVal)
         {
+            this->albedo = albedoVal;
             this->nodeName = nodeName;
             this->newNodeName = newNodeName;
             this->metallic = metallicVal;
@@ -46,7 +46,7 @@ namespace job
 
     private:
         string newNodeName;
-        glm::vec3& albedo;
+        glm::vec3 albedo;
         float metallic, roughness, ao;
         string instanceOf, textureName;
     };

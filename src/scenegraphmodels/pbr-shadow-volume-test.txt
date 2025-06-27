@@ -1,6 +1,8 @@
 #all the instances
-instance box models/box-outside.obj
-instance sphere models/sphere.obj
+instance box models/box-outside-2.obj
+instance sphere models/sphere-2.obj
+#instance plane models/plane-test.obj
+#instance vase models/vase-2.obj
 
 #materials
 material box-material
