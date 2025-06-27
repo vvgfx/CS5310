@@ -6,6 +6,7 @@
 #include <fstream>
 #include <vector>
 #include <algorithm>
+#include <map>
 using namespace std;
 
 namespace util
@@ -22,6 +23,24 @@ namespace util
     class ObjAdjImporter
     {
     private:
+        // Struct to represent a unique vertex combination
+        struct VertexKey
+        {
+            int posIndex;
+            int texIndex;
+            int normalIndex;
+            
+            VertexKey(int pos = -1, int tex = -1, int norm = -1) 
+                : posIndex(pos), texIndex(tex), normalIndex(norm) {}
+            
+            bool operator<(const VertexKey& other) const
+            {
+                if (posIndex != other.posIndex) return posIndex < other.posIndex;
+                if (texIndex != other.texIndex) return texIndex < other.texIndex;
+                return normalIndex < other.normalIndex;
+            }
+        };
+
         struct Edge
         {
             unsigned int vert1, vert2;
@@ -170,6 +189,11 @@ namespace util
             int lineno;
             PolygonMesh<K> mesh;
 
+            // Map to track unique vertex combinations
+            map<VertexKey, unsigned int> vertexMap;
+            vector<VertexKey> uniqueVertices;
+            unsigned int nextVertexIndex = 0;
+
             lineno = 0;
 
             string line;
@@ -290,8 +314,10 @@ namespace util
                         str.str("");
                         str.clear();
                         str << "Line " << lineno << ": Face has too few vertices, must be at least 3";
+                        throw str.str();
                     }
 
+                    vector<unsigned int> faceVertices;
                     vector<unsigned int> t_triangles, t_tex, t_normal;
 
                     for (i = 1; i < tokens.size(); i++)
@@ -306,7 +332,7 @@ namespace util
                         while (getline(str, temp, '/'))
                             data.push_back(temp);
 
-                        if ((data.size() < 1) && (data.size() > 3))
+                        if ((data.size() < 1) || (data.size() > 3))
                         {
                             str.str("");
                             str.clear();
@@ -314,36 +340,54 @@ namespace util
                             throw str.str();
                         }
 
+                        // Parse vertex indices (OBJ is 1-based, convert to 0-based)
+                        VertexKey key;
                         // in OBJ file format all indices begin at 1, so must subtract 1 here
+                        // Position index (required)
                         int vi;
                         str.str("");
                         str.clear();
                         str << data[0];
                         str >> vi;
                         t_triangles.push_back(vi - 1); // vertex index
-                        if (data.size() > 1)
+                        key.posIndex = vi - 1;
+                        
+                        // Texture index (optional)
+                        if (data.size() > 1 && data[1].length() > 0)
                         {
-                            if (data[1].length() > 0) // a vertex texture index exists
-                            {
-                                str.str("");
-                                str.clear();
-                                str << data[1];
-                                str >> vi;
-                                t_tex.push_back(vi - 1);
-                            }
-
-                            if (data.size() > 2) // a vertex normal index exists
-                            {
-                                str.str("");
-                                str.clear();
-                                str << data[2];
-                                str >> vi;
-                                t_normal.push_back(vi - 1);
-                            }
+                            str.str("");
+                            str.clear();
+                            str << data[1];
+                            str >> vi;
+                            t_tex.push_back(vi - 1);
+                            key.texIndex = vi - 1;
+                            
                         }
+                        
+                        // Normal index (optional)
+                        if (data.size() > 2 && data[2].length() > 0)
+                        {
+                            str.str("");
+                            str.clear();
+                            str << data[2];
+                            str >> vi;
+                            t_normal.push_back(vi - 1);
+                            key.normalIndex = vi - 1;
+                        }
+
+                        // Check if this vertex combination already exists
+                        if (vertexMap.find(key) == vertexMap.end())
+                        {
+                            // New unique vertex combination
+                            vertexMap[key] = nextVertexIndex;
+                            uniqueVertices.push_back(key);
+                            nextVertexIndex++;
+                        }
+                        
+                        faceVertices.push_back(vertexMap[key]);
                     }
 
-                    if (t_triangles.size() < 3)
+                    if (faceVertices.size() < 3)
                     {
                         str.str("");
                         str.clear();
@@ -351,30 +395,31 @@ namespace util
                         throw str.str();
                     }
 
-                    // if face has more than 3 vertices, break down into a triangle fan
-                    for (i = 2; i < t_triangles.size(); i++)
+                    // Triangle fan for faces with more than 3 vertices
+                    for (i = 2; i < faceVertices.size(); i++)
                     {
-                        triangles.push_back(t_triangles[0]);
-                        triangles.push_back(t_triangles[i - 1]);
-                        triangles.push_back(t_triangles[i]);
-
-                        if (t_tex.size() > 0)
-                        {
-                            triangle_texture_indices.push_back(t_tex[0]);
-                            triangle_texture_indices.push_back(t_tex[i - 1]);
-                            triangle_texture_indices.push_back(t_tex[i]);
-                        }
-
-                        if (t_normal.size() > 0)
-                        {
-                            triangle_normal_indices.push_back(t_normal[0]);
-                            triangle_normal_indices.push_back(t_normal[i - 1]);
-                            triangle_normal_indices.push_back(t_normal[i]);
-                        }
+                        triangles.push_back(faceVertices[0]);
+                        triangles.push_back(faceVertices[i - 1]);
+                        triangles.push_back(faceVertices[i]);
+                        
+                        // if (t_tex.size() > 0)
+                        // {
+                        //     triangle_texture_indices.push_back(t_tex[0]);
+                        //     triangle_texture_indices.push_back(t_tex[i - 1]);
+                        //     triangle_texture_indices.push_back(t_tex[i]);
+                        // }
+    
+                        // if (t_normal.size() > 0)
+                        // {
+                        //     triangle_normal_indices.push_back(t_normal[0]);
+                        //     triangle_normal_indices.push_back(t_normal[i - 1]);
+                        //     triangle_normal_indices.push_back(t_normal[i]);
+                        // }
                     }
                 }
             }
 
+            // Scale and center if requested
             if (scaleAndCenter)
             {
                 // center about the origin and within a cube of side 1 centered at the origin
@@ -414,49 +459,90 @@ namespace util
                 }
             }
 
+            // Build final vertex data using unique combinations
             vector<K> vertexData;
             vector<float> data;
-            for (i = 0; i < vertices.size(); i++)
+            // for (i = 0; i < vertices.size(); i++)
+            // {
+            //     K v;
+
+            //     data.clear();
+            //     data.push_back(vertices[i].x);
+            //     data.push_back(vertices[i].y);
+            //     data.push_back(vertices[i].z);
+            //     data.push_back(vertices[i].w);
+
+            //     v.setData("position", data);
+            //     if (texcoords.size() == vertices.size())
+            //     {
+            //         data.clear();
+            //         data.push_back(texcoords[i].x);
+            //         data.push_back(texcoords[i].y);
+            //         data.push_back(texcoords[i].z);
+            //         data.push_back(texcoords[i].w);
+            //         v.setData("texcoord", data);
+            //     }
+            //     if (normals.size() == vertices.size())
+            //     {
+            //         data.clear();
+            //         data.push_back(normals[i].x);
+            //         data.push_back(normals[i].y);
+            //         data.push_back(normals[i].z);
+            //         data.push_back(normals[i].w);
+            //         v.setData("normal", data);
+            //     }
+
+            //     vertexData.push_back(v);
+            // }
+
+            for (const VertexKey& key : uniqueVertices)
             {
                 K v;
 
-                data.clear();
-                data.push_back(vertices[i].x);
-                data.push_back(vertices[i].y);
-                data.push_back(vertices[i].z);
-                data.push_back(vertices[i].w);
-
-                v.setData("position", data);
-                if (texcoords.size() == vertices.size())
+                // Set position data
+                if (key.posIndex >= 0 && key.posIndex < vertices.size())
                 {
                     data.clear();
-                    data.push_back(texcoords[i].x);
-                    data.push_back(texcoords[i].y);
-                    data.push_back(texcoords[i].z);
-                    data.push_back(texcoords[i].w);
+                    data.push_back(vertices[key.posIndex].x);
+                    data.push_back(vertices[key.posIndex].y);
+                    data.push_back(vertices[key.posIndex].z);
+                    data.push_back(vertices[key.posIndex].w);
+                    v.setData("position", data);
+                }
+
+                // Set texture coordinate data
+                if (key.texIndex >= 0 && key.texIndex < texcoords.size())
+                {
+                    data.clear();
+                    data.push_back(texcoords[key.texIndex].x);
+                    data.push_back(texcoords[key.texIndex].y);
+                    data.push_back(texcoords[key.texIndex].z);
+                    data.push_back(texcoords[key.texIndex].w);
                     v.setData("texcoord", data);
                 }
-                if (normals.size() == vertices.size())
+
+                // Set normal data
+                if (key.normalIndex >= 0 && key.normalIndex < normals.size())
                 {
                     data.clear();
-                    data.push_back(normals[i].x);
-                    data.push_back(normals[i].y);
-                    data.push_back(normals[i].z);
-                    data.push_back(normals[i].w);
+                    data.push_back(normals[key.normalIndex].x);
+                    data.push_back(normals[key.normalIndex].y);
+                    data.push_back(normals[key.normalIndex].z);
+                    data.push_back(normals[key.normalIndex].w);
                     v.setData("normal", data);
                 }
 
                 vertexData.push_back(v);
             }
 
-            if ((normals.size() == 0) || (normals.size() != vertices.size()))
+            // Compute normals if not provided
+            if (normals.size() == 0)
                 mesh.computeNormals();
 
             mesh.setVertexData(vertexData);
-            // mesh.setPrimitives(triangles); // Converting this to the adjacency type for Geometry Shaders.
             mesh.setPrimitives(findAdjacencies(triangles));
             mesh.setPrimitiveType(GL_TRIANGLES_ADJACENCY);
-            mesh.setPrimitiveSize(6); // fix - its 6 not 3
+            mesh.setPrimitiveSize(6);
             return mesh;
         }
     };
