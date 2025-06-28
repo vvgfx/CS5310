@@ -1,5 +1,5 @@
-#ifndef _UPDATELIGHTJOB
-#define _UPDATELIGHTJOB
+#ifndef _UPDATELIGHTJOB_H_
+#define _UPDATELIGHTJOB_H_
 
 #include <string>
 #include "../../Model.h"

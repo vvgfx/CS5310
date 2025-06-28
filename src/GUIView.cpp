@@ -393,7 +393,7 @@ void GUIView::showPopups()
                     leafAlbedo.y = colorAlbedo.y;
                     leafAlbedo.z = colorAlbedo.z;
                 };
-                
+
                 bool metallicChanged = ImGui::SliderFloat("Metallic", &materialMetallic, 0.1f, 1.0f);
                 bool roughnessChanged = ImGui::SliderFloat("Roughness", &materialRoughness, 0.1f, 1.0f);
                 bool aoChanged = ImGui::SliderFloat("Ambient Occlusion", &materialAO, 0.1f, 1.0f);

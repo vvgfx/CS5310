@@ -13,6 +13,7 @@
 #include "Jobs/UpdateTranslateJob.h"
 #include "Jobs/UpdateRotateJob.h"
 #include "Jobs/UpdateLightJob.h"
+#include "Jobs/InsertLightJob.h"
 #include "Jobs/UpdateLeafMaterialJob.h"
 #include "../GUIView.h"
 #include <ShaderProgram.h>
@@ -40,6 +41,7 @@ namespace sgraph
          */
         NodeDetailsRenderer(GUIView *v) : view(v)
         {
+            resetLightPopupVars();
         }
 
         /**
@@ -248,11 +250,88 @@ namespace sgraph
                     ImGui::Separator();
                 }
 
-                // button to add new lights here
+                // new light logic here
+                if(ImGui::Button("Add new light"))
+                {
+                    showLightPopup = true;
+                    addLightNode = node;
+                }
+                if(showLightPopup)
+                {
+                    // light popup
+                    ImGui::OpenPopup("Add new light");
+                    ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+                    ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+                    if(ImGui::BeginPopupModal("Add new light"))
+                    {
+                        ImGui::InputText("Light name", lightName, 32);
+                        float colorFloat3f[3] = {color.x, color.y, color.z};
+                        if(ImGui::DragFloat3("Color", colorFloat3f))
+                        {
+                            color.x = colorFloat3f[0];
+                            color.y = colorFloat3f[1];
+                            color.z = colorFloat3f[2];
+                        }
+
+                        float position3f[3] = {position.x, position.y, position.z};
+                        if(ImGui::DragFloat3("Position", position3f))
+                        {
+                            position.x = position3f[0];
+                            position.y = position3f[1];
+                            position.z = position3f[2];
+                        }
+
+                        float spotDir3f[3] = {spotDir.x, spotDir.y, spotDir.z};
+                        if(ImGui::DragFloat3("Spot Direction", spotDir3f))
+                        {
+                            spotDir.x = spotDir3f[0];
+                            spotDir.y = spotDir3f[1];
+                            spotDir.z = spotDir3f[2];
+                        }
+
+                        if(ImGui::InputFloat("Spot Angle", &spotAngle))
+                        {
+                        }
+
+                        if (ImGui::Button("Confirm")) 
+                        {
+                            job::InsertLightJob* insertLightJob = new job::InsertLightJob(addLightNode->getName(), lightName, color, spotDir, position, spotAngle);
+                            view->getViewJob(insertLightJob);
+                            resetLightPopupVars();
+                            ImGui::CloseCurrentPopup();
+                        }
+                        ImGui::SetItemDefaultFocus();
+                        ImGui::SameLine();
+                        if (ImGui::Button("Cancel")) 
+                        {
+                            resetLightPopupVars();
+                            ImGui::CloseCurrentPopup();
+                        }
+                        ImGui::EndPopup();
+                    }
+                }
             }
         }
 
+        void resetLightPopupVars()
+        {
+            showLightPopup = false;
+            strcpy(lightName, "");
+            spotDir = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+            position = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+            color = glm::vec3(0.0f);
+            spotAngle = 0.0f;
+        }
+
+        
+
         private:
+            bool showLightPopup;
+            SGNode* addLightNode;
+            char lightName[32];
+            glm::vec4 spotDir, position;
+            glm::vec3 color;
+            float spotAngle;
             GUIView *view;
         };
     }
