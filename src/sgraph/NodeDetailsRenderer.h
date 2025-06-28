@@ -13,6 +13,7 @@
 #include "Jobs/UpdateTranslateJob.h"
 #include "Jobs/UpdateRotateJob.h"
 #include "Jobs/UpdateLightJob.h"
+#include "Jobs/UpdateLeafMaterialJob.h"
 #include "../GUIView.h"
 #include <ShaderProgram.h>
 #include <ShaderLocationsVault.h>
@@ -64,6 +65,35 @@ namespace sgraph
         {
             if (ImGui::CollapsingHeader("Leaf Node", ImGuiTreeNodeFlags_DefaultOpen))
             {
+                string name = leafNode->getName();
+                util::Material leafMaterial = leafNode->getMaterial();
+                glm::vec4 albedo = leafMaterial.getAlbedo();
+                float metallic = leafMaterial.getMetallic();
+                float roughness = leafMaterial.getRoughness();
+                float ao = leafMaterial.getAO();
+                bool changed = false;
+                if(ImGui::DragFloat3("Albedo", &albedo.x))
+                {
+                    changed = true;
+                }
+                if(ImGui::InputFloat("Metallic", &metallic))
+                {
+                    changed = true;
+                }
+                if(ImGui::InputFloat("Roughness", &roughness))
+                {
+                    changed = true;
+                }
+                if(ImGui::InputFloat("AO", &ao))
+                {
+                    changed = true;
+                }
+                if(changed)
+                {
+                    job::UpdateLeafMaterialJob* updateMatJob = new job::UpdateLeafMaterialJob(leafNode->getName(), albedo, metallic, roughness, ao);
+                    view->getViewJob(updateMatJob);
+                }
+
             }
             drawLightHeader(leafNode);
         }
@@ -110,9 +140,6 @@ namespace sgraph
                 if (ImGui::DragFloat3("Scale", vec3f))
                 {
                     // this runs only when a value is changed
-                    cout << "value changed in NodeDetailsRenderer" << endl;
-                    // command::ScaleCommand *scaleCommand = new command::ScaleCommand(scaleNode->getName(), vec3f[0], vec3f[1], vec3f[2]);
-                    // view->addToCommandQueue(scaleCommand);
                     job::UpdateScaleJob *scaleJob = new job::UpdateScaleJob(scaleNode->getName(), vec3f[0], vec3f[1], vec3f[2]);
                     view->getViewJob(scaleJob);
                 }
@@ -210,7 +237,6 @@ namespace sgraph
                     }
                     if(changed)
                     {
-                        cout<<"Color float :"<<colorFloat[0]<<" , "<<colorFloat[1]<<" , "<<colorFloat[2]<<endl;
                         job::UpdateLightJob *updateLightJob = new job::UpdateLightJob(node->getName(), lights[i].getName(), colorFloat, spotDirFloat, positionFloat, spotAngle);
                         view->getViewJob(updateLightJob);
                     }
