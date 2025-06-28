@@ -68,23 +68,25 @@ namespace sgraph
                 string name = leafNode->getName();
                 util::Material leafMaterial = leafNode->getMaterial();
                 glm::vec4 albedo = leafMaterial.getAlbedo();
+                ImVec4 colorAlbedo =  ImVec4(albedo.x, albedo.y, albedo.z, albedo.w);
                 float metallic = leafMaterial.getMetallic();
                 float roughness = leafMaterial.getRoughness();
                 float ao = leafMaterial.getAO();
                 bool changed = false;
-                if(ImGui::DragFloat3("Albedo", &albedo.x))
+                if(ImGui::ColorEdit3("Albedo", (float*)&colorAlbedo))
+                {
+                    changed = true;
+                    albedo = {colorAlbedo.x, colorAlbedo.y, colorAlbedo.z, colorAlbedo.w};
+                }
+                if(ImGui::SliderFloat("Metallic", &metallic, 0.0f, 1.0f))
                 {
                     changed = true;
                 }
-                if(ImGui::InputFloat("Metallic", &metallic))
+                if(ImGui::SliderFloat("Roughness", &roughness, 0.0f, 1.0f))
                 {
                     changed = true;
                 }
-                if(ImGui::InputFloat("Roughness", &roughness))
-                {
-                    changed = true;
-                }
-                if(ImGui::InputFloat("AO", &ao))
+                if(ImGui::SliderFloat("AO", &ao, 0.0f, 1.0f))
                 {
                     changed = true;
                 }
@@ -208,6 +210,7 @@ namespace sgraph
                 for (int i = 0; i < lights.size(); i++)
                 {
                     ImGui::PushID(i); // Using index as unique ID
+                    string lightName = lights[i].getName();
                     glm::vec3 color = lights[i].getColor();
                     float colorFloat[3] = {color.x, color.y, color.z};
                     glm::vec4 spotDirection = lights[i].getSpotDirection();
@@ -216,6 +219,7 @@ namespace sgraph
                     float positionFloat[4] = {position.x, position.y, position.z, position.w};
                     float spotAngle = lights[i].getSpotCutoff();
                     bool changed  = false;
+                    ImGui::Text("Light Name : %s", lightName);
                     if (ImGui::DragFloat3("Color", colorFloat))
                     {
                         changed = true;
@@ -243,6 +247,8 @@ namespace sgraph
                     ImGui::PopID();
                     ImGui::Separator();
                 }
+
+                // button to add new lights here
             }
         }
 

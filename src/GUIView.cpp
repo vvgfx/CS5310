@@ -378,17 +378,25 @@ void GUIView::showPopups()
                 ImGui::InputText("Node name", childNodeName, 32);
                 ImGui::InputText("Object instance", objectInstanceName, 32);
 
-                float albedoFloat3f[3] = {leafAlbedo.x, leafAlbedo.y, leafAlbedo.z};
-                if(ImGui::DragFloat3("Albedo", albedoFloat3f, 0.01f, 0.0f, 1.0f))
-                {
-                    leafAlbedo.x = albedoFloat3f[0];
-                    leafAlbedo.y = albedoFloat3f[1];
-                    leafAlbedo.z = albedoFloat3f[2];
-                }
+                // float albedoFloat3f[3] = {leafAlbedo.x, leafAlbedo.y, leafAlbedo.z};
+                // if(ImGui::DragFloat3("Albedo", albedoFloat3f, 0.01f, 0.0f, 1.0f))
+                // {
+                //     leafAlbedo.x = albedoFloat3f[0];
+                //     leafAlbedo.y = albedoFloat3f[1];
+                //     leafAlbedo.z = albedoFloat3f[2];
+                // }
 
-                bool metallicChanged = ImGui::InputFloat("Metallic", &materialMetallic, 0.1f, 1.0f);
-                bool roughnessChanged = ImGui::InputFloat("Roughness", &materialRoughness, 0.1f, 1.0f);
-                bool aoChanged = ImGui::InputFloat("Ambient Occlusion", &materialAO, 0.1f, 1.0f);
+                ImVec4 colorAlbedo = ImVec4(leafAlbedo.x, leafAlbedo.y, leafAlbedo.z, 1.0f);
+                if(ImGui::ColorEdit3("clear color", (float*)&colorAlbedo))
+                {
+                    leafAlbedo.x = colorAlbedo.x;
+                    leafAlbedo.y = colorAlbedo.y;
+                    leafAlbedo.z = colorAlbedo.z;
+                };
+                
+                bool metallicChanged = ImGui::SliderFloat("Metallic", &materialMetallic, 0.1f, 1.0f);
+                bool roughnessChanged = ImGui::SliderFloat("Roughness", &materialRoughness, 0.1f, 1.0f);
+                bool aoChanged = ImGui::SliderFloat("Ambient Occlusion", &materialAO, 0.1f, 1.0f);
                 
                 ImGui::Separator();
                 if (ImGui::Button("Confirm")) 
