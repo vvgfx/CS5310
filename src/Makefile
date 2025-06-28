@@ -1,5 +1,5 @@
 # ImGui objects
-IMGUI_OBJS = imgui.o imgui_demo.o imgui_draw.o imgui_tables.o imgui_widgets.o imgui_impl_glfw.o imgui_impl_opengl3.o
+IMGUI_OBJS = imgui.o imgui_draw.o imgui_tables.o imgui_widgets.o imgui_impl_glfw.o imgui_impl_opengl3.o #imgui_demo.o removed demo file
 
 # Original objects plus ImGui
 OBJS = RenderingEngine.o View.o Controller.o Model.o GUIView.o GUIController.o $(IMGUI_OBJS)
@@ -44,8 +44,8 @@ GUIView.o: GUIView.cpp GUIView.h
 imgui.o: ../include/Imgui/imgui.cpp
 	$(COMPILER) $(INCLUDES) $(CFLAGS) -c ../include/Imgui/imgui.cpp
 
-imgui_demo.o: ../include/Imgui/imgui_demo.cpp
-	$(COMPILER) $(INCLUDES) $(CFLAGS) -c ../include/Imgui/imgui_demo.cpp
+# imgui_demo.o: ../include/Imgui/imgui_demo.cpp
+# 	$(COMPILER) $(INCLUDES) $(CFLAGS) -c ../include/Imgui/imgui_demo.cpp
 
 imgui_draw.o: ../include/Imgui/imgui_draw.cpp
 	$(COMPILER) $(INCLUDES) $(CFLAGS) -c ../include/Imgui/imgui_draw.cpp
