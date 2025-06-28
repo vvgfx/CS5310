@@ -13,6 +13,7 @@ namespace util
          * direction in which it is pointing (if a spotlight), angle of the cone (if a spotlight)
          * 
          * Update: It now also takes a "color" parameter, for PBR support.
+         * Update 2: It now has a default "name" string to use for equality checks.
          */
   class Light
   {
@@ -27,6 +28,7 @@ namespace util
       spotDirection = glm::vec4(0, 0, 0, 0);
       spotCutoff = 0.0f;
       color = glm::vec3(0, 0, 0);
+      name = "default";
     }
     Light(const Light& l)
     {
@@ -40,6 +42,7 @@ namespace util
 
       // PBR stuff here!!!!!
       color = glm::vec3(l.color);
+      name = l.name;
     }
     ~Light()
     {
@@ -75,11 +78,16 @@ namespace util
     inline void setColor(float r, float g, float b);
     inline void setColor(glm::vec3& color);
 
+    // set and get name
+    inline void setName(string name);
+    inline string getName();
+
   private:
     glm::vec3 ambient, diffuse, specular;
     glm::vec4 position, spotDirection;
     glm::vec3 color; // PBR color here. This represents color (with intensity?)
     float spotCutoff;
+    string name;
   };
 
 
@@ -185,6 +193,16 @@ namespace util
   void Light::setColor(glm::vec3& col)
   {
     color = glm::vec3(col);
+  }
+
+  void Light::setName(string name)
+  {
+    this->name = name;
+  }
+
+  string Light::getName()
+  {
+    return this->name;
   }
 
 }

@@ -94,9 +94,9 @@ namespace sgraph
     }
 
 
-    std::vector<util::Light> getLights()
+    std::vector<util::Light>* getLights()
     {
-      return lights;
+      return &lights;
     }
 
   };

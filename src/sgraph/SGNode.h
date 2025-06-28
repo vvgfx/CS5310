@@ -87,7 +87,7 @@ namespace sgraph {
     /**
      * Get all the lights attached to this node.
      */
-    virtual vector<util::Light> getLights()=0;
+    virtual vector<util::Light>* getLights()=0;
 
     protected:
     /**

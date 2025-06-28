@@ -99,7 +99,7 @@ void main()
     else
         lightVec = normalize(-light.position.xyz);
 
-    bool isSpot = light.spotAngleCosine < 0.95;
+    bool isSpot = light.spotAngleCosine < 0.99;
 
     // spot direction is already in the view co-ordinate space now.
 
@@ -111,6 +111,8 @@ void main()
         spotAttenuation = 1.0 - (1.0 - angle) * 1.0 / (1.0 - light.spotAngleCosine);
     }
 
+    spotAttenuation = clamp(spotAttenuation, 0.0f, 1.0f);
+    
     halfwayVec = normalize(viewVec + lightVec); // world space
 
     dist = length(light.position.xyz - fPosition.xyz);

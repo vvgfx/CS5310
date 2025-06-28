@@ -1,0 +1,47 @@
+C:\Users\ASUS\AppData\Local\Temp\RenderDoc\Rendering_Engine_2025.06.27_17.26.07_frame15744.rdc - Frame #15744
+
+ EID  | Event                                                                                             | Action #
+--------------------------------------------------------------------------------------------------------------------
+6     | - glClear(Color = <0.000000, 0.000000, 0.000000, 1.000000>, Depth = <1.000000>, Stencil = <0x00>) | 1     
+311   | - Depth-only Pass #1                                                                              | 2-12  
+12    |  \- glDrawElements(72)                                                                            | 2     
+16    |   - glDrawElements(72)                                                                            | 3     
+20    |   - glDrawElements(76800)                                                                         | 4     
+24    |   - glDrawElements(55440)                                                                         | 5     
+28    |   - glDrawElements(472488)                                                                        | 6     
+34    |   - glClear(Stencil = <0x00>)                                                                     | 7     
+46    |   - glDrawElements(72)                                                                            | 8     
+50    |   - glDrawElements(72)                                                                            | 9     
+54    |   - glDrawElements(76800)                                                                         | 10    
+58    |   - glDrawElements(55440)                                                                         | 11    
+62    |   - glDrawElements(472488)                                                                        | 12    
+312   | - Colour Pass #1 (1 Targets + Depth)                                                              | 13-40 
+83    |  \- glDrawElements(72)                                                                            | 13    
+92    |   - glDrawElements(72)                                                                            | 14    
+101   |   - glDrawElements(76800)                                                                         | 15    
+110   |   - glDrawElements(55440)                                                                         | 16    
+119   |   - glDrawElements(472488)                                                                        | 17    
+122   |   - glClear(Stencil = <0x00>)                                                                     | 18    
+134   |   - glDrawElements(72)                                                                            | 19    
+138   |   - glDrawElements(72)                                                                            | 20    
+142   |   - glDrawElements(76800)                                                                         | 21    
+146   |   - glDrawElements(55440)                                                                         | 22    
+150   |   - glDrawElements(472488)                                                                        | 23    
+171   |   - glDrawElements(72)                                                                            | 24    
+180   |   - glDrawElements(72)                                                                            | 25    
+189   |   - glDrawElements(76800)                                                                         | 26    
+198   |   - glDrawElements(55440)                                                                         | 27    
+207   |   - glDrawElements(472488)                                                                        | 28    
+220   |   - glDrawElements(72)                                                                            | 29    
+225   |   - glDrawElements(72)                                                                            | 30    
+230   |   - glDrawElements(76800)                                                                         | 31    
+235   |   - glDrawElements(55440)                                                                         | 32    
+240   |   - glDrawElements(472488)                                                                        | 33    
+272   |   - glDrawElementsBaseVertex(126)                                                                 | 34    
+275   |   - glDrawElementsBaseVertex(246)                                                                 | 35    
+280   |   - glDrawElementsBaseVertex(138)                                                                 | 36    
+283   |   - glDrawElementsBaseVertex(591)                                                                 | 37    
+288   |   - glDrawElementsBaseVertex(144)                                                                 | 38    
+291   |   - glDrawElementsBaseVertex(336)                                                                 | 39    
+309   |   - glFlush()                                                                                     | 40    
+310   | - SwapBuffers(Backbuffer Color)                                                                   | 41    

@@ -37,7 +37,7 @@ namespace sgraph
 
         void saveLights(SGNode *node)
         {
-            vector<util::Light> nodeLights =  node->getLights();
+            vector<util::Light> nodeLights =  *(node->getLights());
             if(nodeLights.empty())
                 return;
             for(auto& light : nodeLights)

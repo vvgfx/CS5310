@@ -12,6 +12,7 @@
 #include "Jobs/UpdateScaleJob.h"
 #include "Jobs/UpdateTranslateJob.h"
 #include "Jobs/UpdateRotateJob.h"
+#include "Jobs/UpdateLightJob.h"
 #include "../GUIView.h"
 #include <ShaderProgram.h>
 #include <ShaderLocationsVault.h>
@@ -175,31 +176,44 @@ namespace sgraph
         {
             if (ImGui::CollapsingHeader("Lights", ImGuiTreeNodeFlags_DefaultOpen))
             {
-                vector<util::Light> lights = node->getLights();
+                vector<util::Light> lights = *(node->getLights());
 
                 for (int i = 0; i < lights.size(); i++)
                 {
                     ImGui::PushID(i); // Using index as unique ID
                     glm::vec3 color = lights[i].getColor();
+                    float colorFloat[3] = {color.x, color.y, color.z};
                     glm::vec4 spotDirection = lights[i].getSpotDirection();
+                    float spotDirFloat[3] = {spotDirection.x, spotDirection.y, spotDirection.z};
                     glm::vec4 position = lights[i].getPosition();
+                    float positionFloat[4] = {position.x, position.y, position.z, position.w};
                     float spotAngle = lights[i].getSpotCutoff();
-                    if (ImGui::DragFloat3("Color", &color.x))
+                    bool changed  = false;
+                    if (ImGui::DragFloat3("Color", colorFloat))
                     {
+                        changed = true;
                     }
 
-                    if (ImGui::DragFloat3("Spot Direction", &spotDirection.x))
+                    if (ImGui::DragFloat3("Spot Direction", spotDirFloat))
                     {
+                        changed = true;
                     }
 
-                    if (ImGui::DragFloat3("Position", &position.x))
+                    if (ImGui::DragFloat3("Position", positionFloat))
                     {
+                        changed = true;
                     }
 
                     if (ImGui::InputFloat("Angle", &spotAngle))
                     {
+                        changed = true;
                     }
-
+                    if(changed)
+                    {
+                        cout<<"Color float :"<<colorFloat[0]<<" , "<<colorFloat[1]<<" , "<<colorFloat[2]<<endl;
+                        job::UpdateLightJob *updateLightJob = new job::UpdateLightJob(node->getName(), lights[i].getName(), colorFloat, spotDirFloat, positionFloat, spotAngle);
+                        view->getViewJob(updateLightJob);
+                    }
                     ImGui::PopID();
                     ImGui::Separator();
                 }

@@ -328,6 +328,7 @@ namespace sgraph {
                     float x, y, z;
                     string name;
                     input >> name;
+                    light.setName(name);
                     string command;
                     input >> command;
                     while(command != "end-light")
