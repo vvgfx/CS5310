@@ -32,6 +32,19 @@ namespace sgraph
       
     }
 
+    void removeChild(string name)
+    {
+      for(vector<SGNode *>::iterator it = children.begin(); it != children.end(); it++)
+      {
+        if((*it)->getName() == name)
+        {
+          // this is the node to erase.
+          children.erase(it);
+          break;
+        }
+      }
+    }
+
     
 
     /**

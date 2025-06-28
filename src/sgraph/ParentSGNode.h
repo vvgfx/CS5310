@@ -19,6 +19,9 @@ namespace sgraph {
             }
         }
         virtual void addChild(SGNode *child)=0;
+
+        virtual void removeChild(string childName)=0;
+        
         vector<SGNode *> getChildren() {
             return children;
         }

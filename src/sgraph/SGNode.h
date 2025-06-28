@@ -44,6 +44,9 @@ namespace sgraph {
      */
     virtual void setParent(SGNode *parent)=0;
 
+
+    virtual SGNode* getParent()=0;
+
     /**
      * Traverse the scene graph rooted at this node, and store references to the scenegraph object
      * \param graph a reference to the scenegraph object of which this tree is a part

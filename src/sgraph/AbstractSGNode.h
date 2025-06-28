@@ -57,6 +57,11 @@ namespace sgraph
       this->parent = parent;
     }
 
+    SGNode* getParent()
+    {
+      return this->parent;
+    }
+
     /**
      * Sets the scene graph object whose part this node is and then adds itself
      * to the scenegraph (in case the scene graph ever needs to directly access this node)

@@ -25,6 +25,7 @@ using namespace std;
 #include "sgraph/Jobs/InsertTranslateJob.h"
 #include "sgraph/Jobs/InsertScaleJob.h"
 #include "sgraph/Jobs/InsertLeafJob.h"
+#include "sgraph/Jobs/DeleteNodeJob.h"
 
 // Imgui required files.
 #include "imgui.h"
@@ -201,6 +202,8 @@ void GUIView::showPopups()
             ImGui::Separator();
             if (ImGui::Button("Yes")) 
             {
+                job::DeleteNodeJob* deleteNodeJob = new job::DeleteNodeJob(deleteNode->getName(), deleteNode->getParent()->getName());
+                getViewJob(deleteNodeJob);
                 ImGui::CloseCurrentPopup();
                 sgRenderer->resetDeleteNode();
             }

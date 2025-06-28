@@ -34,6 +34,13 @@ namespace sgraph
     }
 
     
+    void removeChild(string name)
+    {
+      if (this->children.size()>0 && this->children[0]->getName() == name)
+      {
+        this->children = vector<SGNode*>();
+      }
+    }
 
     
 
