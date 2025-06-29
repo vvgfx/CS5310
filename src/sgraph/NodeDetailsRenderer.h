@@ -14,6 +14,7 @@
 #include "Jobs/UpdateRotateJob.h"
 #include "Jobs/UpdateLightJob.h"
 #include "Jobs/InsertLightJob.h"
+#include "Jobs/DeleteLightJob.h"
 #include "Jobs/UpdateLeafMaterialJob.h"
 #include "../GUIView.h"
 #include <ShaderProgram.h>
@@ -221,7 +222,8 @@ namespace sgraph
                     float positionFloat[4] = {position.x, position.y, position.z, position.w};
                     float spotAngle = lights[i].getSpotCutoff();
                     bool changed  = false;
-                    ImGui::Text("Light Name : %s", lightName);
+                    string lightText = "Light name : "  + lightName;
+                    ImGui::Text(lightText.c_str(), lightName);
                     if (ImGui::DragFloat3("Color", colorFloat))
                     {
                         changed = true;
@@ -245,6 +247,11 @@ namespace sgraph
                     {
                         job::UpdateLightJob *updateLightJob = new job::UpdateLightJob(node->getName(), lights[i].getName(), colorFloat, spotDirFloat, positionFloat, spotAngle);
                         view->getViewJob(updateLightJob);
+                    }
+                    if(ImGui::Button("Delete light"))
+                    {
+                        job::DeleteLightJob *deleteLightJob = new job::DeleteLightJob(node->getName(), lights[i].getName());
+                        view->getViewJob(deleteLightJob);
                     }
                     ImGui::PopID();
                     ImGui::Separator();
