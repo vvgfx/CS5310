@@ -28,7 +28,7 @@ View::~View(){
 
 }
 
-void View::init(Callbacks *callbacks,map<string,util::PolygonMesh<VertexAttrib>>& meshes, map<string, util::TextureImage*>& texMap)
+void View::init(Callbacks *callbacks,map<string,util::PolygonMesh<VertexAttrib>>& meshes, map<string, unsigned int>& texIdMap)
 {
     cout<<"Parent view init"<<endl;
     if (!glfwInit())
@@ -80,7 +80,8 @@ void View::init(Callbacks *callbacks,map<string,util::PolygonMesh<VertexAttrib>>
     gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
     glfwSwapInterval(1); // VSync!!!
 
-    initTextures(texMap);
+    // initTextures(texMap);
+    this->textureIdMap = &texIdMap;
     int window_width,window_height;
     glfwGetFramebufferSize(window,&window_width,&window_height);
     projection = glm::perspective(glm::radians(60.0f),(float)window_width/window_height,0.1f,10000.0f);
@@ -88,9 +89,9 @@ void View::init(Callbacks *callbacks,map<string,util::PolygonMesh<VertexAttrib>>
     pipeline = new pipeline::PBRShadowVolumePipeline();
     reinterpret_cast<pipeline::PBRShadowVolumePipeline*>(pipeline)->init(meshes, projection);
     // pipeline = new pipeline::TexturedPBRSVPipeline();
-    // reinterpret_cast<pipeline::TexturedPBRSVPipeline*>(pipeline)->init(meshes, projection, textureIdMap);
+    // reinterpret_cast<pipeline::TexturedPBRSVPipeline*>(pipeline)->init(meshes, projection, texIdMap);
     // pipeline = new pipeline::TexturedPBRPipeline();
-    // reinterpret_cast<pipeline::TexturedPBRPipeline*>(pipeline)->init(meshes, projection, textureIdMap);
+    // reinterpret_cast<pipeline::TexturedPBRPipeline*>(pipeline)->init(meshes, projection, texIdMap);
     // pipeline = new pipeline::BasicPBRPipeline();
     // reinterpret_cast<pipeline::BasicPBRPipeline*>(pipeline)->init(meshes, projection);
     #pragma endregion
@@ -99,33 +100,6 @@ void View::init(Callbacks *callbacks,map<string,util::PolygonMesh<VertexAttrib>>
 
     frames = 0;
     time = glfwGetTime();
-}
-
-void View::initTextures(map<string, util::TextureImage*>& textureMap)
-{
-    for(typename map<string, util::TextureImage*>::iterator it = textureMap.begin(); it!=textureMap.end(); it++)
-    {
-        //first - name of texture, second - texture itself
-        util::TextureImage* textureObject = it->second;
-        
-        //generate texture ID
-        unsigned int textureId;
-        glGenTextures(1,&textureId);
-        glBindTexture(GL_TEXTURE_2D,textureId);
-        
-        //texture params
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
-	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,GL_LINEAR); // Mipmaps are not available for maximization
-        
-        //copy texture to GPU
-	    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, textureObject->getWidth(),textureObject->getHeight(), 0, GL_RGB, GL_UNSIGNED_BYTE,textureObject->getImage());
-        glGenerateMipmap(GL_TEXTURE_2D);
-        
-        //save id in map
-        textureIdMap[it->first] = textureId;
-    }
 }
 
 void View::computeTangents(util::PolygonMesh<VertexAttrib>& tmesh)

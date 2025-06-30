@@ -42,9 +42,9 @@ GUIView::~GUIView()
 {
 }
 
-void GUIView::init(Callbacks *callbacks, map<string, util::PolygonMesh<VertexAttrib>> &meshes, map<string, util::TextureImage *>& texMap)
+void GUIView::init(Callbacks *callbacks, map<string, util::PolygonMesh<VertexAttrib>> &meshes, map<string, unsigned int>& texIdMap)
 {
-    View::init(callbacks, meshes, texMap);
+    View::init(callbacks, meshes, texIdMap);
     cout<<"Setting up ImGUI initialization"<<endl;
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -58,11 +58,6 @@ void GUIView::init(Callbacks *callbacks, map<string, util::PolygonMesh<VertexAtt
 
     GuiVisitor = new sgraph::ScenegraphGUIRenderer(this);
     NodeRenderer = new sgraph::NodeDetailsRenderer(this);
-}
-
-void GUIView::initTextures(map<string, util::TextureImage *> &textureMap)
-{
-    View::initTextures(textureMap);
 }
 
 void GUIView::computeTangents(util::PolygonMesh<VertexAttrib> &tmesh)

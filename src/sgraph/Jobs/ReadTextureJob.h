@@ -3,7 +3,7 @@
 
 #include <string>
 #include "../../Model.h"
-// #include "../Commands/InsertGroupCommand.h"
+#include "../../Tasks/TransferTextureTask.h"
 #include "../PPMImageLoader.h"
 #include "Ijob.h"
 using namespace std;
@@ -25,18 +25,22 @@ namespace job
             this->textureName = texName;
             this->texturePath = texPath;
         }
+        ~ReadTextureJob()
+        {
+        }
 
         virtual void execute(Model *m)
         {
-            // command::InsertGroupCommand* groupCommand = new command::InsertGroupCommand(nodeName, newNodeName, m->getScenegraph());
-            // cout<<"Adding to command queue in job"<<endl;
-            // m->addToCommandQueue(groupCommand);
             cout<<"About to load textures!"<<endl;
             sgraph::PPMImageLoader textureLoader;
             textureLoader.load(texturePath);
             util::TextureImage* texImage = new util::TextureImage(textureLoader.getPixels(), textureLoader.getWidth(), textureLoader.getHeight(), textureName);
             cout<<"Loaded textures!"<<endl;
             
+            // now create the task and add it to the task queue
+            // worried about object lifespan. the texImage should survive, but what about the 
+            task::TransferTextureTask* memTransferTask = new task::TransferTextureTask(textureName, texImage);
+            m->addToTaskQueue(memTransferTask);
         }
 
     private:

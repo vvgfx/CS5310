@@ -26,7 +26,7 @@ class View
 public:
     View();
     ~View();
-    virtual void init(Callbacks* callbacks,map<string,util::PolygonMesh<VertexAttrib>>& meshes, map<string, util::TextureImage*>& textureMap);
+    virtual void init(Callbacks* callbacks,map<string,util::PolygonMesh<VertexAttrib>>& meshes, map<string, unsigned int>& texIdMap);
     virtual void Resize();
     virtual void display(sgraph::IScenegraph *scenegraph);
     virtual bool shouldWindowClose();
@@ -43,7 +43,6 @@ public:
     virtual void changeCameraType(int type);
     virtual void initLights(sgraph::IScenegraph *scenegraph);
     virtual void switchShaders();
-    virtual void initTextures(map<string, util::TextureImage*>& textureMap);
     float xDelta, yDelta, zDelta;
     
     //This class saves the shader locations of all the light inputs.
@@ -99,7 +98,7 @@ public:
     vector<util::Light> lights;
     vector<glm::mat4> lightTransformations;
     bool isToonShaderUsed = false;
-    map<string, unsigned int> textureIdMap;
+    map<string, unsigned int>* textureIdMap;
 };
 
 #endif

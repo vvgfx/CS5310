@@ -19,6 +19,8 @@ namespace job {
         /**
          * This should do any sort of processing required in a parallel thread, and once done,
          * create a ICommand node and add it to the command-queue using m->addToCommandQueue()
+         * Alternatively, if you do not work on a scenegraph node, you can create a task and add
+         * it to the task queue through m->addToTaskQueue()
          */
         virtual void execute(Model* m)=0;
 

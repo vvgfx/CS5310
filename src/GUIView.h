@@ -15,7 +15,7 @@ class GUIView : public View
 public:
     GUIView();
     ~GUIView();
-    void init(Callbacks* callbacks,map<string,util::PolygonMesh<VertexAttrib>>& meshes, map<string, util::TextureImage*>& textureMap) override;
+    void init(Callbacks* callbacks,map<string,util::PolygonMesh<VertexAttrib>>& meshes, map<string, unsigned int>& texIdMap) override;
     void Resize() override;
     void display(sgraph::IScenegraph *scenegraph) override;
     bool shouldWindowClose() override;
@@ -32,7 +32,6 @@ public:
     void changeCameraType(int type) override;
     void initLights(sgraph::IScenegraph *scenegraph) override;
     void switchShaders() override;
-    void initTextures(map<string, util::TextureImage*>& textureMap) override;
 
     // GUI stuff
     void ImGUIView(sgraph::IScenegraph *scenegraph);

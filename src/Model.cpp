@@ -36,22 +36,38 @@ map<string, util::TextureImage*>& Model::getTextureMap()
 void Model::addToCommandQueue(command::ICommand* command)
 {
     cout<<"Adding to command queue"<<endl;
-    m.lock();
-    backQueue.push(command);
-    m.unlock();
+    commandMutex.lock();
+    backCommandQueue.push(command);
+    commandMutex.unlock();
 }
 
-void Model::clearCommandQueue()
+void Model::clearQueues()
 {
-    if(backQueue.empty())
-        return;
-    m.lock();
-    std::swap(backQueue, frontQueue);
-    m.unlock();
-    while(!frontQueue.empty())
+    // clear tasks first
+    if(!backTaskQueue.empty())
     {
-        cout<<"model queue is not empty : "<<frontQueue.size()<<endl;
-        command::ICommand* command = frontQueue.front();
+        cout<<"Task queue is not empty!"<<endl;
+        taskMutex.lock();
+        std::swap(backTaskQueue, frontTaskQueue);
+        taskMutex.unlock();
+        while(!frontTaskQueue.empty())
+        {
+            task::ITask* task = frontTaskQueue.front();
+            task->execute(this);
+            frontTaskQueue.pop();
+        }
+    }
+
+    // clear command queues now.
+    if(backCommandQueue.empty())
+        return;
+    commandMutex.lock();
+    std::swap(backCommandQueue, frontCommandQueue);
+    commandMutex.unlock();
+    while(!frontCommandQueue.empty())
+    {
+        cout<<"model queue is not empty : "<<frontCommandQueue.size()<<endl;
+        command::ICommand* command = frontCommandQueue.front();
         string nodeName = command->getNodeName();
         map<string, sgraph::SGNode *>* nodes = scenegraph->getNodes();
         if(nodes->find(nodeName) != nodes->end())
@@ -59,7 +75,79 @@ void Model::clearCommandQueue()
             // node exists in hierarchy
             (*nodes)[nodeName]->accept(command);
         }
-        frontQueue.pop();
+        frontCommandQueue.pop();
     }
 }
 
+void Model::addToTaskQueue(task::ITask* task)
+{
+    cout<<"Adding to task queue"<<endl;
+    taskMutex.lock();
+    backTaskQueue.push(task);
+    taskMutex.unlock();
+
+}
+
+// This needs to run AFTER the view's init because the opengl context and references are set up there
+void Model::initTextures(map<string, util::TextureImage*>& textureMap)
+{
+    for(typename map<string, util::TextureImage*>::iterator it = textureMap.begin(); it!=textureMap.end(); it++)
+    {
+        //first - name of texture, second - texture itself
+        util::TextureImage* textureObject = it->second;
+        //generate texture ID
+        unsigned int textureId;
+        glGenTextures(1,&textureId);
+        glBindTexture(GL_TEXTURE_2D,textureId);
+        //texture params
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
+	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,GL_LINEAR); // Mipmaps are not available for maximization
+        
+        //copy texture to GPU
+	    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, textureObject->getWidth(),textureObject->getHeight(), 0, GL_RGB, GL_UNSIGNED_BYTE,textureObject->getImage());
+        glGenerateMipmap(GL_TEXTURE_2D);
+        
+        //save id in map
+        textureIdMap[it->first] = textureId;
+        
+    }
+}
+
+/**
+ * Since this code does not use mutexes, run it on the main thread. Use the task interface if you need to.
+ */
+void Model::addTexture(string name, util::TextureImage* textureObject)
+{
+    // first add to texture map
+    cout<<"transfering texture to GPU"<<endl;
+    textureMap[name] = textureObject;
+    unsigned int textureId;
+    glGenTextures(1,&textureId);
+    glBindTexture(GL_TEXTURE_2D,textureId);
+    
+    //texture params
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,GL_LINEAR); // Mipmaps are not available for maximization
+    
+    //copy texture to GPU
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, textureObject->getWidth(),textureObject->getHeight(), 0, GL_RGB, GL_UNSIGNED_BYTE,textureObject->getImage());
+    glGenerateMipmap(GL_TEXTURE_2D);
+    
+    // worried about race/starvation here. Might need to add a mutex and pass it all the way to pipeline (model->controller->view->pipline)
+    // alternative is to run this through the command so that it runs on the main thread. 
+    // Hopefully the bottleneck is in file IO and not CPU-GPU memory transfer!
+
+    // running this on the main thread for now.
+    //save id in map
+    textureIdMap[name] = textureId;
+    cout<<"GPU transfer done"<<endl;
+}
+
+map<string, unsigned int>& Model::getTextureIdMap()
+{
+    return this->textureIdMap;
+}
