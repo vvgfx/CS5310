@@ -198,6 +198,8 @@ void main()
 
     fColor = vec4(color, 1.0);
 
+    // fColor = vec4(texture(albedoMap, fTexCoord.st).rgb, 1.0);
+
     // Debugging code here
     
     // specular = (NDF * G * F) / (4.0 * max(dot(tempNormal, viewVec), 0.0) * max(dot(tempNormal, lightVec), 0.0) + 0.001);

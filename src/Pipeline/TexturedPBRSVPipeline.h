@@ -61,7 +61,7 @@ namespace pipeline
         sgraph::SGNodeVisitor *ambientRenderer;
 
         map<string, util::ObjectInstance *> objects;
-        map<string, unsigned int> textureIdMap;
+        map<string, unsigned int>* textureIdMap;
         vector<util::Light> lights;
         vector<glm::mat4> lightTransformations;
         glm::mat4 projection;
@@ -78,7 +78,7 @@ namespace pipeline
     {
         this->projection = proj;
 
-        textureIdMap = texMap;
+        textureIdMap = &texMap;
         // Render program initialization
         renderProgram.createProgram("shaders/shadow/TexturePBR-SV.vert",
                                     "shaders/shadow/TexturePBR-SV.frag");
@@ -125,11 +125,11 @@ namespace pipeline
             objects[it->first] = obj;
         }
 
-        renderer = new sgraph::TexturedPBRSVRenderer(modelview, objects, renderShaderLocations, textureIdMap);
+        renderer = new sgraph::TexturedPBRSVRenderer(modelview, objects, renderShaderLocations, *textureIdMap);
         lightRetriever = new sgraph::LightRetriever(modelview);
         shadowRenderer = new sgraph::ShadowRenderer(modelview, objects, shadowShaderLocations);
         depthRenderer = new sgraph::DepthRenderer(modelview, objects, depthShaderLocations);
-        ambientRenderer = new sgraph::TexturedPBRAmbientRenderer(modelview, objects, ambientShaderLocations, textureIdMap);
+        ambientRenderer = new sgraph::TexturedPBRAmbientRenderer(modelview, objects, ambientShaderLocations, *textureIdMap);
         initialized = true;
     }
 

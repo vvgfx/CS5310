@@ -42,7 +42,7 @@ namespace pipeline
         sgraph::SGNodeVisitor *renderer;
         sgraph::SGNodeVisitor *lightRetriever;
         map<string, util::ObjectInstance *> objects;
-        map<string, unsigned int> textureIdMap;
+        map<string, unsigned int>* textureIdMap;
         vector<util::Light> lights;
         vector<glm::mat4> lightTransformations;
         glm::mat4 projection;
@@ -71,7 +71,7 @@ namespace pipeline
         shaderVarsToVertexAttribs["vTexCoord"] = "texcoord";
         shaderVarsToVertexAttribs["vTangent"] = "tangent";
 
-        textureIdMap = texMap;
+        textureIdMap = &texMap;
 
         for (typename map<string, util::PolygonMesh<VertexAttrib>>::iterator it = meshes.begin();
              it != meshes.end();
@@ -82,7 +82,7 @@ namespace pipeline
             obj->initPolygonMesh(shaderLocations, shaderVarsToVertexAttribs, it->second);
             objects[it->first] = obj;
         }
-        renderer = new sgraph::TexturedPBRRenderer(modelview, objects, shaderLocations, textureIdMap);
+        renderer = new sgraph::TexturedPBRRenderer(modelview, objects, shaderLocations, *textureIdMap);
         lightRetriever = new sgraph::LightRetriever(modelview);
         initialized = true;
     }
@@ -91,7 +91,6 @@ namespace pipeline
     {
         if (!initialized)
             throw runtime_error("pipeline has not been initialized.");
-
         // can't pass the view vec3 directly so doing this.
         glm::mat4 inverseView = glm::inverse(viewMat);
         cameraPos = glm::vec3(inverseView[3]);
