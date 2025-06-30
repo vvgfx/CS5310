@@ -65,6 +65,15 @@ public:
     float materialMetallic;
     float materialRoughness;
     float materialAO;
+    bool leafTextures;
+    char albedoMap[100];
+    char normalMap[100];
+    char metallicMap[100];
+    char roughnessMap[100];
+    char aoMap[100];
+    char texName[100];
+    char texPath[100];
+    bool loadTexture;
 };
 
 #endif

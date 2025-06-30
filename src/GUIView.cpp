@@ -151,6 +151,52 @@ void GUIView::ImGUIView(sgraph::IScenegraph *scenegraph)
 
     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
     ImGui::End();
+
+    if (ImGui::BeginMainMenuBar())
+    {
+        if (ImGui::BeginMenu("File"))
+        {
+            // ShowExampleMenuFile();
+            if (ImGui::MenuItem("Save scene")) {}
+            if (ImGui::MenuItem("Load scene")) {}
+            ImGui::EndMenu();
+        }
+        if (ImGui::BeginMenu("Async task"))
+        {
+            if (ImGui::MenuItem("Load texture")) 
+            {
+                loadTexture = true;
+            }
+            ImGui::EndMenu();
+        }
+        ImGui::EndMainMenuBar();
+    }
+
+    if(loadTexture)
+    {
+
+        ImGui::OpenPopup("Load Texture");
+        if(ImGui::BeginPopupModal("Load Texture"))
+        {
+            ImGui::InputText("Texture name", texName, 100);
+            ImGui::InputText("Texture path", texPath, 100);
+            ImGui::Separator();
+            if (ImGui::Button("Yes")) 
+            {
+                ImGui::CloseCurrentPopup();
+                resetPopupVars();
+            }
+            ImGui::SetItemDefaultFocus();
+            ImGui::SameLine();
+            if (ImGui::Button("No")) 
+            {
+                ImGui::CloseCurrentPopup();
+                resetPopupVars();
+            }
+            ImGui::EndPopup();
+        }
+    }
+
     GUIScenegraph(scenegraph);
 
     ImGui::Render();
@@ -161,16 +207,16 @@ void GUIView::GUIScenegraph(sgraph::IScenegraph *scenegraph)
 {
 
     // Draw the scenegraph on the left
-    ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
-    ImGui::SetNextWindowSize(ImVec2(ImGui::GetIO().DisplaySize.x / 8 , ImGui::GetIO().DisplaySize.y), ImGuiCond_Always);
+    ImGui::SetNextWindowPos(ImVec2(0, 20), ImGuiCond_Always);
+    ImGui::SetNextWindowSize(ImVec2(ImGui::GetIO().DisplaySize.x / 8 , ImGui::GetIO().DisplaySize.y - 16), ImGuiCond_Always);
     ImGui::Begin("Scenegraph");
     scenegraph->getRoot()->accept(GuiVisitor);
     ImGui::End();
 
     // Draw the Node details on the right
     sgraph::SGNode* selectedNode = reinterpret_cast<sgraph::ScenegraphGUIRenderer*>(GuiVisitor)->getSelectedNode();
-    ImGui::SetNextWindowPos(ImVec2(ImGui::GetIO().DisplaySize.x  * 5 / 6, 0), ImGuiCond_Always);
-    ImGui::SetNextWindowSize(ImVec2(ImGui::GetIO().DisplaySize.x / 6 , ImGui::GetIO().DisplaySize.y), ImGuiCond_Always);
+    ImGui::SetNextWindowPos(ImVec2(ImGui::GetIO().DisplaySize.x  * 5 / 6, 20), ImGuiCond_Always);
+    ImGui::SetNextWindowSize(ImVec2(ImGui::GetIO().DisplaySize.x / 6 , ImGui::GetIO().DisplaySize.y - 16), ImGuiCond_Always);
     ImGui::Begin("Node Details");
     if(selectedNode)
     selectedNode->accept(NodeRenderer);
@@ -206,6 +252,7 @@ void GUIView::showPopups()
                 getViewJob(deleteNodeJob);
                 ImGui::CloseCurrentPopup();
                 sgRenderer->resetDeleteNode();
+                resetPopupVars();
             }
             ImGui::SetItemDefaultFocus();
             ImGui::SameLine();
@@ -213,6 +260,7 @@ void GUIView::showPopups()
             {
                 ImGui::CloseCurrentPopup();
                 sgRenderer->resetDeleteNode();
+                resetPopupVars();
             }
             ImGui::EndPopup();
         }
@@ -390,7 +438,7 @@ void GUIView::showPopups()
                 // }
 
                 ImVec4 colorAlbedo = ImVec4(leafAlbedo.x, leafAlbedo.y, leafAlbedo.z, 1.0f);
-                if(ImGui::ColorEdit3("clear color", (float*)&colorAlbedo))
+                if(ImGui::ColorEdit3("albedo", (float*)&colorAlbedo))
                 {
                     leafAlbedo.x = colorAlbedo.x;
                     leafAlbedo.y = colorAlbedo.y;
@@ -402,6 +450,18 @@ void GUIView::showPopups()
                 bool aoChanged = ImGui::SliderFloat("Ambient Occlusion", &materialAO, 0.1f, 1.0f);
                 
                 ImGui::Separator();
+
+                if(ImGui::Checkbox("Textures", &leafTextures))
+                {
+                }
+                if(leafTextures)
+                {
+                    ImGui::InputText("Albedo map", albedoMap, 100);
+                    ImGui::InputText("Metallic map", metallicMap, 100);
+                    ImGui::InputText("Roughness map", roughnessMap, 100);
+                    ImGui::InputText("AO map", aoMap, 100);
+                }
+
                 if (ImGui::Button("Confirm")) 
                 {
                     job::InsertLeafJob* leafJob = new job::InsertLeafJob(sgRenderer->getAddChildNode()->getName(), childNodeName, leafAlbedo, materialMetallic, materialRoughness, materialAO, objectInstanceName, ""); //passing texture as empty
@@ -438,6 +498,18 @@ void GUIView::resetPopupVars()
     materialMetallic = 0.0f;
     materialRoughness = 0.0f;
     materialAO = 0.0f;
+
+    // texture stuff here
+    leafTextures = false;
+    strcpy(albedoMap , "");
+    strcpy(metallicMap , "");
+    strcpy(roughnessMap , "");
+    strcpy(aoMap , "");
+
+    // main menu stuff here
+    loadTexture = false;
+    strcpy(texName, "");
+    strcpy(texPath, "");
 }
 
 void GUIView::initLights(sgraph::IScenegraph *scenegraph)

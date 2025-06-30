@@ -19,7 +19,7 @@ public:
     sgraph::IScenegraph *getScenegraph();
     void setScenegraph(sgraph::IScenegraph *scenegraph);
     void saveTextureMap(map<string, util::TextureImage*>& texMap);
-    map<string, util::TextureImage*> getTextureMap();
+    map<string, util::TextureImage*>& getTextureMap();
     
     // command queue stuff
     void addToCommandQueue(command::ICommand* command);

@@ -28,7 +28,7 @@ void Model::saveTextureMap(map<string, util::TextureImage*>& texMap)
     this->textureMap = texMap;
 }
 
-map<string, util::TextureImage*> Model::getTextureMap()
+map<string, util::TextureImage*>& Model::getTextureMap()
 {
     return this->textureMap;
 }
