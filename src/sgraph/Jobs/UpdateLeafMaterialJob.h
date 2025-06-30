@@ -12,7 +12,7 @@ namespace job
 
     /**
      * This is an implementation of the IJob interface.
-     * It uses the command design pattern to update the translation of an object.
+     * It uses the command design pattern to update the material of a leaf node.
      *
      * Note: This is a part of the controller.
      */

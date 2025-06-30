@@ -18,7 +18,7 @@ public:
     ~Model();
     sgraph::IScenegraph *getScenegraph();
     void setScenegraph(sgraph::IScenegraph *scenegraph);
-    void saveTextureMap(map<string, util::TextureImage*>& texMap);
+    void saveTextureMap(map<string, util::TextureImage*> texMap);
     map<string, util::TextureImage*>& getTextureMap();
     
     // command queue stuff

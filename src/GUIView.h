@@ -15,7 +15,7 @@ class GUIView : public View
 public:
     GUIView();
     ~GUIView();
-    void init(Callbacks* callbacks,map<string,util::PolygonMesh<VertexAttrib>>& meshes, map<string, util::TextureImage*> textureMap) override;
+    void init(Callbacks* callbacks,map<string,util::PolygonMesh<VertexAttrib>>& meshes, map<string, util::TextureImage*>& textureMap) override;
     void Resize() override;
     void display(sgraph::IScenegraph *scenegraph) override;
     bool shouldWindowClose() override;

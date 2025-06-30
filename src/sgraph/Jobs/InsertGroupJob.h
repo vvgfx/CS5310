@@ -12,7 +12,7 @@ namespace job
 
     /**
      * This is an implementation of the IJob interface.
-     * It uses the command design pattern to insert a translate node under the given node.
+     * It uses the command design pattern to insert a group node under the given node.
      *
      * Note: This is a part of the controller.
      */
@@ -23,9 +23,6 @@ namespace job
         {
             this->nodeName = nodeName;
             this->newNodeName = newNodeName;
-            this->tx = tx;
-            this->ty = ty;
-            this->tz = tz;
         }
 
         virtual void execute(Model *m)
@@ -36,7 +33,6 @@ namespace job
         }
 
     private:
-        float tx, ty, tz;
         string newNodeName;
     };
 }

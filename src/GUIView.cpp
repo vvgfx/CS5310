@@ -26,6 +26,7 @@ using namespace std;
 #include "sgraph/Jobs/InsertScaleJob.h"
 #include "sgraph/Jobs/InsertLeafJob.h"
 #include "sgraph/Jobs/DeleteNodeJob.h"
+#include "sgraph/Jobs/ReadTextureJob.h"
 
 // Imgui required files.
 #include "imgui.h"
@@ -41,7 +42,7 @@ GUIView::~GUIView()
 {
 }
 
-void GUIView::init(Callbacks *callbacks, map<string, util::PolygonMesh<VertexAttrib>> &meshes, map<string, util::TextureImage *> texMap)
+void GUIView::init(Callbacks *callbacks, map<string, util::PolygonMesh<VertexAttrib>> &meshes, map<string, util::TextureImage *>& texMap)
 {
     View::init(callbacks, meshes, texMap);
     cout<<"Setting up ImGUI initialization"<<endl;
@@ -181,14 +182,16 @@ void GUIView::ImGUIView(sgraph::IScenegraph *scenegraph)
             ImGui::InputText("Texture name", texName, 100);
             ImGui::InputText("Texture path", texPath, 100);
             ImGui::Separator();
-            if (ImGui::Button("Yes")) 
+            if (ImGui::Button("Load"))
             {
+                job::ReadTextureJob* readJob = new job::ReadTextureJob(texName, texPath);
+                getViewJob(readJob);
                 ImGui::CloseCurrentPopup();
                 resetPopupVars();
             }
             ImGui::SetItemDefaultFocus();
             ImGui::SameLine();
-            if (ImGui::Button("No")) 
+            if (ImGui::Button("Cancel")) 
             {
                 ImGui::CloseCurrentPopup();
                 resetPopupVars();

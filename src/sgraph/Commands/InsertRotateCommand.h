@@ -18,7 +18,7 @@ namespace command
 {
     /**
      * This command uses the command design pattern to make updates to a scenegraph's nodes
-     * This class inserts a rotate node under the provided child.
+     * This class inserts a rotate node under the provided parent.
      *
      */
     class InsertRotateCommand : public AbstractCommand

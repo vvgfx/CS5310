@@ -18,10 +18,6 @@ namespace command
 {
     /**
      * This command uses the command design pattern to make updates to a scenegraph's nodes
-     * This class exists to provide dummy implementations of SGNodeVisitor, and are expected to be overridden in
-     * all of it's children.
-     * If any of the SGNodeVisitor overrides are called, an implementation is missing or
-     * the function and node are mismatched.
      *
      */
     class RotateCommand : public AbstractCommand

@@ -23,7 +23,7 @@ void Model::setScenegraph(sgraph::IScenegraph *scenegraph) {
     this->scenegraph = scenegraph;
 }
 
-void Model::saveTextureMap(map<string, util::TextureImage*>& texMap)
+void Model::saveTextureMap(map<string, util::TextureImage*> texMap)
 {
     this->textureMap = texMap;
 }

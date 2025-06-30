@@ -12,7 +12,7 @@ namespace job
 
     /**
      * This is an implementation of the IJob interface.
-     * It uses the command design pattern to insert a translate node under the given node.
+     * It uses the command design pattern to delete a child node from a parent.
      *
      * Note: This is a part of the controller.
      * @param nodeName name of the node you want to delete

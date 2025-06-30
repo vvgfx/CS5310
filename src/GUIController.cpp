@@ -37,8 +37,9 @@ void GUIController::initScenegraph() {
     IScenegraph *scenegraph = importer.parse(inFile);
     //scenegraph->setMeshes(meshes);
     model->setScenegraph(scenegraph);
-    map<string, util::TextureImage*> textureMap = importer.getTextureMap();
-    model->saveTextureMap(textureMap);
+    map<string, util::TextureImage*> textureMap = importer.getTextureMap(); // this is copied
+
+    model->saveTextureMap(textureMap); // this should also be copied, the source of truth is the model!
 
     // ugly code, can fix later??
     reinterpret_cast<GUIView*>(view)->setControllerReference(this);
@@ -55,10 +56,9 @@ GUIController::~GUIController()
 
 void GUIController::run()
 {
-    cout<<"Child controller run"<<endl;
     sgraph::IScenegraph * scenegraph = model->getScenegraph();
     map<string,util::PolygonMesh<VertexAttrib> > meshes = scenegraph->getMeshes();
-    map<string, util::TextureImage*> texMap = model->getTextureMap();
+    map<string, util::TextureImage*>& texMap = model->getTextureMap();
     view->init(this,meshes, texMap);
     //Save the nodes required for transformation when running!
     view->initScenegraphNodes(scenegraph);
