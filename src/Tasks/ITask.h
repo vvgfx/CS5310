@@ -2,10 +2,8 @@
 #define _ITASK_H_
 
 #include <string>
-// #include "../Model.h"
 using namespace std;
 
-class Model;
 namespace task {
 
 /**
@@ -24,7 +22,7 @@ namespace task {
         /**
          * This execute method is run on the main thread before the start of next frame.
          */
-        virtual void execute(Model* m)=0;
+        virtual void execute()=0;
 
         protected:
         string nodeName;

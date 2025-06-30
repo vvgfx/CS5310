@@ -39,7 +39,7 @@ namespace job
             
             // now create the task and add it to the task queue
             // worried about object lifespan. the texImage should survive, but what about the 
-            task::TransferTextureTask* memTransferTask = new task::TransferTextureTask(textureName, texImage);
+            task::TransferTextureTask* memTransferTask = new task::TransferTextureTask(m, textureName, texImage);
             m->addToTaskQueue(memTransferTask);
         }
 

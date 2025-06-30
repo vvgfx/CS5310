@@ -18,18 +18,20 @@ namespace task
     class TransferTextureTask : public ITask
     {
     public:
-        TransferTextureTask(string textureName, util::TextureImage* texImage)
+        TransferTextureTask(Model* m, string textureName, util::TextureImage* texImage)
         {
             this->textureName = textureName;
             this->texImage = texImage;
+            this->m = m;
         }
 
-        virtual void execute(Model *m)
+        virtual void execute()
         {
             m->addTexture(textureName, texImage);
         }
 
     private:
+    Model* m;
     string textureName;
     util::TextureImage* texImage;
     };

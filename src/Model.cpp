@@ -53,7 +53,7 @@ void Model::clearQueues()
         while(!frontTaskQueue.empty())
         {
             task::ITask* task = frontTaskQueue.front();
-            task->execute(this);
+            task->execute();
             frontTaskQueue.pop();
         }
     }
