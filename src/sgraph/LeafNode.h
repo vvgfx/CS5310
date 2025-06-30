@@ -50,14 +50,17 @@ public:
         textureTransform  = glm::mat4(1.0f);//Assuming that the default texture transformation is the identity matrix.
     }
 
-    LeafNode(const string& instanceOf,const string& name,sgraph::IScenegraph *graph, string texName)
+    LeafNode(const string& instanceOf,const string& name,sgraph::IScenegraph *graph)
         :AbstractSGNode(name,graph) {
         this->objInstanceName = instanceOf;
-        this->textureMap = texName;
+        this->textureMap = "";
         // this->normalMap = normalName;
         this->isPBR = false;
         // this->textureTransform = glm::mat4(1.0f) * glm::scale(glm::mat4(1.0f), glm::vec3(5.0f, 5.0f, 5.0f));
         this->textureTransform = glm::mat4(1.0f);
+        this->normalMap = "";
+        this->metallicMap = "";
+        this->roughnessMap = "";
     }
 	
 	~LeafNode(){}

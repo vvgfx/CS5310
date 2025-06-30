@@ -33,7 +33,7 @@ void Controller::initScenegraph() {
         inFile = ifstream("scenegraphmodels/texture-pbr-shadow-volume-test.txt");
     else
         inFile = ifstream(textfile);
-    sgraph::ScenegraphImporter importer("textures/white.ppm");
+    sgraph::ScenegraphImporter importer;
     
 
     IScenegraph *scenegraph = importer.parse(inFile);

@@ -19,7 +19,7 @@ namespace job
     class InsertLeafJob : public IJob
     {
     public:
-        InsertLeafJob(string nodeName, string newNodeName, glm::vec3 albedoVal, float metallicVal, float roughnessVal, float aoVal, string instanceOf, string texName)
+        InsertLeafJob(string nodeName, string newNodeName, glm::vec3 albedoVal, float metallicVal, float roughnessVal, float aoVal, string instanceOf)
         {
             this->albedo = albedoVal;
             this->nodeName = nodeName;
@@ -28,7 +28,6 @@ namespace job
             this->roughness = roughnessVal;
             this->ao = aoVal;
             this->instanceOf = instanceOf;
-            this->textureName = texName;
         }
 
         virtual void execute(Model *m)
@@ -39,7 +38,7 @@ namespace job
             material.setMetallic(metallic);
             material.setAO(ao);
 
-            command::InsertLeafCommand* leafCommand = new command::InsertLeafCommand(nodeName, newNodeName, m->getScenegraph(), material, instanceOf, textureName);
+            command::InsertLeafCommand* leafCommand = new command::InsertLeafCommand(nodeName, newNodeName, m->getScenegraph(), material, instanceOf);
             cout<<"Adding to command queue in job"<<endl;
             m->addToCommandQueue(leafCommand);
         }

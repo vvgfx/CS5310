@@ -28,10 +28,10 @@ void GUIController::initScenegraph() {
     //read in the file of commands
     ifstream inFile;
     if(textfile == "")
-        inFile = ifstream("scenegraphmodels/texture-pbr-shadow-volume-test-2.txt");
+        inFile = ifstream("scenegraphmodels/pbr-shadow-volume-test.txt");
     else
         inFile = ifstream(textfile);
-    sgraph::ScenegraphImporter importer("textures/white.ppm");
+    sgraph::ScenegraphImporter importer;
     
 
     IScenegraph *scenegraph = importer.parse(inFile);

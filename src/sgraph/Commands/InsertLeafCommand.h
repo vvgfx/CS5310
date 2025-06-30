@@ -33,14 +33,13 @@ namespace command
          * @param material Util::Material of this leaf
          * @param texName name of the texture. Pass empty string if not used.
          */
-        InsertLeafCommand(string name, string newNodeName, sgraph::IScenegraph *scenegraph, util::Material mat, string instanceOf, string texName)
+        InsertLeafCommand(string name, string newNodeName, sgraph::IScenegraph *scenegraph, util::Material mat, string instanceOf)
         {
             this->material = mat;
             this->nodeName = name;
             this->newNodeName = newNodeName;
             sgraph = scenegraph;
             this->instanceOf = instanceOf;
-            this->textureName = texName;
         }
 
         /**
@@ -106,7 +105,7 @@ namespace command
          */
         void addChildren(sgraph::ParentSGNode *parentNode)
         {
-            sgraph::LeafNode *leafNode = new sgraph::LeafNode(instanceOf, newNodeName, sgraph, textureName);
+            sgraph::LeafNode *leafNode = new sgraph::LeafNode(instanceOf, newNodeName, sgraph);
             leafNode->setMaterial(material);
             parentNode->addChild(leafNode);
         }

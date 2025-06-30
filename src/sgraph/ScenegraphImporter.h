@@ -25,12 +25,8 @@ using namespace std;
 namespace sgraph {
     class ScenegraphImporter {
         public:
-            ScenegraphImporter(string defaultTexPath) 
+            ScenegraphImporter() 
             {
-                PPMImageLoader textureLoader;
-                textureLoader.load(defaultTexPath);
-                util::TextureImage* texImage = new util::TextureImage(textureLoader.getPixels(), textureLoader.getWidth(), textureLoader.getHeight(), "default"); // directly converting to reference. Hope this works.
-                textureMap["default"] = texImage;
             }
 
             IScenegraph *parse(istream& input) {
@@ -237,7 +233,7 @@ namespace sgraph {
                     if (command == "instanceof") {
                         input >> instanceof;
                     }
-                    SGNode *leaf = new LeafNode(instanceof,name,scenegraph, "default"); // changed this to remove "default" and "default-normal" hardcode from leafNode.
+                    SGNode *leaf = new LeafNode(instanceof,name,scenegraph); 
                     LeafNode* leafInstance = dynamic_cast<LeafNode*>(leaf);
                     nodes[varname] = leaf;
                 } 

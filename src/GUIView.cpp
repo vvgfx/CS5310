@@ -462,7 +462,7 @@ void GUIView::showPopups()
 
                 if (ImGui::Button("Confirm")) 
                 {
-                    job::InsertLeafJob* leafJob = new job::InsertLeafJob(sgRenderer->getAddChildNode()->getName(), childNodeName, leafAlbedo, materialMetallic, materialRoughness, materialAO, objectInstanceName, ""); //passing texture as empty
+                    job::InsertLeafJob* leafJob = new job::InsertLeafJob(sgRenderer->getAddChildNode()->getName(), childNodeName, leafAlbedo, materialMetallic, materialRoughness, materialAO, objectInstanceName);
                     getViewJob(leafJob);
                     ImGui::CloseCurrentPopup();
                     sgRenderer->resetAddChildNode();
