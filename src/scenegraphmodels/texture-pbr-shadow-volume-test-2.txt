@@ -32,11 +32,11 @@ spot-angle 20
 end-light
 
 #textures
-image box-base textures/metal2_albedo.ppm
-image box-normal textures/metal2_normal.ppm
-image box-metallic textures/metal2_metallic.ppm
-image box-roughness textures/metal2_roughness.ppm
-image box-ao textures/metal2_ao.ppm
+image box-base textures/paint-albedo.ppm
+image box-normal textures/paint-normal.ppm
+image box-metallic textures/paint-metallic.ppm
+image box-roughness textures/paint-roughness.ppm
+image box-ao textures/paint-ao.ppm
 
 image sphere-base textures/metal_albedo.ppm
 image sphere-normal textures/metal_normal.ppm

@@ -44,7 +44,7 @@ https://vv-22.github.io/rendering-with-opengl
 ### References:
 
 - https://ogldev.org/www/tutorial40/tutorial40.html  - Used this reference for shadow volumes.
-- https://freestylized.com - All textures are from this website. 
+- https://freestylized.com , https://freepbr.com/ - PBR textures. 
 - https://learnopengl.com/ - Multiple references for PBR, Image based lighting, GPU Frustum culling, etc.
 
 
