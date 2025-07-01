@@ -33,13 +33,23 @@ namespace command
          * @param material Util::Material of this leaf
          * @param texName name of the texture. Pass empty string if not used.
          */
-        InsertLeafCommand(string name, string newNodeName, sgraph::IScenegraph *scenegraph, util::Material mat, string instanceOf)
+        InsertLeafCommand(string name, string newNodeName, sgraph::IScenegraph *scenegraph, util::Material mat, string instanceOf, bool textures, 
+                            string albedoMap, string normalMap, string metallicMap, string roughnessMap, string aoMap)
         {
             this->material = mat;
             this->nodeName = name;
             this->newNodeName = newNodeName;
             sgraph = scenegraph;
             this->instanceOf = instanceOf;
+
+            //texture stuff here
+
+            this->textures = textures;
+            this->albedoMap = albedoMap;
+            this->normalMap = normalMap;
+            this->metallicMap = metallicMap;
+            this->roughnessMap = roughnessMap;
+            this->aoMap = aoMap;
         }
 
         /**
@@ -106,6 +116,16 @@ namespace command
         void addChildren(sgraph::ParentSGNode *parentNode)
         {
             sgraph::LeafNode *leafNode = new sgraph::LeafNode(instanceOf, newNodeName, sgraph);
+
+            // set textures if texture bool is true
+            if(textures)
+            {
+                leafNode->setTextureMap(albedoMap);
+                leafNode->setNormalMap(normalMap);
+                leafNode->setMetallicMap(metallicMap);
+                leafNode->setRoughnessMap(roughnessMap);
+                leafNode->setAOMap(aoMap);
+            }
             leafNode->setMaterial(material);
             parentNode->addChild(leafNode);
         }
@@ -115,6 +135,10 @@ namespace command
         string newNodeName;
         util::Material material;
         string instanceOf, textureName;
+
+        // texture variables.
+        bool textures;
+        string albedoMap, normalMap, metallicMap, roughnessMap, aoMap;
     };
 }
 

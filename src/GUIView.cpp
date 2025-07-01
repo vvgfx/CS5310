@@ -455,6 +455,7 @@ void GUIView::showPopups()
                 if(leafTextures)
                 {
                     ImGui::InputText("Albedo map", albedoMap, 100);
+                    ImGui::InputText("Normal map", normalMap, 100);
                     ImGui::InputText("Metallic map", metallicMap, 100);
                     ImGui::InputText("Roughness map", roughnessMap, 100);
                     ImGui::InputText("AO map", aoMap, 100);
@@ -462,7 +463,8 @@ void GUIView::showPopups()
 
                 if (ImGui::Button("Confirm")) 
                 {
-                    job::InsertLeafJob* leafJob = new job::InsertLeafJob(sgRenderer->getAddChildNode()->getName(), childNodeName, leafAlbedo, materialMetallic, materialRoughness, materialAO, objectInstanceName);
+                    job::InsertLeafJob* leafJob = new job::InsertLeafJob(sgRenderer->getAddChildNode()->getName(), childNodeName, leafAlbedo, materialMetallic, materialRoughness, materialAO, objectInstanceName,
+                                                                            leafTextures, albedoMap, normalMap, metallicMap, roughnessMap, aoMap);
                     getViewJob(leafJob);
                     ImGui::CloseCurrentPopup();
                     sgRenderer->resetAddChildNode();
@@ -500,6 +502,7 @@ void GUIView::resetPopupVars()
     // texture stuff here
     leafTextures = false;
     strcpy(albedoMap , "");
+    strcpy(normalMap , "");
     strcpy(metallicMap , "");
     strcpy(roughnessMap , "");
     strcpy(aoMap , "");
