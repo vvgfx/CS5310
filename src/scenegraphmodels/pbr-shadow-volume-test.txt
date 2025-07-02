@@ -68,9 +68,9 @@ assign-material one-sphere sphere-material
 add-child one-sphere s-scale
 add-child s-scale s-translate
 add-child s-translate root
-dynamic trackball trackball
-add-child root trackball
+dynamic camera camera
+add-child camera root
 
 
-assign-root trackball
+assign-root root
 

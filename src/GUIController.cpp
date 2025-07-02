@@ -16,6 +16,7 @@ using namespace std;
 #include "sgraph/ScenegraphImporter.h"
 #include "sgraph/ScenegraphDrawer.h"
 #include "GUIView.h"
+#include "imgui.h"
 
 GUIController::GUIController(Model* m,View* v, string textfile) :
     Controller(m,v, textfile) {
@@ -28,7 +29,7 @@ void GUIController::initScenegraph() {
     //read in the file of commands
     ifstream inFile;
     if(textfile == "")
-        inFile = ifstream("scenegraphmodels/texture-pbr-shadow-volume-test-2.txt");
+        inFile = ifstream("scenegraphmodels/pbr-shadow-volume-test.txt");
     else
         inFile = ifstream(textfile);
     sgraph::ScenegraphImporter importer;
@@ -75,7 +76,34 @@ void GUIController::run()
 
 void GUIController::onkey(int key, int scancode, int action, int mods)
 {
+    ImGuiIO& io = ImGui::GetIO();
+    if(io.WantCaptureKeyboard)
+        return;
+    if(action != GLFW_PRESS && action != GLFW_REPEAT)
+        return;
     cout << (char)key << " pressed on GUIController" << endl;
+    switch(key)
+    {
+        case GLFW_KEY_W:
+            reinterpret_cast<GUIView*>(view)->moveCamera(-1, 0);
+            break;
+        case GLFW_KEY_S://translate the drone backward
+            reinterpret_cast<GUIView*>(view)->moveCamera(1, 0);
+            break;
+        case GLFW_KEY_A:
+            reinterpret_cast<GUIView*>(view)->moveCamera(0, -1);
+            break;
+        case GLFW_KEY_D:
+            reinterpret_cast<GUIView*>(view)->moveCamera(0, 1);
+            break;
+        case GLFW_KEY_LEFT://rotate the drone left
+            reinterpret_cast<GUIView*>(view)->rotateCamera(1.0f, 0.0f);
+            break;
+        case GLFW_KEY_RIGHT://rotate the drone right
+            reinterpret_cast<GUIView*>(view)->rotateCamera(-1.0f, 0.0f);
+            break;
+
+    }
 }
 
 void GUIController::onMouseInput(int button, int action, int mods)
@@ -85,7 +113,15 @@ void GUIController::onMouseInput(int button, int action, int mods)
 
 void GUIController::onCursorMove(double newXPos, double newYPos)
 {
-    Controller::onCursorMove(newXPos, newYPos);
+    oldXPos = this->newXPos;
+    oldYPos = this->newYPos;
+    this->newXPos = newXPos;
+    this->newYPos = newYPos;
+    float deltaX = newXPos - oldXPos;
+    float deltaY = newYPos - oldYPos;
+    if(!(mousePressed && ( deltaX != 0 || deltaY != 0)))
+    return;
+    reinterpret_cast<GUIView*>(view)->rotateCamera(deltaX, deltaY);
 }
 
 void GUIController::reshape(int width, int height) 

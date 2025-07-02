@@ -86,10 +86,10 @@ void View::init(Callbacks *callbacks,map<string,util::PolygonMesh<VertexAttrib>>
     glfwGetFramebufferSize(window,&window_width,&window_height);
     projection = glm::perspective(glm::radians(60.0f),(float)window_width/window_height,0.1f,10000.0f);
     #pragma region Pipeline init
-    // pipeline = new pipeline::PBRShadowVolumePipeline();
-    // reinterpret_cast<pipeline::PBRShadowVolumePipeline*>(pipeline)->init(meshes, projection);
-    pipeline = new pipeline::TexturedPBRSVPipeline();
-    reinterpret_cast<pipeline::TexturedPBRSVPipeline*>(pipeline)->init(meshes, projection, texIdMap);
+    pipeline = new pipeline::PBRShadowVolumePipeline();
+    reinterpret_cast<pipeline::PBRShadowVolumePipeline*>(pipeline)->init(meshes, projection);
+    // pipeline = new pipeline::TexturedPBRSVPipeline();
+    // reinterpret_cast<pipeline::TexturedPBRSVPipeline*>(pipeline)->init(meshes, projection, texIdMap);
     // pipeline = new pipeline::TexturedPBRPipeline();
     // reinterpret_cast<pipeline::TexturedPBRPipeline*>(pipeline)->init(meshes, projection, texIdMap);
     // pipeline = new pipeline::BasicPBRPipeline();
@@ -356,7 +356,7 @@ void View::initScenegraphNodes(sgraph::IScenegraph *scenegraph)
 {
     auto nodes = scenegraph->getNodes();
     std::vector<string> savedNodes = {"propeller-1-rotate", "propeller-2-rotate", "propeller-3-rotate", "propeller-4-rotate",
-                                         "trackball", "drone-movement"};
+                                         "trackball", "drone-movement", "camera"};
 
     for(const auto& nodeName: savedNodes)
     {
@@ -421,7 +421,7 @@ void View::rotate()
 }
 
 /**
- * Move/Rotate the drone by passing the matrix to premultiply. This stacks on top of previous input.
+ * Move/Rotate the drone by passing the matrix to postmultiply. This stacks on top of previous input.
  */
 void View::moveDrone(int direction)
 {

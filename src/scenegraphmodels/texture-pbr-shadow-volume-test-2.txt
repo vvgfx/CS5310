@@ -94,8 +94,10 @@ add-child one-sphere s-scale
 add-child s-scale s-translate
 add-child s-translate root
 dynamic trackball trackball
+dynamic camera camera
 add-child root trackball
+add-child trackball camera
 
 
-assign-root trackball
+assign-root camera
 

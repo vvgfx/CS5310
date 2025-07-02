@@ -39,6 +39,10 @@ public:
     void getViewJob(job::IJob* job);
     void setControllerReference(GUIController* controller); // Ask for solutions next time :)
     void showPopups();
+
+    // camera
+    void moveCamera(int forwardDir, int horizontalDr);
+    void rotateCamera(int xDir, int yDir);
     
     protected: 
     void resetPopupVars();
