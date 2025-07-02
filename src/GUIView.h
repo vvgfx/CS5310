@@ -73,6 +73,10 @@ public:
     char texName[100];
     char texPath[100];
     bool loadTexture;
+
+    bool loadModel;
+    char modelName[100];
+    char modelPath[100];
 };
 
 #endif

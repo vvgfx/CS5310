@@ -157,11 +157,15 @@ void GUIView::ImGUIView(sgraph::IScenegraph *scenegraph)
             if (ImGui::MenuItem("Load scene")) {}
             ImGui::EndMenu();
         }
-        if (ImGui::BeginMenu("Async task"))
+        if (ImGui::BeginMenu("Task"))
         {
             if (ImGui::MenuItem("Load texture")) 
             {
                 loadTexture = true;
+            }
+            if (ImGui::MenuItem("Load model")) 
+            {
+                loadModel = true;
             }
             ImGui::EndMenu();
         }
@@ -194,6 +198,36 @@ void GUIView::ImGUIView(sgraph::IScenegraph *scenegraph)
             ImGui::EndPopup();
         }
     }
+
+    /**
+     * Not adding models because of complexity for now. Might come back to this later.
+     */
+    
+    // if(loadModel)
+    // {
+
+    //     ImGui::OpenPopup("Load Model");
+    //     if(ImGui::BeginPopupModal("Load Model"))
+    //     {
+    //         ImGui::InputText("Model name", modelName, 100);
+    //         ImGui::InputText("Model path", modelPath, 100);
+    //         ImGui::Separator();
+    //         if (ImGui::Button("Load"))
+    //         {
+    //             // need to run on the main thread unfortunately :(
+    //             ImGui::CloseCurrentPopup();
+    //             resetPopupVars();
+    //         }
+    //         ImGui::SetItemDefaultFocus();
+    //         ImGui::SameLine();
+    //         if (ImGui::Button("Cancel")) 
+    //         {
+    //             ImGui::CloseCurrentPopup();
+    //             resetPopupVars();
+    //         }
+    //         ImGui::EndPopup();
+    //     }
+    // }
 
     GUIScenegraph(scenegraph);
 
@@ -511,6 +545,11 @@ void GUIView::resetPopupVars()
     loadTexture = false;
     strcpy(texName, "");
     strcpy(texPath, "");
+
+    // model load here
+    loadModel = false;
+    strcpy(modelName, "");
+    strcpy(modelPath, "");
 }
 
 void GUIView::initLights(sgraph::IScenegraph *scenegraph)
