@@ -28,7 +28,7 @@ View::~View(){
 
 }
 
-void View::init(Callbacks *callbacks,map<string,util::PolygonMesh<VertexAttrib>>& meshes, map<string, unsigned int>& texIdMap)
+void View::init(Callbacks *callbacks,map<string,util::PolygonMesh<VertexAttrib>>& meshes, map<string, unsigned int>& texIdMap, sgraph::IScenegraph* sgraph)
 {
     cout<<"Parent view init"<<endl;
     if (!glfwInit())
@@ -100,6 +100,7 @@ void View::init(Callbacks *callbacks,map<string,util::PolygonMesh<VertexAttrib>>
 
     frames = 0;
     time = glfwGetTime();
+    initScenegraphNodes(sgraph);
 }
 
 void View::computeTangents(util::PolygonMesh<VertexAttrib>& tmesh)

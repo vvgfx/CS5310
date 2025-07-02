@@ -59,12 +59,12 @@ void Controller::run()
     sgraph::IScenegraph * scenegraph = model->getScenegraph();
     map<string,util::PolygonMesh<VertexAttrib> > meshes = scenegraph->getMeshes();
     map<string, unsigned int>& texIdMap = model->getTextureIdMap();
-    view->init(this,meshes, texIdMap);
+    view->init(this,meshes, texIdMap, scenegraph);
     // creating the texture Id maps AFTER init. This is because the OpenGL initialization needs to occur before the textures can be loaded
     model->initTextures(model->getTextureMap());
 
     //Save the nodes required for transformation when running!
-    view->initScenegraphNodes(scenegraph);
+    // view->initScenegraphNodes(scenegraph);
     //Set the initial orientation of the drone!
     glm::mat4 droneOrientation  = glm::translate(glm::mat4(1.0f), glm::vec3(-100.0f, 100.0f, 150.0f));
     view->setDroneOrientation(droneOrientation);

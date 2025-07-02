@@ -45,9 +45,9 @@ GUIView::~GUIView()
 {
 }
 
-void GUIView::init(Callbacks *callbacks, map<string, util::PolygonMesh<VertexAttrib>> &meshes, map<string, unsigned int>& texIdMap)
+void GUIView::init(Callbacks *callbacks, map<string, util::PolygonMesh<VertexAttrib>> &meshes, map<string, unsigned int>& texIdMap, sgraph::IScenegraph* sgraph)
 {
-    View::init(callbacks, meshes, texIdMap);
+    View::init(callbacks, meshes, texIdMap, sgraph);
     cout<<"Setting up ImGUI initialization"<<endl;
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -62,7 +62,8 @@ void GUIView::init(Callbacks *callbacks, map<string, util::PolygonMesh<VertexAtt
     GuiVisitor = new sgraph::ScenegraphGUIRenderer(this);
     NodeRenderer = new sgraph::NodeDetailsRenderer(this);
     camera = new camera::AngleCamera(glm::vec3(0.0f, 0.0f, 100.0f));
-    // camera = new camera::DynamicCamera(glm::vec3(0.0f, 0.0f, 100.0f), nullptr);
+    // camera = new camera::DynamicCamera(glm::vec3(0.0f, 0.0f, 100.0f), reinterpret_cast<sgraph::DynamicTransform*>(cachedNodes["camera"]));
+
 
 }
 
@@ -88,6 +89,9 @@ void GUIView::resetTrackball()
 
 void GUIView::display(sgraph::IScenegraph *scenegraph)
 {
+    float currentFrame = static_cast<float>(glfwGetTime());
+    deltaTime = currentFrame - lastFrame;
+    lastFrame = currentFrame;
     #pragma region lightSetup
     // setting up the view matrices beforehand because all render calculations are going to be on the view coordinate system.
 
@@ -655,13 +659,13 @@ void GUIView::moveCamera(int forwardDir, int horizontalDir)
     // if(cameraType == 1)
     // {
         if(forwardDir > 0)
-            camera->ProcessKeyboard(FORWARD, 1.0);
+            camera->ProcessKeyboard(FORWARD, deltaTime);
         else if(forwardDir < 0)
-            camera->ProcessKeyboard(BACKWARD, 1.0);
+            camera->ProcessKeyboard(BACKWARD, deltaTime);
         if(horizontalDir > 0)
-            camera->ProcessKeyboard(RIGHT,1.0);
+            camera->ProcessKeyboard(RIGHT,deltaTime);
         if(horizontalDir <  0)
-            camera->ProcessKeyboard(LEFT, 1.0);
+            camera->ProcessKeyboard(LEFT, deltaTime);
     // }
     // else
     // {

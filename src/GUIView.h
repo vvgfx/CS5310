@@ -14,7 +14,7 @@ class GUIView : public View
 public:
     GUIView();
     ~GUIView();
-    void init(Callbacks* callbacks,map<string,util::PolygonMesh<VertexAttrib>>& meshes, map<string, unsigned int>& texIdMap) override;
+    void init(Callbacks* callbacks,map<string,util::PolygonMesh<VertexAttrib>>& meshes, map<string, unsigned int>& texIdMap, sgraph::IScenegraph* sgraph) override;
     void Resize() override;
     void display(sgraph::IScenegraph *scenegraph) override;
     bool shouldWindowClose() override;
@@ -83,6 +83,8 @@ public:
 
     // testing alternative camera
     camera::ICamera* camera;
+    float lastFrame;
+    float deltaTime;
 };
 
 #endif

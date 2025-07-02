@@ -11,8 +11,8 @@
 
 
 // Default camera values
-const float MOVESPEED       =  12.5f;
-const float MOUSESENSITIVITY =  0.5f;
+const float MOVESPEED       =  300.0f;
+const float MOUSESENSITIVITY =  0.1f;
 
 namespace camera
 {
@@ -63,7 +63,7 @@ namespace camera
         void ProcessMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch = true)
         {
             glm::mat4 rotateMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(-xoffset * MOUSESENSITIVITY), glm::vec3(0.0f, 1.0f, 0.0f));
-            rotateMatrix = glm::rotate(rotateMatrix, glm::radians(-yoffset * MOUSESENSITIVITY), glm::vec3(1.0f, 0.0f, 0.0f)); // screen space is 0,0 at the top left, so need to invert the pitchDir
+            rotateMatrix = glm::rotate(rotateMatrix, glm::radians(yoffset * MOUSESENSITIVITY), glm::vec3(1.0f, 0.0f, 0.0f)); // screen space is 0,0 at the top left, so need to invert the pitchDir
             cameraNode->postmulTransformMatrix(rotateMatrix);
         }
     

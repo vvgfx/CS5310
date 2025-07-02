@@ -26,7 +26,7 @@ class View
 public:
     View();
     ~View();
-    virtual void init(Callbacks* callbacks,map<string,util::PolygonMesh<VertexAttrib>>& meshes, map<string, unsigned int>& texIdMap);
+    virtual void init(Callbacks* callbacks,map<string,util::PolygonMesh<VertexAttrib>>& meshes, map<string, unsigned int>& texIdMap, sgraph::IScenegraph* sgraph);
     virtual void Resize();
     virtual void display(sgraph::IScenegraph *scenegraph);
     virtual bool shouldWindowClose();

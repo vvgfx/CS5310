@@ -61,11 +61,11 @@ void GUIController::run()
     map<string,util::PolygonMesh<VertexAttrib> > meshes = scenegraph->getMeshes();
 
     map<string, unsigned int>& texIdMap = model->getTextureIdMap(); // not copied! reference to the model variable.
-    view->init(this,meshes, texIdMap);
+    view->init(this,meshes, texIdMap, scenegraph);
     // creating the texture Id maps AFTER init. This is because the OpenGL initialization needs to occur before the textures can be loaded
     model->initTextures(model->getTextureMap());
     //Save the nodes required for transformation when running!
-    view->initScenegraphNodes(scenegraph);
+    // view->initScenegraphNodes(scenegraph);
     while (!view->shouldWindowClose()) {
         model->clearQueues();
         view->display(scenegraph);
