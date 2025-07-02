@@ -86,19 +86,19 @@ void GUIView::display(sgraph::IScenegraph *scenegraph)
     // setting up the view matrices beforehand because all render calculations are going to be on the view coordinate system.
 
     glm::mat4 viewMat(1.0f);
-    // if(cachedNodes["camera"])
-    // {
-    //         glm::mat4 cameraTransformMatrix = dynamic_cast<sgraph::DynamicTransform*>(cachedNodes["camera"])->getTransformMatrix();
-    //         glm::vec3 cameraEye = cameraTransformMatrix * glm::vec4(0.0f, 0.0f, 100.0f, 1.0f); // setting 1 as the homogenous coordinate
-    //         cout<<"camera at: "<<cameraEye.x<<" , "<<cameraEye.y<<" , "<<cameraEye.z<<endl;
-    //         // Implicit typecasts work!!!!
-    //         glm::vec3 cameraLookAt = cameraTransformMatrix * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-    //         cout<<"looking at: "<<cameraLookAt.x<<" , "<<cameraLookAt.y<<" , "<<cameraLookAt.z<<endl;
-    //         glm::vec3 cameraUp = cameraTransformMatrix * glm::vec4(0.0f, 1.0f, 0.0f, 0.0f);//homogenous coordinate is 0.0f as the vector is an axis, not a point.
+    if(cachedNodes["camera"])
+    {
+            glm::mat4 cameraTransformMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0, 10.0, 100.0)) * dynamic_cast<sgraph::DynamicTransform*>(cachedNodes["camera"])->getTransformMatrix();
+            glm::vec3 cameraEye = cameraTransformMatrix * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f); // setting 1 as the homogenous coordinate
+            // cout<<"camera at: "<<cameraEye.x<<" , "<<cameraEye.y<<" , "<<cameraEye.z<<endl;
+            // Implicit typecasts work!!!!
+            glm::vec3 cameraLookAt = cameraTransformMatrix * glm::vec4(0.0f, 0.0f, -1.0f, 1.0f);
+            // cout<<"looking at: "<<cameraLookAt.x<<" , "<<cameraLookAt.y<<" , "<<cameraLookAt.z<<endl;
+            glm::vec3 cameraUp = cameraTransformMatrix * glm::vec4(0.0f, 1.0f, 0.0f, 0.0f);//homogenous coordinate is 0.0f as the vector is an axis, not a point.
             
-    //         viewMat = viewMat * glm::lookAt(cameraEye, cameraLookAt, cameraUp);        
-    // }
-    // else
+            viewMat = viewMat * glm::lookAt(cameraEye, cameraLookAt, cameraUp);        
+    }
+    else
         viewMat = viewMat * glm::lookAt(glm::vec3(0.0f, 100.0f, 100.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     #pragma endregion
 
