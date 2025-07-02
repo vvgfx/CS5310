@@ -7,9 +7,8 @@
 #include "View.h"
 #include "sgraph/Jobs/IJob.h"
 #include "GUIController.h"
+#include "Camera/ICamera.h"
 using namespace std;
-
-
 class GUIView : public View
 {
 public:
@@ -81,6 +80,9 @@ public:
     bool loadModel;
     char modelName[100];
     char modelPath[100];
+
+    // testing alternative camera
+    camera::ICamera* camera;
 };
 
 #endif

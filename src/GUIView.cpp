@@ -27,6 +27,9 @@ using namespace std;
 #include "sgraph/Jobs/InsertLeafJob.h"
 #include "sgraph/Jobs/DeleteNodeJob.h"
 #include "sgraph/Jobs/ReadTextureJob.h"
+#include "Camera/ICamera.h"
+#include "Camera/AngleCamera.h"
+#include "Camera/DynamicCamera.h"
 
 // Imgui required files.
 #include "imgui.h"
@@ -58,6 +61,9 @@ void GUIView::init(Callbacks *callbacks, map<string, util::PolygonMesh<VertexAtt
 
     GuiVisitor = new sgraph::ScenegraphGUIRenderer(this);
     NodeRenderer = new sgraph::NodeDetailsRenderer(this);
+    camera = new camera::AngleCamera(glm::vec3(0.0f, 0.0f, 100.0f));
+    // camera = new camera::DynamicCamera(glm::vec3(0.0f, 0.0f, 100.0f), nullptr);
+
 }
 
 void GUIView::computeTangents(util::PolygonMesh<VertexAttrib> &tmesh)
@@ -86,20 +92,21 @@ void GUIView::display(sgraph::IScenegraph *scenegraph)
     // setting up the view matrices beforehand because all render calculations are going to be on the view coordinate system.
 
     glm::mat4 viewMat(1.0f);
-    if(cachedNodes["camera"])
-    {
-            glm::mat4 cameraTransformMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0, 10.0, 100.0)) * dynamic_cast<sgraph::DynamicTransform*>(cachedNodes["camera"])->getTransformMatrix();
-            glm::vec3 cameraEye = cameraTransformMatrix * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f); // setting 1 as the homogenous coordinate
-            // cout<<"camera at: "<<cameraEye.x<<" , "<<cameraEye.y<<" , "<<cameraEye.z<<endl;
-            // Implicit typecasts work!!!!
-            glm::vec3 cameraLookAt = cameraTransformMatrix * glm::vec4(0.0f, 0.0f, -1.0f, 1.0f);
-            // cout<<"looking at: "<<cameraLookAt.x<<" , "<<cameraLookAt.y<<" , "<<cameraLookAt.z<<endl;
-            glm::vec3 cameraUp = cameraTransformMatrix * glm::vec4(0.0f, 1.0f, 0.0f, 0.0f);//homogenous coordinate is 0.0f as the vector is an axis, not a point.
+        viewMat = camera->GetViewMatrix();
+    // else if(cachedNodes["camera"])
+    // {
+    //         glm::mat4 cameraTransformMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0, 10.0, 100.0)) * dynamic_cast<sgraph::DynamicTransform*>(cachedNodes["camera"])->getTransformMatrix();
+    //         glm::vec3 cameraEye = cameraTransformMatrix * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f); // setting 1 as the homogenous coordinate
+    //         // cout<<"camera at: "<<cameraEye.x<<" , "<<cameraEye.y<<" , "<<cameraEye.z<<endl;
+    //         // Implicit typecasts work!!!!
+    //         glm::vec3 cameraLookAt = cameraTransformMatrix * glm::vec4(0.0f, 0.0f, -1.0f, 1.0f);
+    //         // cout<<"looking at: "<<cameraLookAt.x<<" , "<<cameraLookAt.y<<" , "<<cameraLookAt.z<<endl;
+    //         glm::vec3 cameraUp = cameraTransformMatrix * glm::vec4(0.0f, 1.0f, 0.0f, 0.0f);//homogenous coordinate is 0.0f as the vector is an axis, not a point.
             
-            viewMat = viewMat * glm::lookAt(cameraEye, cameraLookAt, cameraUp);        
-    }
-    else
-        viewMat = viewMat * glm::lookAt(glm::vec3(0.0f, 100.0f, 100.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    //         viewMat = viewMat * glm::lookAt(cameraEye, cameraLookAt, cameraUp);        
+    // }
+    // else
+    //     viewMat = viewMat * glm::lookAt(glm::vec3(0.0f, 100.0f, 100.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     #pragma endregion
 
 
@@ -645,25 +652,49 @@ void GUIView::setControllerReference(GUIController* controller)
 void GUIView::moveCamera(int forwardDir, int horizontalDir)
 {
     cout<<"Moving camera!!"<<endl;
-    glm::mat4 translateMatrix(1.0);
-    float forwardDirSpeed = (forwardDir == 0)? 0.0: (forwardDir > 0 ? 1.0f : -1.0f) * speed * 5.0f;
-    float horizontalDirSpeed = (horizontalDir == 0) ? 0.0 : (horizontalDir > 0 ? 1.0f : -1.0f) * speed * 5.0f;
-    translateMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(horizontalDirSpeed, 0.0f, forwardDirSpeed));
-    sgraph::DynamicTransform *cameraNode = dynamic_cast<sgraph::DynamicTransform*>(cachedNodes["camera"]);
-    if(cachedNodes["camera"])
-    {
-        cameraNode->postmulTransformMatrix(translateMatrix);
-    }
+    // if(cameraType == 1)
+    // {
+        if(forwardDir > 0)
+            camera->ProcessKeyboard(FORWARD, 1.0);
+        else if(forwardDir < 0)
+            camera->ProcessKeyboard(BACKWARD, 1.0);
+        if(horizontalDir > 0)
+            camera->ProcessKeyboard(RIGHT,1.0);
+        if(horizontalDir <  0)
+            camera->ProcessKeyboard(LEFT, 1.0);
+    // }
+    // else
+    // {
+    //     glm::mat4 translateMatrix(1.0);
+    //     float forwardDirSpeed = (forwardDir == 0)? 0.0: (forwardDir > 0 ? 1.0f : -1.0f) * speed * 5.0f;
+    //     float horizontalDirSpeed = (horizontalDir == 0) ? 0.0 : (horizontalDir > 0 ? 1.0f : -1.0f) * speed * 5.0f;
+    //     translateMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(horizontalDirSpeed, 0.0f, -forwardDirSpeed)); // negative forward direction because the camera is pointed towards the negative x-axis. So moving forward should actually decrement the z-position
+    //     sgraph::DynamicTransform *cameraNode = dynamic_cast<sgraph::DynamicTransform*>(cachedNodes["camera"]);
+    //     if(cachedNodes["camera"])
+    //     {
+    //         cameraNode->postmulTransformMatrix(translateMatrix);
+    //     }
+    // }
+
+
 }
 
+// yawDir = deltaX, pitchDir = deltaY
 void GUIView::rotateCamera(int yawDir, int pitchDir)
 {
-    float sensitivity = 0.5f;
-    glm::mat4 rotateMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(-yawDir * sensitivity), glm::vec3(0.0f, 1.0f, 0.0f));
-    rotateMatrix = glm::rotate(rotateMatrix, glm::radians(-pitchDir * sensitivity), glm::vec3(1.0f, 0.0f, 0.0f)); // screen space is 0,0 at the top left, so need to invert the pitchDir
-    sgraph::DynamicTransform *cameraNode = dynamic_cast<sgraph::DynamicTransform*>(cachedNodes["camera"]);
-    if(cachedNodes["camera"])
-    {
-        cameraNode->postmulTransformMatrix(rotateMatrix);
-    }
+    // if(cameraType == 1)
+        camera->ProcessMouseMovement(yawDir, -pitchDir);
+    // else
+    // {
+    //     float sensitivity = 0.5f;
+    //     glm::mat4 rotateMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(-yawDir * sensitivity), glm::vec3(0.0f, 1.0f, 0.0f));
+    //     rotateMatrix = glm::rotate(rotateMatrix, glm::radians(-pitchDir * sensitivity), glm::vec3(1.0f, 0.0f, 0.0f)); // screen space is 0,0 at the top left, so need to invert the pitchDir
+    //     sgraph::DynamicTransform *cameraNode = dynamic_cast<sgraph::DynamicTransform*>(cachedNodes["camera"]);
+    //     if(cachedNodes["camera"])
+    //     {
+    //         cameraNode->postmulTransformMatrix(rotateMatrix);
+    //     }
+
+    // }
+    
 }

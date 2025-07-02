@@ -29,7 +29,7 @@ void GUIController::initScenegraph() {
     //read in the file of commands
     ifstream inFile;
     if(textfile == "")
-        inFile = ifstream("scenegraphmodels/pbr-shadow-volume-test.txt");
+        inFile = ifstream("scenegraphmodels/pbr-shadow-volume-test-2.txt");
     else
         inFile = ifstream(textfile);
     sgraph::ScenegraphImporter importer;
@@ -85,10 +85,12 @@ void GUIController::onkey(int key, int scancode, int action, int mods)
     switch(key)
     {
         case GLFW_KEY_W:
-            reinterpret_cast<GUIView*>(view)->moveCamera(-1, 0);
+            // reinterpret_cast<GUIView*>(view)->moveCamera(-1, 0);
+            reinterpret_cast<GUIView*>(view)->moveCamera(1, 0);
             break;
         case GLFW_KEY_S://translate the drone backward
-            reinterpret_cast<GUIView*>(view)->moveCamera(1, 0);
+            // reinterpret_cast<GUIView*>(view)->moveCamera(1, 0);
+            reinterpret_cast<GUIView*>(view)->moveCamera(-1, 0);
             break;
         case GLFW_KEY_A:
             reinterpret_cast<GUIView*>(view)->moveCamera(0, -1);
