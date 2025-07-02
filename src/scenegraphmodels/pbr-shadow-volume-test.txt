@@ -1,6 +1,7 @@
 #all the instances
 instance box models/box-outside-2.obj
 instance sphere models/sphere-2.obj
+instance monkey models/monkey.obj
 #instance plane models/plane-test.obj
 #instance vase models/vase-2.obj
 
