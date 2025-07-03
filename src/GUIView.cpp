@@ -25,6 +25,7 @@ using namespace std;
 #include "sgraph/Jobs/InsertTranslateJob.h"
 #include "sgraph/Jobs/InsertScaleJob.h"
 #include "sgraph/Jobs/InsertLeafJob.h"
+#include "sgraph/Jobs/InsertSRTJob.h"
 #include "sgraph/Jobs/DeleteNodeJob.h"
 #include "sgraph/Jobs/ReadTextureJob.h"
 #include "Camera/ICamera.h"
@@ -428,6 +429,63 @@ void GUIView::showPopups()
                 {
                     job::InsertScaleJob* scaleJob = new job::InsertScaleJob(sgRenderer->getAddChildNode()->getName(), childNodeName, newScale.x, newScale.y, newScale.z);
                     getViewJob(scaleJob);
+                    ImGui::CloseCurrentPopup();
+                    sgRenderer->resetAddChildNode();
+                    resetPopupVars();
+                }
+                ImGui::SetItemDefaultFocus();
+                ImGui::SameLine();
+                if (ImGui::Button("Cancel")) 
+                {
+                    ImGui::CloseCurrentPopup();
+                    sgRenderer->resetAddChildNode();
+                    resetPopupVars();
+                }
+                ImGui::EndPopup();
+            }
+        }
+        else if(childType == "SRT")
+        {
+            ImGui::OpenPopup("Add SRT Node");
+
+            ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+            ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+            
+
+            if(ImGui::BeginPopupModal("Add SRT Node"))
+            {
+                ImGui::InputText("Node name", childNodeName, 32);
+                float scaleFloat3f[3] = {newScale.x, newScale.y, newScale.z};
+                bool scaleChanged = ImGui::DragFloat3("Scale", scaleFloat3f);
+                if (scaleChanged)
+                {
+                    newScale.x = scaleFloat3f[0];
+                    newScale.y = scaleFloat3f[1];
+                    newScale.z = scaleFloat3f[2];
+                }
+                float newRotation3f[3] = {newRotation.x, newRotation.y, newRotation.z};
+                bool rotateChanged = ImGui::DragFloat3("Rotation", newRotation3f);
+                if (rotateChanged)
+                {
+                    newRotation.x = newRotation3f[0];
+                    newRotation.y = newRotation3f[1];
+                    newRotation.z = newRotation3f[2];
+                }
+
+                float translateFloat3f[3] = {newTranslation.x, newTranslation.y, newTranslation.z};
+                bool translateChanged = ImGui::DragFloat3("Translate", translateFloat3f);
+                if (translateChanged)
+                {
+                    newTranslation.x = translateFloat3f[0];
+                    newTranslation.y = translateFloat3f[1];
+                    newTranslation.z = translateFloat3f[2];
+                }
+                ImGui::Separator();
+                if (ImGui::Button("Confirm")) 
+                {
+                    job::InsertSRTJob* srtJob = new job::InsertSRTJob(sgRenderer->getAddChildNode()->getName(), childNodeName, newScale.x, newScale.y, newScale.z,
+                                                                                            newRotation.x, newRotation.y, newRotation.z, newTranslation.x, newTranslation.y, newTranslation.z);
+                    getViewJob(srtJob);
                     ImGui::CloseCurrentPopup();
                     sgRenderer->resetAddChildNode();
                     resetPopupVars();

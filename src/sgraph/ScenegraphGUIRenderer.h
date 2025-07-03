@@ -181,6 +181,11 @@ namespace sgraph
                         addChildNode = node;
                         nodeType = "Group";
                     }
+                    if(ImGui::MenuItem("SRT"))
+                    {
+                        addChildNode = node;
+                        nodeType = "SRT";
+                    }
                     if(ImGui::MenuItem("Translate"))
                     {
                         addChildNode = node;

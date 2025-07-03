@@ -22,6 +22,7 @@ namespace sgraph {
         }
 
         public:
+            // Note that all angles are in radians
             SRTNode(float tx,float ty,float tz,float rx, float ry, float rz, float sx, float sy, float sz, const string& name,sgraph::IScenegraph *graph) 
                 :TransformNode(name,graph) {
                     this->tx = tx;

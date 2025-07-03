@@ -220,14 +220,14 @@ namespace sgraph
 
                 glm::vec3 rotate = srtNode->getRotate();
                 float vec3fr[3] = {rotate.x, rotate.y, rotate.z};
-                if (ImGui::DragFloat3("Scale", vec3fr))
+                if (ImGui::DragFloat3("Rotate", vec3fr))
                 {
                     changed = true;
                 }
 
                 glm::vec3 translate = srtNode->getTranslate();
                 float vec3ft[3] = {translate.x, translate.y, translate.z};
-                if (ImGui::DragFloat3("Scale", vec3ft))
+                if (ImGui::DragFloat3("Translate", vec3ft))
                 {
                     changed = true;
                 }
