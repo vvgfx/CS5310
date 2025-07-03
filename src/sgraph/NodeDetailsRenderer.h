@@ -17,6 +17,7 @@
 #include "Jobs/InsertLightJob.h"
 #include "Jobs/DeleteLightJob.h"
 #include "Jobs/UpdateLeafMaterialJob.h"
+#include "Jobs/UpdateSRTJob.h"
 #include "../GUIView.h"
 #include <ShaderProgram.h>
 #include <ShaderLocationsVault.h>
@@ -219,7 +220,7 @@ namespace sgraph
                 }
 
                 glm::vec3 rotate = srtNode->getRotate();
-                float vec3fr[3] = {rotate.x, rotate.y, rotate.z};
+                float vec3fr[3] = {glm::degrees(rotate.x), glm::degrees(rotate.y), glm::degrees(rotate.z)};
                 if (ImGui::DragFloat3("Rotate", vec3fr))
                 {
                     changed = true;
@@ -234,6 +235,8 @@ namespace sgraph
                 if(changed)
                 {
                     // update SRT Job here.
+                    job::UpdateSRTJob* srtJob = new job::UpdateSRTJob(srtNode->getName(), vec3fs[0], vec3fs[1], vec3fs[2], vec3fr[0], vec3fr[1], vec3fr[2], vec3ft[0], vec3ft[1], vec3ft[2]);
+                    view->getViewJob(srtJob);
                     changed = false;
 
                 }
