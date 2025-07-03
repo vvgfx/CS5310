@@ -9,6 +9,7 @@
 #include "../ScaleTransform.h"
 #include "../TranslateTransform.h"
 #include "../DynamicTransform.h"
+#include "../SRTNode.h"
 #include <stack>
 #include <iostream>
 using namespace std;
@@ -104,6 +105,15 @@ namespace command
          * @param translateNode
          */
         void visitDynamicTransform(sgraph::DynamicTransform *dynamicTransformNode)
+        {
+        }
+
+        /**
+         * @brief Visit SRT Node on AbstractCommand
+         *
+         * @param srtNode
+         */
+        void visitSRTNode(sgraph::SRTNode* srtNode)
         {
         }
 

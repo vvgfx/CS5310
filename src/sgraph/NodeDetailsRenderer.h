@@ -9,6 +9,7 @@
 #include "ScaleTransform.h"
 #include "TranslateTransform.h"
 #include "DynamicTransform.h"
+#include "SRTNode.h"
 #include "Jobs/UpdateScaleJob.h"
 #include "Jobs/UpdateTranslateJob.h"
 #include "Jobs/UpdateRotateJob.h"
@@ -202,6 +203,42 @@ namespace sgraph
             {
             }
             drawLightHeader(dynamicTransformNode);
+        }
+
+
+        void visitSRTNode(SRTNode *srtNode)
+        {
+            if (ImGui::CollapsingHeader("SRT Node", ImGuiTreeNodeFlags_DefaultOpen))
+            {
+                bool changed  = false;
+                glm::vec3 scale = srtNode->getScale();
+                float vec3fs[3] = {scale.x, scale.y, scale.z};
+                if (ImGui::DragFloat3("Scale", vec3fs))
+                {
+                    changed = true;
+                }
+
+                glm::vec3 rotate = srtNode->getRotate();
+                float vec3fr[3] = {rotate.x, rotate.y, rotate.z};
+                if (ImGui::DragFloat3("Scale", vec3fr))
+                {
+                    changed = true;
+                }
+
+                glm::vec3 translate = srtNode->getTranslate();
+                float vec3ft[3] = {translate.x, translate.y, translate.z};
+                if (ImGui::DragFloat3("Scale", vec3ft))
+                {
+                    changed = true;
+                }
+                if(changed)
+                {
+                    // update SRT Job here.
+                    changed = false;
+
+                }
+            }
+            drawLightHeader(srtNode);
         }
 
         void drawLightHeader(SGNode *node)

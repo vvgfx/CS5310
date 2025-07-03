@@ -9,6 +9,7 @@
 #include "ScaleTransform.h"
 #include "TranslateTransform.h"
 #include "DynamicTransform.h"
+#include "SRTNode.h"
 #include <ShaderProgram.h>
 #include <ShaderLocationsVault.h>
 #include "ObjectInstance.h"
@@ -146,6 +147,11 @@ namespace sgraph {
         void visitDynamicTransform(DynamicTransform *dynamicTransformNode)
         {
             visitTransformNode(dynamicTransformNode);
+        }
+
+        void visitSRTNode(SRTNode* srtNode)
+        {
+            visitTransformNode(srtNode);
         }
 
         private:

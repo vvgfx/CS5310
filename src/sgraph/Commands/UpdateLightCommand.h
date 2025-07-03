@@ -10,6 +10,7 @@
 #include "../ScaleTransform.h"
 #include "../TranslateTransform.h"
 #include "../DynamicTransform.h"
+#include "../SRTNode.h"
 #include <stack>
 #include <iostream>
 #include <algorithm>
@@ -122,6 +123,11 @@ namespace command
             updateLightInNode(dynamicTransformNode);
         }
 
+        void visitSRTNode(sgraph::SRTNode* srtNode)
+        {
+            updateLightInNode(srtNode);
+        }
+
 
         void updateLightInNode(sgraph::SGNode* node)
         {   
@@ -147,7 +153,6 @@ namespace command
                     lightIterator->setPosition(position[0], position[1], position[2]);
                 }
             }
-
         }
 
 

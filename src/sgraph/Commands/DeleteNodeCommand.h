@@ -10,6 +10,7 @@
 #include "../ScaleTransform.h"
 #include "../TranslateTransform.h"
 #include "../DynamicTransform.h"
+#include "../SRTNode.h"
 #include <stack>
 #include <iostream>
 using namespace std;
@@ -94,6 +95,13 @@ namespace command
             if(dynamicTransformNode->getChildren().size() < 1)
                 return;
             deleteChild(dynamicTransformNode);
+        }
+
+        void visitSRTNode(sgraph::SRTNode* srtNode)
+        {
+            if(srtNode->getChildren().size() < 1)
+                return;
+            deleteChild(srtNode);
         }
 
 

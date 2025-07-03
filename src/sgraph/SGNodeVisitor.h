@@ -21,6 +21,7 @@ namespace sgraph {
     class RotateTransform;
     class TranslateTransform;
     class DynamicTransform;
+    class SRTNode;
 
 /**
  * This class represents the interface for a visitor on scene graph nodes.
@@ -38,6 +39,7 @@ namespace sgraph {
         virtual void visitTranslateTransform(TranslateTransform *node)=0;
         virtual void visitRotateTransform(RotateTransform *node)=0;
         virtual void visitDynamicTransform(DynamicTransform *node)=0;
+        virtual void visitSRTNode(SRTNode* node)=0;
     };
 }
 

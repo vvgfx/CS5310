@@ -10,6 +10,7 @@
 #include "../ScaleTransform.h"
 #include "../TranslateTransform.h"
 #include "../DynamicTransform.h"
+#include "../SRTNode.h"
 #include <stack>
 #include <iostream>
 #include <algorithm>
@@ -116,6 +117,11 @@ namespace command
         void visitDynamicTransform(sgraph::DynamicTransform *dynamicTransformNode)
         {
             deleteLightInNode(dynamicTransformNode);
+        }
+
+        void visitSRTNode(sgraph::SRTNode* srtNode)
+        {
+            deleteLightInNode(srtNode);
         }
 
 

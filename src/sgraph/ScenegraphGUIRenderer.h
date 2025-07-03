@@ -9,6 +9,7 @@
 #include "ScaleTransform.h"
 #include "TranslateTransform.h"
 #include "DynamicTransform.h"
+#include "SRTNode.h"
 #include <ShaderProgram.h>
 #include <ShaderLocationsVault.h>
 #include "ObjectInstance.h"
@@ -144,6 +145,16 @@ namespace sgraph
         void visitDynamicTransform(DynamicTransform *dynamicTransformNode)
         {
             visitParentNode(dynamicTransformNode, !(dynamicTransformNode->getChildren().size() > 0));
+        }
+
+        /**
+         * @brief Visit parent node to draw GUI.
+         *
+         * @param srtNode
+         */
+        void visitSRTNode(SRTNode *srtNode)
+        {
+            visitParentNode(srtNode, !(srtNode->getChildren().size() > 0));
         }
 
         /**

@@ -8,6 +8,7 @@
 #include "RotateTransform.h"
 #include "ScaleTransform.h"
 #include "TranslateTransform.h"
+#include "SRTNode.h"
 #include <sstream>
 using namespace std;
 
@@ -176,6 +177,11 @@ namespace sgraph {
                 if (level==1) {
                     append("assign-root "+varname);
                 }
+            }
+
+            void visitSRTNode(SRTNode* srtNode)
+            {
+                // not supported for now.
             }
 
         private:

@@ -6,6 +6,7 @@
 #include "ScaleTransform.h"
 #include "TranslateTransform.h"
 #include "DynamicTransform.h"
+#include "SRTNode.h"
 #include <ShaderProgram.h>
 #include <ShaderLocationsVault.h>
 #include "ObjectInstance.h"
@@ -86,6 +87,16 @@ namespace sgraph {
         {
             string s = "Dynamic transform";
             transformNodeHelper(node, s);
+        }
+
+        void visitSRTNode(SRTNode* srtNode)
+        {
+            glm::vec3 rotate = srtNode->getRotate();
+            glm::vec3 translate = srtNode->getTranslate();
+            glm::vec3 scale = srtNode->getScale();
+            string s = "SRT Node: " + to_string(scale.x) + " , " + to_string(scale.y) + " , " + to_string(scale.z) + " " + to_string(rotate.x) + " , " + to_string(rotate.y) + " , " + to_string(rotate.z) + " "
+                        + to_string(translate.x) + " , " + to_string(translate.y) + " , " + to_string(translate.z) + " ";
+            transformNodeHelper(srtNode, s);
         }
 
         private:
