@@ -1,0 +1,94 @@
+#all the instances
+instance box models/box-outside-2.obj
+instance sphere models/sphere-2.obj
+
+#materials
+material box-material
+albedo 0.9 0.9 0.9
+metallic 0.2
+roughness 0.95
+ao 1.0
+end-material
+
+material sphere-material
+albedo 0.8 0.8 0
+metallic 0.2
+roughness 0.2
+ao 1.0
+end-material
+
+#lights
+light one-light
+color 100.0 100.0 100.0
+position 0 10 30
+end-light
+
+#lights
+light two-light
+color 350.0 350.0 350.0
+position 0 50 0 # was 0 50 0 initially
+spot-direction 0 -1 0 
+spot-angle 20
+end-light
+
+#textures
+image box-base textures/paint-albedo.ppm
+image box-normal textures/paint-normal.ppm
+image box-metallic textures/paint-metallic.ppm
+image box-roughness textures/paint-roughness.ppm
+image box-ao textures/paint-ao.ppm
+
+image sphere-base textures/metal_albedo.ppm
+image sphere-normal textures/metal_normal.ppm
+image sphere-metallic textures/metal_metallic.ppm
+image sphere-roughness textures/metal_roughness.ppm
+image sphere-ao textures/metal_ao.ppm
+
+#the root
+group root root
+assign-light one-light root
+assign-light two-light root
+
+#box
+leaf one-box one-box instanceof box 
+assign-material one-box box-material
+assign-texture one-box box-base
+assign-normal one-box box-normal
+assign-metallic one-box box-metallic
+assign-roughness one-box box-roughness
+assign-ao one-box box-ao
+
+srt box-srt box-srt 10 10 10 0 0 0 -10 0 0
+add-child one-box box-srt
+add-child box-srt root
+
+
+#box
+leaf ground-box ground-box instanceof box 
+assign-material ground-box box-material
+assign-texture ground-box box-base
+assign-normal ground-box box-normal
+assign-metallic ground-box box-metallic
+assign-roughness ground-box box-roughness
+assign-ao ground-box box-ao
+
+srt ground-srt ground-srt 80 5 80 0 0 0 0 -25 0
+add-child ground-box ground-srt
+add-child ground-srt root
+
+#sphere
+translate s-translate s-translate 10 0 0
+scale s-scale s-scale 5 5 5
+leaf one-sphere one-sphere instanceof sphere 
+assign-material one-sphere sphere-material
+assign-texture one-sphere sphere-base
+assign-normal one-sphere sphere-normal
+assign-metallic one-sphere sphere-metallic
+assign-roughness one-sphere sphere-roughness
+assign-ao one-sphere sphere-ao
+
+srt sphere-srt sphere-srt 5 5 5 0 0 0 10 0 0
+add-child one-sphere sphere-srt
+add-child sphere-srt root
+
+assign-root root

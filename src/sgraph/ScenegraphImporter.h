@@ -59,6 +59,10 @@ namespace sgraph {
                     {
                         parseDynamic(inputWithOutComments, scenegraph);
                     }
+                    else if (command == "srt")
+                    {
+                        parseSRT(inputWithOutComments, scenegraph);
+                    }
                     else if (command == "image")
                     {
                         parseTexture(inputWithOutComments);
@@ -214,6 +218,17 @@ namespace sgraph {
                     cout << "Read " << varname << " " << name << endl;
                     SGNode *dynamic = new DynamicTransform(glm::mat4(1.0), name, scenegraph);
                     nodes[varname] = dynamic;
+                }
+
+                virtual void parseSRT(istream& input, IScenegraph *scenegraph)
+                {
+                    string varname, name;
+                    float sx, sy, sz, rx, ry, rz, tx, ty, tz;
+                    input >> varname >> name;
+                    cout << "Read " << varname << " " << name << endl;
+                    input >> sx >> sy >> sz >> rx >> ry >> rz >> tx >> ty >> tz;
+                    SGNode *srtNode = new SRTNode(tx, ty, tz, rx, ry, rz, sx, sy, sz, name, scenegraph);
+                    nodes[varname] = srtNode;
                 }
 
                 virtual void parseGroup(istream& input, IScenegraph *scenegraph) {

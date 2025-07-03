@@ -95,6 +95,22 @@ namespace sgraph
                 {
                     changed = true;
                 }
+                ImGui::Separator();
+                ImGui::Text("Textures");
+                string albedoMap = leafNode->getTextureMap();
+                string normalMap = leafNode->getNormalMap();
+                string metallicMap = leafNode->getMetallicMap();
+                string roughnessMap = leafNode->getRoughnessMap();
+                string aoMap = leafNode->getAOMap();
+                ImGui::BeginDisabled(true);
+                {
+                    ImGui::InputText("Albedo map" , &albedoMap[0], albedoMap.size(), ImGuiInputTextFlags_ReadOnly);
+                    ImGui::InputText("Normal map" , &normalMap[0], normalMap.size(), ImGuiInputTextFlags_ReadOnly);
+                    ImGui::InputText("Metallic map" , &metallicMap[0], metallicMap.size(), ImGuiInputTextFlags_ReadOnly);
+                    ImGui::InputText("Roughness map" , &roughnessMap[0], roughnessMap.size(), ImGuiInputTextFlags_ReadOnly);
+                    ImGui::InputText("AO map" , &aoMap[0], aoMap.size(), ImGuiInputTextFlags_ReadOnly);
+                }
+                ImGui::EndDisabled();
                 if(changed)
                 {
                     job::UpdateLeafMaterialJob* updateMatJob = new job::UpdateLeafMaterialJob(leafNode->getName(), albedo, metallic, roughness, ao);
