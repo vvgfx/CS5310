@@ -23,6 +23,9 @@ public:
 
     virtual void receiveJob(job::IJob* job);
 
+    // for restart
+    virtual void restartEngine(string newScenegraphName);
+
 protected:
 };
 

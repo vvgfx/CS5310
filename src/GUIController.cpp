@@ -18,6 +18,14 @@ using namespace std;
 #include "GUIView.h"
 #include "imgui.h"
 
+// restart imports here
+#ifdef _WIN32
+    #include <process.h>
+#else
+    #include <unistd.h>
+#endif
+
+
 GUIController::GUIController(Model* m,View* v, string textfile) :
     Controller(m,v, textfile) {
 }
@@ -29,7 +37,7 @@ void GUIController::initScenegraph() {
     //read in the file of commands
     ifstream inFile;
     if(textfile == "")
-        inFile = ifstream("scenegraphmodels/pbr-shadow-volume-test-2.txt");
+        inFile = ifstream("scenegraphmodels/pbr-shadow-volume-test.txt");
     else
         inFile = ifstream(textfile);
     sgraph::ScenegraphImporter importer;
@@ -151,4 +159,20 @@ void GUIController::receiveJob(job::IJob* job)
     });
     t.detach();
     
+}
+
+void GUIController::restartEngine(string newScenegraphName)
+{
+    view->closeWindow();
+    glfwTerminate();
+    vector<char*> args;
+    args.push_back(const_cast<char*>("rendering_engine.exe"));  // argv[0] - program name
+    args.push_back(const_cast<char*>(newScenegraphName.c_str()));        // argv[1] - your file parameter
+    args.push_back(nullptr);             
+
+    #ifdef _WIN32
+        _execv("Rendering_Engine.exe", args.data());  // Windows
+    #else
+        execv("./Rendering_Engine", args.data());   // Unix/Linux/macOS
+    #endif
 }

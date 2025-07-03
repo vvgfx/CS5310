@@ -85,6 +85,10 @@ public:
     camera::ICamera* camera;
     float lastFrame;
     float deltaTime;
+
+    // load scenegraph
+    char newFileName[200];
+    bool showLoadScenePopup;
 };
 
 #endif

@@ -7,7 +7,6 @@
 /**
  * This camera requires a node of type camera in the scenegraph. This node must be attached to the root, and cannot be modified.
  */
-// Defines several possible options for camera movement. Used as abstraction to stay away from window-system specific input methods
 
 
 // Default camera values
