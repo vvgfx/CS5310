@@ -8,6 +8,7 @@
 #include "RotateTransform.h"
 #include "ScaleTransform.h"
 #include "TranslateTransform.h"
+#include "DynamicTransform.h"
 #include "SRTNode.h"
 #include <sstream>
 using namespace std;
@@ -15,13 +16,19 @@ using namespace std;
 namespace sgraph {
     class ScenegraphExporter: public SGNodeVisitor {
         public:
-            ScenegraphExporter(map<string,string>& meshPaths) {
+            ScenegraphExporter(map<string,string> meshPaths, map<string, string> texPaths) {
                 level = 1;
                 number = 0;
 
+                append("# meshes");
                 for (map<string,string>::iterator it=meshPaths.begin(); it!=meshPaths.end();it++) {
                     append("instance "+it->first + " " + it->second);
                 }
+                append("\n\n# textures");
+                for (map<string,string>::iterator it=texPaths.begin(); it!=texPaths.end();it++) {
+                    append("image "+it->first + " " + it->second);
+                }
+                append("\n\n");
             }
 
             string getOutput() {
@@ -37,10 +44,10 @@ namespace sgraph {
                 string varname;
                 stringstream namestream;
                 namestream << "node-" << level << "-" << number;
-                varname = namestream.str();
+                varname = groupNode->getName();
 
                 append("group " + varname + " " + groupNode->getName());
-
+                appendLights(groupNode, varname);
                 visitParentSGNode(groupNode,varname);
 
                 if (level==1) {
@@ -59,8 +66,9 @@ namespace sgraph {
                 string varname;
                 stringstream namestream;
                 namestream << "node-" << level << "-" << number;
-                varname = namestream.str();
+                varname = leafNode->getName();
 
+                appendLights(leafNode, varname);
                 append("leaf " + varname + " " +leafNode->getName() + " " + "instanceof " +leafNode->getInstanceOf());                
 
                 append("material mat-" + varname);
@@ -81,12 +89,47 @@ namespace sgraph {
                     << leafNode->getMaterial().getSpecular()[0] << " "
                     << leafNode->getMaterial().getSpecular()[1] << " "
                     << leafNode->getMaterial().getSpecular()[2] << endl;
-                mat << "shininess " << leafNode->getMaterial().getShininess();
+                mat << "shininess " << leafNode->getMaterial().getShininess() << endl;
+
+                // PBR stuff here
+                mat << "#PBR" << endl;
+                mat << "albedo " 
+                    << leafNode->getMaterial().getAlbedo()[0] << " "
+                    << leafNode->getMaterial().getAlbedo()[1] << " "
+                    << leafNode->getMaterial().getAlbedo()[2] << endl;
+                mat << "metallic " 
+                    << leafNode->getMaterial().getMetallic() << endl;
+                mat << "roughness " 
+                    << leafNode->getMaterial().getRoughness() << endl;
+                mat << "ao " 
+                    << leafNode->getMaterial().getAO();
                 append(mat.str());
-                append("end-material");
-                append("assign-material "+varname+" mat-"+varname);
+                append("end-material \n");
+                append("assign-material "+varname+" mat-"+varname + " \n");
+
+                // now do the same for textures
+                string texName = leafNode->getTextureMap();
+                if(texName != "")
+                    append("assign-texture " + varname + " " + texName);
+                    
+                string normalMapName = leafNode->getNormalMap();
+                if(normalMapName != "")
+                    append("assign-normal " + varname + " " + normalMapName);
+
+                string metallicMapName = leafNode->getMetallicMap();
+                if(metallicMapName != "")
+                    append("assign-metallic " + varname + " " + metallicMapName);
+
+                string roughnessMap = leafNode->getRoughnessMap();
+                if(roughnessMap != "")
+                    append("assign-roughness " + varname + " " + roughnessMap);
+
+                string aoMapName = leafNode->getAOMap();
+                if(aoMapName != "")
+                    append("assign-ao " + varname + " " + aoMapName);
 
                 if (level==1) {
+                    append("\n\n");
                     append("assign-root "+varname);
                 }
             }
@@ -111,19 +154,21 @@ namespace sgraph {
                 string varname;
                 stringstream namestream;
                 namestream << "node-" << level << "-" << number;
-                varname = namestream.str();
+                varname = scaleNode->getName();
 
                 stringstream t;
                 t << "scale " << varname  << " " << scaleNode->getName() + " "
                   << scaleNode->getScale()[0] << " "
                   << scaleNode->getScale()[1] << " "
-                  << scaleNode->getScale()[2];            
+                  << scaleNode->getScale()[2] << "\n";            
 
                 append(t.str());
 
+                appendLights(scaleNode, varname);
                 visitParentSGNode(scaleNode,varname);
 
                 if (level==1) {
+                    append("\n\n");
                     append("assign-root "+varname);
                 }
                 
@@ -140,19 +185,20 @@ namespace sgraph {
                 string varname;
                 stringstream namestream;
                 namestream << "node-" << level << "-" << number;
-                varname = namestream.str();
+                varname = translateNode->getName();
 
                 stringstream t;
                 t << "translate " << varname << " " + translateNode->getName()
                   << translateNode->getTranslate()[0] << " "
                   << translateNode->getTranslate()[1] << " "
-                  << translateNode->getTranslate()[2];            
+                  << translateNode->getTranslate()[2] << "\n";            
 
                 append(t.str());
-
+                appendLights(translateNode, varname);
                 visitParentSGNode(translateNode,varname);
 
                 if (level==1) {
+                    append("\n\n");
                     append("assign-root "+varname);
                 }
             }
@@ -161,27 +207,67 @@ namespace sgraph {
                 string varname;
                 stringstream namestream;
                 namestream << "node-" << level << "-" << number;
-                varname = namestream.str();
+                varname = rotateNode->getName();
                 
                 stringstream t;
                 t << "rotate " << varname << " " +rotateNode->getName()
                   << glm::degrees(rotateNode->getAngleInRadians()) << " "
                   << rotateNode->getRotationAxis()[0] << " "
                   << rotateNode->getRotationAxis()[1] << " "
-                  << rotateNode->getRotationAxis()[2];            
+                  << rotateNode->getRotationAxis()[2] << "\n";
 
                 append(t.str());
-
+                appendLights(rotateNode, varname);
                 visitParentSGNode(rotateNode,varname);
 
                 if (level==1) {
+                    append("\n\n");
+                    append("assign-root "+varname);
+                }
+            }
+
+            void visitDynamicTransform(DynamicTransform* dynamicTransformNode)
+            {
+                string varname;
+                stringstream namestream;
+                namestream << "node-" << level << "-" << number;
+                varname = dynamicTransformNode->getName();
+                stringstream t;
+
+
+                t << "dynamic " << varname << " " << dynamicTransformNode->getName() << "\n";
+                append(t.str());
+                appendLights(dynamicTransformNode, varname);
+                visitParentSGNode(dynamicTransformNode,varname);
+
+                if (level==1) {
+                    append("\n\n");
                     append("assign-root "+varname);
                 }
             }
 
             void visitSRTNode(SRTNode* srtNode)
             {
-                // not supported for now.
+                string varname;
+                stringstream namestream;
+                namestream << "node-" << level << "-" << number;
+                varname = srtNode->getName();
+
+
+                stringstream t;
+                t << "srt " << varname << " " << srtNode->getName() << " "
+                    << srtNode->getScale().x << " " << srtNode->getScale().y << " " << srtNode->getScale().z << " "
+                    << glm::degrees(srtNode->getRotate().x) << " " << glm::degrees(srtNode->getRotate().y) << " " << glm::degrees(srtNode->getRotate().z) << " "
+                    << srtNode->getTranslate().x << " " << srtNode->getTranslate().y << " " << srtNode->getTranslate().z << "\n";
+                    
+                append(t.str());
+                appendLights(srtNode, varname);
+                visitParentSGNode(srtNode,varname);
+
+                if (level==1) {
+                    append("\n\n");
+                    append("assign-root "+varname);
+                }
             }
 
         private:
@@ -198,11 +284,36 @@ namespace sgraph {
                     node->getChildren()[i]->accept(this);
                     stringstream childname;
                     childname << "node-" << level << "-" << number;
-                    append("add-child " + childname.str() + " " +name);
+                    append("add-child " + node->getChildren()[i]->getName() + " " +name);
                     number = number + 1;
                 }
                 level -=1;
                 number = old;
+            }
+
+            void appendLights(SGNode* node, const string& name)
+            {
+                vector<util::Light>* lights = node->getLights();
+
+                for(vector<util::Light>::iterator it = lights->begin(); it != lights->end(); it++)
+                {
+                    append("light " + it->getName());
+                    stringstream l;
+                    l << "ambient " << it->getAmbient().x << " " << it->getAmbient().y << " " << it->getAmbient().z << endl;
+                    l << "diffuse " << it->getDiffuse().x << " " << it->getDiffuse().y << " " << it->getDiffuse().z << endl;
+                    l << "specular " << it->getSpecular().x << " " << it->getSpecular().y << " " << it->getSpecular().z << endl;
+                    l << "position " << it->getPosition().x << " " << it->getPosition().y << " " << it->getPosition().z << endl;
+                    if(it->getSpotCutoff() > 0)
+                    {
+                        l << "spot-direction " << it->getSpotDirection().x << " " << it->getSpotDirection().y << " " << it->getSpotDirection().z << endl;
+                        l << "spot-angle " << it->getSpotCutoff() << endl;
+                    }
+                    l << "color " << it->getColor().x << " " << it->getColor().y << " " << it->getColor().z;
+                    append(l.str());
+                    append("end-light");
+                    append("assign-light " + it->getName() + " " + name + "\n");
+                }
+
             }
             int level; //the level of the scene graph
             int number; //the number of the current node at the current level (only changes with parent sg nodes)

@@ -89,6 +89,10 @@ public:
     // load scenegraph
     char newFileName[200];
     bool showLoadScenePopup;
+
+    // save scenegraph
+    char saveFileName[200];
+    bool showSaveScenePopup;
 };
 
 #endif

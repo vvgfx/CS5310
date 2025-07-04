@@ -61,6 +61,7 @@ public:
         this->normalMap = "";
         this->metallicMap = "";
         this->roughnessMap = "";
+        this->aoMap = "";
     }
 	
 	~LeafNode(){}

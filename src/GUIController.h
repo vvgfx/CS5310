@@ -19,6 +19,7 @@ public:
     virtual void error_callback(int error, const char *description);
     virtual void onMouseInput(int button, int action, int mods);
     virtual void onCursorMove(double newXPos, double newYPos);
+    virtual void exportScene(string fileName);
     void initScenegraph() override;
 
     virtual void receiveJob(job::IJob* job);

@@ -149,7 +149,10 @@ void GUIView::ImGUIView(sgraph::IScenegraph *scenegraph)
         if (ImGui::BeginMenu("File"))
         {
             // ShowExampleMenuFile();
-            if (ImGui::MenuItem("Save scene")) {}
+            if (ImGui::MenuItem("Save scene")) 
+            {
+                showSaveScenePopup = true;
+            }
             if (ImGui::MenuItem("Load scene")) 
             {
                 showLoadScenePopup = true;
@@ -181,6 +184,30 @@ void GUIView::ImGUIView(sgraph::IScenegraph *scenegraph)
             if (ImGui::Button("Load"))
             {
                 reinterpret_cast<GUIController*>(controller)->restartEngine(newFileName);
+                ImGui::CloseCurrentPopup();
+                resetPopupVars();
+            }
+            ImGui::SetItemDefaultFocus();
+            ImGui::SameLine();
+            if (ImGui::Button("Cancel")) 
+            {
+                ImGui::CloseCurrentPopup();
+                resetPopupVars();
+            }
+            ImGui::EndPopup();
+        }
+    }
+
+    if(showSaveScenePopup)
+    {
+        ImGui::OpenPopup("Save scene");
+        if(ImGui::BeginPopupModal("Save scene"))
+        {
+            ImGui::InputText("file name", saveFileName, 200);
+            ImGui::Separator();
+            if (ImGui::Button("Save"))
+            {
+                reinterpret_cast<GUIController*>(controller)->exportScene(saveFileName);
                 ImGui::CloseCurrentPopup();
                 resetPopupVars();
             }
@@ -634,6 +661,10 @@ void GUIView::resetPopupVars()
     // new file stuff here
     strcpy(newFileName, "");
     showLoadScenePopup = false;
+
+    // save scene here
+    strcpy(saveFileName, "");
+    showSaveScenePopup = false;
 }
 
 void GUIView::initLights(sgraph::IScenegraph *scenegraph)

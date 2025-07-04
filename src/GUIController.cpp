@@ -10,6 +10,7 @@
 using namespace sgraph;
 #include <iostream>
 #include <thread>
+#include <fstream>
 using namespace std;
 
 #include "sgraph/ScenegraphExporter.h"
@@ -37,7 +38,7 @@ void GUIController::initScenegraph() {
     //read in the file of commands
     ifstream inFile;
     if(textfile == "")
-        inFile = ifstream("scenegraphmodels/texture-pbr-sv-srt-test.txt");
+        inFile = ifstream("scenegraphmodels/test-export.txt");
     else
         inFile = ifstream(textfile);
     sgraph::ScenegraphImporter importer;
@@ -48,8 +49,11 @@ void GUIController::initScenegraph() {
     model->setScenegraph(scenegraph);
     map<string, util::TextureImage*> textureMap = importer.getTextureMap(); // this is copied
 
+    map<string, string> texturePaths = importer.getTexturePaths();
+
     model->saveTextureMap(textureMap); // this should also be copied, the source of truth is the model!
 
+    model->saveTexturePaths(texturePaths);
     // ugly code, can fix later??
     reinterpret_cast<GUIView*>(view)->setControllerReference(this);
 
@@ -112,6 +116,9 @@ void GUIController::onkey(int key, int scancode, int action, int mods)
         case GLFW_KEY_RIGHT://rotate the drone right
             reinterpret_cast<GUIView*>(view)->rotateCamera(-1.0f, 0.0f);
             break;
+        case GLFW_KEY_0://rotate the drone right
+            exportScene("scenegraphmodels/test-export.txt");
+            break;
 
     }
 }
@@ -166,8 +173,8 @@ void GUIController::restartEngine(string newScenegraphName)
     view->closeWindow();
     glfwTerminate();
     vector<char*> args;
-    args.push_back(const_cast<char*>("rendering_engine.exe"));  // argv[0] - program name
-    args.push_back(const_cast<char*>(newScenegraphName.c_str()));        // argv[1] - your file parameter
+    args.push_back(const_cast<char*>("rendering_engine.exe"));
+    args.push_back(const_cast<char*>(newScenegraphName.c_str()));
     args.push_back(nullptr);             
 
     #ifdef _WIN32
@@ -175,4 +182,13 @@ void GUIController::restartEngine(string newScenegraphName)
     #else
         execv("./Rendering_Engine", args.data());   // Unix/Linux/macOS
     #endif
+}
+
+void GUIController::exportScene(string name)
+{
+    ofstream file(name);
+    sgraph::ScenegraphExporter* exporter = new sgraph::ScenegraphExporter(model->getScenegraph()->getMeshPaths(), model->getTexturePaths());
+    model->getScenegraph()->getRoot()->accept(exporter);
+    file << exporter->getOutput();
+    file.close();
 }
