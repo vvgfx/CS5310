@@ -140,6 +140,11 @@ namespace sgraph {
                 return this->textureMap;
             }
 
+            map<string, string> getTexturePaths()
+            {
+                return this->texturePaths;
+            }
+
 
             map<string, SGNode*> getNodeMap()
             {
@@ -161,6 +166,7 @@ namespace sgraph {
                     textureLoader.load(texPath);
                     util::TextureImage* texImage = new util::TextureImage(textureLoader.getPixels(), textureLoader.getWidth(), textureLoader.getHeight(), texName); // directly converting to reference. Hope this works.
                     textureMap[texName] = texImage;
+                    texturePaths[texName] = texPath;
                 }
 
                 virtual void parseAssignNormal(istream& input)
@@ -484,6 +490,7 @@ namespace sgraph {
                 map<string,util::Material> materials;
                 map<string,util::PolygonMesh<VertexAttrib> > meshes;
                 map<string,string> meshPaths;
+                map<string, string> texturePaths;
                 SGNode *root;
                 map<string, util::Light> lights;
                 map<string,util::TextureImage*> textureMap;

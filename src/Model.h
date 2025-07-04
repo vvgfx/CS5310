@@ -23,11 +23,15 @@ public:
     map<string, util::TextureImage*>& getTextureMap();
     map<string, unsigned int>& getTextureIdMap();
     void initTextures(map<string, util::TextureImage*>& textureMap);
-    void addTexture(string name, util::TextureImage* textureObject);
+    void addTexture(string name, string path, util::TextureImage* textureObject);
     // command queue stuff
     void addToCommandQueue(command::ICommand* command);
     void clearQueues();
     void addToTaskQueue(task::ITask* task);
+
+    // save texture
+    void saveTexturePaths(map<string, string> texturePaths);
+    map<string, string> getTexturePaths();
 
 private:
     
@@ -40,5 +44,8 @@ private:
     queue<task::ITask*> backTaskQueue;
     mutex commandMutex;
     mutex taskMutex;
+
+    // save textures
+    map<string, string> texturePaths;
 };
 #endif

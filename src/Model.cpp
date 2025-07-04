@@ -118,7 +118,7 @@ void Model::initTextures(map<string, util::TextureImage*>& textureMap)
 /**
  * Since this code does not use mutexes, run it on the main thread. Use the task interface if you need to.
  */
-void Model::addTexture(string name, util::TextureImage* textureObject)
+void Model::addTexture(string name, string path, util::TextureImage* textureObject)
 {
     // first add to texture map
     cout<<"transfering texture to GPU"<<endl;
@@ -150,4 +150,14 @@ void Model::addTexture(string name, util::TextureImage* textureObject)
 map<string, unsigned int>& Model::getTextureIdMap()
 {
     return this->textureIdMap;
+}
+
+map<string, string> Model::getTexturePaths()
+{
+    return this->texturePaths;
+}
+
+void Model::saveTexturePaths(map<string, string> texturePaths)
+{
+    this->texturePaths = texturePaths;
 }
