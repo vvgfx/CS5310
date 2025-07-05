@@ -35,6 +35,10 @@ namespace pipeline
          * Update the projection matrix. This is called when the window is resized.
          */
         virtual void updateProjection(glm::mat4& newProjection)=0;
+
+        // add mesh here, then implement in all the pipelines.
+
+        virtual void addMesh(string objectName, util::PolygonMesh<VertexAttrib>& mesh)=0;
     };
 
 }

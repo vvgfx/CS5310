@@ -35,6 +35,7 @@ namespace pipeline
 
     public:
         inline void init(map<string, util::PolygonMesh<VertexAttrib>> &meshes, glm::mat4 &projection, map<string, unsigned int>& texMap);
+        inline void addMesh(string objectName, util::PolygonMesh<VertexAttrib>& mesh);
         inline void drawFrame(sgraph::IScenegraph *scenegraph, glm::mat4 &viewMat);
         inline void initLights(sgraph::IScenegraph *scenegraph);
         inline void depthPass(sgraph::IScenegraph *scenegraph, glm::mat4 &viewMat);
@@ -72,6 +73,7 @@ namespace pipeline
         bool initialized = false;
         int frames;
         double time;
+        map<string, string> shaderVarsToVertexAttribs;
     };
 
     void TexturedPBRSVPipeline::init(map<string, util::PolygonMesh<VertexAttrib>> &meshes, glm::mat4 &proj, map<string, unsigned int>& texMap)
@@ -131,6 +133,13 @@ namespace pipeline
         depthRenderer = new sgraph::DepthRenderer(modelview, objects, depthShaderLocations);
         ambientRenderer = new sgraph::TexturedPBRAmbientRenderer(modelview, objects, ambientShaderLocations, *textureIdMap);
         initialized = true;
+    }
+
+    void TexturedPBRSVPipeline::addMesh(string objectName, util::PolygonMesh<VertexAttrib>& mesh)
+    {
+        util::ObjectInstance *obj = new util::ObjectInstance(objectName);
+        obj->initPolygonMesh(renderShaderLocations, shaderVarsToVertexAttribs, mesh);
+        objects[objectName] = obj;
     }
 
     void TexturedPBRSVPipeline::drawFrame(sgraph::IScenegraph *scenegraph, glm::mat4 &viewMat)

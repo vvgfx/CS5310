@@ -4,6 +4,11 @@ instance sphere models/sphere-2.obj
 
 
 # textures
+image ground-ao textures/mud_ao.png
+image ground-base textures/mud_albedo.png
+image ground-metallic textures/mud_metallic.png
+image ground-normal textures/mud_normal.png
+image ground-roughness textures/mud_roughness.png
 image box-ao textures/paint-ao.ppm
 image box-base textures/paint-albedo.ppm
 image box-metallic textures/paint-metallic.ppm

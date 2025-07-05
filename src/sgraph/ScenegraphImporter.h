@@ -11,6 +11,7 @@
 #include "TranslateTransform.h"
 #include "DynamicTransform.h"
 #include "PPMImageLoader.h"
+#include "PNGImageLoader.h"
 #include "PolygonMesh.h"
 #include "Material.h"
 #include "Light.h"
@@ -162,9 +163,13 @@ namespace sgraph {
                     string texName, texPath;
                     input >> texName >> texPath;
                     cout << "Read " << texName << " " << texPath << endl;
-                    PPMImageLoader textureLoader;
-                    textureLoader.load(texPath);
-                    util::TextureImage* texImage = new util::TextureImage(textureLoader.getPixels(), textureLoader.getWidth(), textureLoader.getHeight(), texName); // directly converting to reference. Hope this works.
+                    ImageLoader* textureLoader;
+                    // if(texPath.find(".ppm") != string::npos)
+                        textureLoader = new PPMImageLoader();
+                    // else if(texPath.find(".png") != string::npos)
+                    //     textureLoader = new PNGImageLoader();
+                    textureLoader->load(texPath);
+                    util::TextureImage* texImage = new util::TextureImage(textureLoader->getPixels(), textureLoader->getWidth(), textureLoader->getHeight(), texName); // directly converting to reference. Hope this works.
                     textureMap[texName] = texImage;
                     texturePaths[texName] = texPath;
                 }

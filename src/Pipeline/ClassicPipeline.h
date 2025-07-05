@@ -31,6 +31,7 @@ namespace pipeline
     public:
         inline void initTextures(map<string, util::TextureImage *> &textureMap);
         inline void init(map<string, util::PolygonMesh<VertexAttrib>>& meshes, map<string, util::TextureImage *>& texMap, glm::mat4 &projection);
+        inline void addMesh(string objectName, util::PolygonMesh<VertexAttrib>& mesh);
         inline void drawFrame(sgraph::IScenegraph *scenegraph, glm::mat4 &viewMat);
         inline void initLights(sgraph::IScenegraph *scenegraph);
         inline void initShaderVars();
@@ -52,6 +53,8 @@ namespace pipeline
         bool initialized = false;
         int frames;
         double time;
+
+        map<string, string> shaderVarsToVertexAttribs;
     };
 
     void ClassicPipeline::init(map<string, util::PolygonMesh<VertexAttrib>>& meshes, map<string, util::TextureImage *>& texMap, glm::mat4 &proj)
@@ -64,7 +67,6 @@ namespace pipeline
         shaderProgram.disable();
 
         // Mapping of shader variables to vertex attributes
-        map<string, string> shaderVarsToVertexAttribs;
         shaderVarsToVertexAttribs["vPosition"] = "position";
         shaderVarsToVertexAttribs["vNormal"] = "normal";
         shaderVarsToVertexAttribs["vTexCoord"] = "texcoord";
@@ -84,6 +86,13 @@ namespace pipeline
         renderer = new sgraph::GLScenegraphRenderer(modelview, objects, shaderLocations, textureIdMap);
         lightRetriever = new sgraph::LightRetriever(modelview);
         initialized = true;
+    }
+
+    void ClassicPipeline::addMesh(string objectName, util::PolygonMesh<VertexAttrib>& mesh)
+    {
+        util::ObjectInstance *obj = new util::ObjectInstance(objectName);
+        obj->initPolygonMesh(shaderLocations, shaderVarsToVertexAttribs, mesh);
+        objects[objectName] = obj;
     }
 
     void ClassicPipeline::drawFrame(sgraph::IScenegraph *scenegraph, glm::mat4 &viewMat)

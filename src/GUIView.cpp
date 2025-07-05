@@ -167,6 +167,9 @@ void GUIView::ImGUIView(sgraph::IScenegraph *scenegraph)
             }
             if (ImGui::MenuItem("Load model")) 
             {
+                // synchronus code probably here. Don't want to deal with mutex in the pipeline.
+                // task to push the mesh and path to model reference
+                // pipeline reference to create object instance and add it to the map.
                 loadModel = true;
             }
             ImGui::EndMenu();

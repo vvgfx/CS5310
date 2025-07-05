@@ -35,6 +35,7 @@ namespace pipeline
 
     public:
         inline void init(map<string, util::PolygonMesh<VertexAttrib>> &meshes, glm::mat4 &projection);
+        inline void addMesh(string objectName, util::PolygonMesh<VertexAttrib>& mesh);
         inline void drawFrame(sgraph::IScenegraph *scenegraph, glm::mat4 &viewMat);
         inline void initLights(sgraph::IScenegraph *scenegraph);
         inline void depthPass(sgraph::IScenegraph *scenegraph, glm::mat4 &viewMat);
@@ -72,6 +73,8 @@ namespace pipeline
         bool initialized = false;
         int frames;
         double time;
+
+        map<string, string> shaderVarsToVertexAttribs;
     };
 
     void PBRShadowVolumePipeline::init(map<string, util::PolygonMesh<VertexAttrib>> &meshes, glm::mat4 &proj)
@@ -108,7 +111,7 @@ namespace pipeline
         shadowProgram.disable();
 
         // Mapping of shader variables to vertex attributes
-        map<string, string> shaderVarsToVertexAttribs;
+        
         shaderVarsToVertexAttribs["vPosition"] = "position";
         shaderVarsToVertexAttribs["vNormal"] = "normal";
 
@@ -127,6 +130,13 @@ namespace pipeline
         depthRenderer = new sgraph::DepthRenderer(modelview, objects, depthShaderLocations);
         ambientRenderer = new sgraph::PBRAmbientRenderer(modelview, objects, ambientShaderLocations);
         initialized = true;
+    }
+
+    void PBRShadowVolumePipeline::addMesh(string objectName, util::PolygonMesh<VertexAttrib>& mesh)
+    {
+        util::ObjectInstance *obj = new util::ObjectInstance(objectName);
+        obj->initPolygonMesh(renderShaderLocations, shaderVarsToVertexAttribs, mesh);
+        objects[objectName] = obj;
     }
 
     void PBRShadowVolumePipeline::drawFrame(sgraph::IScenegraph *scenegraph, glm::mat4 &viewMat)
