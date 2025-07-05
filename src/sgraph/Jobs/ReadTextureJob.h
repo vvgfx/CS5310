@@ -5,6 +5,7 @@
 #include "../../Model.h"
 #include "../../Tasks/TransferTextureTask.h"
 #include "../PPMImageLoader.h"
+#include "../PNGImageLoader.h"
 #include "Ijob.h"
 using namespace std;
 
@@ -32,9 +33,13 @@ namespace job
         virtual void execute(Model *m)
         {
             cout<<"About to load textures!"<<endl;
-            sgraph::PPMImageLoader textureLoader;
-            textureLoader.load(texturePath);
-            util::TextureImage* texImage = new util::TextureImage(textureLoader.getPixels(), textureLoader.getWidth(), textureLoader.getHeight(), textureName);
+            sgraph::ImageLoader* textureLoader;
+            if(texturePath.find(".ppm") != string::npos)
+                textureLoader = new sgraph::PPMImageLoader();
+            else if(texturePath.find(".png") != string::npos)
+                textureLoader = new sgraph::PNGImageLoader();
+            textureLoader->load(texturePath);
+            util::TextureImage* texImage = new util::TextureImage(textureLoader->getPixels(), textureLoader->getWidth(), textureLoader->getHeight(), textureName);
             cout<<"Loaded textures!"<<endl;
             
             // now create the task and add it to the task queue
