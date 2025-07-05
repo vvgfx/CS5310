@@ -164,10 +164,10 @@ namespace sgraph {
                     input >> texName >> texPath;
                     cout << "Read " << texName << " " << texPath << endl;
                     ImageLoader* textureLoader;
-                    // if(texPath.find(".ppm") != string::npos)
+                    if(texPath.find(".ppm") != string::npos)
                         textureLoader = new PPMImageLoader();
-                    // else if(texPath.find(".png") != string::npos)
-                    //     textureLoader = new PNGImageLoader();
+                    else if(texPath.find(".png") != string::npos)
+                        textureLoader = new PNGImageLoader();
                     textureLoader->load(texPath);
                     util::TextureImage* texImage = new util::TextureImage(textureLoader->getPixels(), textureLoader->getWidth(), textureLoader->getHeight(), texName); // directly converting to reference. Hope this works.
                     textureMap[texName] = texImage;

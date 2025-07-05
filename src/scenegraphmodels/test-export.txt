@@ -4,21 +4,21 @@ instance sphere models/sphere-2.obj
 
 
 # textures
-image ground-ao textures/mud_ao.png
-image ground-base textures/mud_albedo.png
-image ground-metallic textures/mud_metallic.png
-image ground-normal textures/mud_normal.png
-image ground-roughness textures/mud_roughness.png
-image box-ao textures/paint-ao.ppm
-image box-base textures/paint-albedo.ppm
-image box-metallic textures/paint-metallic.ppm
-image box-normal textures/paint-normal.ppm
-image box-roughness textures/paint-roughness.ppm
-image sphere-ao textures/metal_ao.ppm
-image sphere-base textures/metal_albedo.ppm
-image sphere-metallic textures/metal_metallic.ppm
-image sphere-normal textures/metal_normal.ppm
-image sphere-roughness textures/metal_roughness.ppm
+image ground-ao textures/damp-block-wall_ao.png
+image ground-base textures/damp-block-wall_albedo.png
+image ground-metallic textures/damp-block-wall_metallic.png
+image ground-normal textures/damp-block-wall_normal-ogl.png
+image ground-roughness textures/damp-block-wall_roughness.png
+image box-ao textures/patched-brickwork_ao.png
+image box-base textures/patched-brickwork_albedo.png
+image box-metallic textures/patched-brickwork_metallic.png
+image box-normal textures/patched-brickwork_normal-ogl.png
+image box-roughness textures/patched-brickwork_roughness.png
+image sphere-ao textures/metal-studs_ao.png
+image sphere-base textures/metal-studs_albedo.png
+image sphere-metallic textures/metal-studs_metallic.png
+image sphere-normal textures/metal-studs_normal-ogl.png
+image sphere-roughness textures/metal-studs_roughness.png
 
 
 
@@ -86,11 +86,11 @@ end-material
 
 assign-material ground-box mat-ground-box 
 
-assign-texture ground-box box-base
-assign-normal ground-box box-normal
-assign-metallic ground-box box-metallic
-assign-roughness ground-box box-roughness
-assign-ao ground-box box-ao
+assign-texture ground-box ground-base
+assign-normal ground-box ground-normal
+assign-metallic ground-box ground-metallic
+assign-roughness ground-box ground-roughness
+assign-ao ground-box ground-ao
 add-child ground-box ground-srt
 add-child ground-srt root
 srt sphere-srt sphere-srt 5 5 5 0 0 0 10 0 0
