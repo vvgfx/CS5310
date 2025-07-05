@@ -178,7 +178,7 @@ namespace sgraph {
         private:
         stack<glm::mat4>& modelview;    
         util::ShaderLocationsVault shaderLocations;
-        map<string,util::ObjectInstance *> objects;
+        map<string,util::ObjectInstance *>& objects;
         map<string, unsigned int>& textureIdMap;
 
    };

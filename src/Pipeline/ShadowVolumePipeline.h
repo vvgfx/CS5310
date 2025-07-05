@@ -136,6 +136,7 @@ namespace pipeline
 
     void ShadowVolumePipeline::addMesh(string objectName, util::PolygonMesh<VertexAttrib>& mesh)
     {
+        TangentComputer::computeTangents(mesh);
         util::ObjectInstance *obj = new util::ObjectInstance(objectName);
         obj->initPolygonMesh(renderShaderLocations, shaderVarsToVertexAttribs, mesh);
         objects[objectName] = obj;

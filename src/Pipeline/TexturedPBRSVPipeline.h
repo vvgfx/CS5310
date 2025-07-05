@@ -111,7 +111,7 @@ namespace pipeline
         shadowProgram.disable();
 
         // Mapping of shader variables to vertex attributes
-        map<string, string> shaderVarsToVertexAttribs;
+        
         shaderVarsToVertexAttribs["vPosition"] = "position";
         shaderVarsToVertexAttribs["vNormal"] = "normal";
         shaderVarsToVertexAttribs["vTexCoord"] = "texcoord";
@@ -137,6 +137,7 @@ namespace pipeline
 
     void TexturedPBRSVPipeline::addMesh(string objectName, util::PolygonMesh<VertexAttrib>& mesh)
     {
+        TangentComputer::computeTangents(mesh);
         util::ObjectInstance *obj = new util::ObjectInstance(objectName);
         obj->initPolygonMesh(renderShaderLocations, shaderVarsToVertexAttribs, mesh);
         objects[objectName] = obj;

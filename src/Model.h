@@ -33,6 +33,9 @@ public:
     void saveTexturePaths(map<string, string> texturePaths);
     map<string, string> getTexturePaths();
 
+    // new model at runtime
+    void addNewMesh(string meshName, string meshPath, util::PolygonMesh<VertexAttrib>& polymesh);
+
 private:
     
     sgraph::IScenegraph *scenegraph;

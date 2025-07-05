@@ -55,7 +55,7 @@ void GUIController::initScenegraph() {
 
     model->saveTexturePaths(texturePaths);
     // ugly code, can fix later??
-    reinterpret_cast<GUIView*>(view)->setControllerReference(this);
+    reinterpret_cast<GUIView*>(view)->setGUICallbackReference(this);
 
     cout <<"Scenegraph made in GUIController" << endl;   
     sgraph::ScenegraphDrawer* drawer = new sgraph::ScenegraphDrawer();
@@ -117,7 +117,7 @@ void GUIController::onkey(int key, int scancode, int action, int mods)
             reinterpret_cast<GUIView*>(view)->rotateCamera(-1.0f, 0.0f);
             break;
         case GLFW_KEY_0://rotate the drone right
-            exportScene("scenegraphmodels/test-export.txt");
+            saveScene("scenegraphmodels/test-export.txt");
             break;
 
     }
@@ -168,7 +168,7 @@ void GUIController::receiveJob(job::IJob* job)
     
 }
 
-void GUIController::restartEngine(string newScenegraphName)
+void GUIController::loadScene(string newScenegraphName)
 {
     view->closeWindow();
     glfwTerminate();
@@ -184,11 +184,16 @@ void GUIController::restartEngine(string newScenegraphName)
     #endif
 }
 
-void GUIController::exportScene(string name)
+void GUIController::saveScene(string name)
 {
     ofstream file(name);
     sgraph::ScenegraphExporter* exporter = new sgraph::ScenegraphExporter(model->getScenegraph()->getMeshPaths(), model->getTexturePaths());
     model->getScenegraph()->getRoot()->accept(exporter);
     file << exporter->getOutput();
     file.close();
+}
+
+void GUIController::loadMesh(string meshName, util::PolygonMesh<VertexAttrib>& polymesh)
+{
+    reinterpret_cast<GUIView*>(view)->loadMesh(meshName, polymesh);
 }

@@ -52,7 +52,7 @@ namespace sgraph
      */
         virtual SGNode *getRoot()=0;
 
-       
+       virtual void addMesh(string meshName, string meshPath)=0;
 
    /**
      * Get a mapping of all (name,INode) pairs for all nodes in this scene graph.

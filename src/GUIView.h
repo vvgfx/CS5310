@@ -6,7 +6,7 @@
 #endif
 #include "View.h"
 #include "sgraph/Jobs/IJob.h"
-#include "GUIController.h"
+#include "GUICallbacks.h"
 #include "Camera/ICamera.h"
 using namespace std;
 class GUIView : public View
@@ -36,12 +36,15 @@ public:
     void ImGUIView(sgraph::IScenegraph *scenegraph);
     void GUIScenegraph(sgraph::IScenegraph *scenegraph);
     void getViewJob(job::IJob* job);
-    void setControllerReference(GUIController* controller); // Ask for solutions next time :)
+    void setGUICallbackReference(GUICallbacks* controller); // Ask for solutions next time :)
     void showPopups();
 
     // camera
     void moveCamera(int forwardDir, int horizontalDr);
     void rotateCamera(int xDir, int yDir);
+
+    // runtime meshes
+    void loadMesh(string meshName, util::PolygonMesh<VertexAttrib>& polymesh);
     
     protected: 
     void resetPopupVars();
@@ -51,7 +54,7 @@ public:
     sgraph::SGNodeVisitor* GuiVisitor;
     sgraph::SGNodeVisitor* NodeRenderer;
 
-    GUIController* controller;
+    GUICallbacks* callbacks;
 
     // Popups
     char childNodeName[32];

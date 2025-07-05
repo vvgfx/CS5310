@@ -28,6 +28,7 @@ using namespace std;
 #include "sgraph/Jobs/InsertSRTJob.h"
 #include "sgraph/Jobs/DeleteNodeJob.h"
 #include "sgraph/Jobs/ReadTextureJob.h"
+#include "sgraph/Jobs/AddMeshJob.h"
 #include "Camera/ICamera.h"
 #include "Camera/AngleCamera.h"
 #include "Camera/DynamicCamera.h"
@@ -167,9 +168,6 @@ void GUIView::ImGUIView(sgraph::IScenegraph *scenegraph)
             }
             if (ImGui::MenuItem("Load model")) 
             {
-                // synchronus code probably here. Don't want to deal with mutex in the pipeline.
-                // task to push the mesh and path to model reference
-                // pipeline reference to create object instance and add it to the map.
                 loadModel = true;
             }
             ImGui::EndMenu();
@@ -186,7 +184,7 @@ void GUIView::ImGUIView(sgraph::IScenegraph *scenegraph)
             ImGui::Separator();
             if (ImGui::Button("Load"))
             {
-                reinterpret_cast<GUIController*>(controller)->restartEngine(newFileName);
+                callbacks->loadScene(newFileName);
                 ImGui::CloseCurrentPopup();
                 resetPopupVars();
             }
@@ -210,7 +208,7 @@ void GUIView::ImGUIView(sgraph::IScenegraph *scenegraph)
             ImGui::Separator();
             if (ImGui::Button("Save"))
             {
-                reinterpret_cast<GUIController*>(controller)->exportScene(saveFileName);
+                callbacks->saveScene(saveFileName);
                 ImGui::CloseCurrentPopup();
                 resetPopupVars();
             }
@@ -256,31 +254,33 @@ void GUIView::ImGUIView(sgraph::IScenegraph *scenegraph)
      * Not adding models because of complexity for now. Might come back to this later.
      */
     
-    // if(loadModel)
-    // {
+    if(loadModel)
+    {
 
-    //     ImGui::OpenPopup("Load Model");
-    //     if(ImGui::BeginPopupModal("Load Model"))
-    //     {
-    //         ImGui::InputText("Model name", modelName, 100);
-    //         ImGui::InputText("Model path", modelPath, 100);
-    //         ImGui::Separator();
-    //         if (ImGui::Button("Load"))
-    //         {
-    //             // need to run on the main thread unfortunately :(
-    //             ImGui::CloseCurrentPopup();
-    //             resetPopupVars();
-    //         }
-    //         ImGui::SetItemDefaultFocus();
-    //         ImGui::SameLine();
-    //         if (ImGui::Button("Cancel")) 
-    //         {
-    //             ImGui::CloseCurrentPopup();
-    //             resetPopupVars();
-    //         }
-    //         ImGui::EndPopup();
-    //     }
-    // }
+        ImGui::OpenPopup("Load Model");
+        if(ImGui::BeginPopupModal("Load Model"))
+        {
+            ImGui::InputText("Model name", modelName, 100);
+            ImGui::InputText("Model path", modelPath, 100);
+            ImGui::Separator();
+            if (ImGui::Button("Load"))
+            {
+                // need to run on the main thread unfortunately :(
+                job::AddMeshJob* meshJob = new job::AddMeshJob(modelName, modelPath, callbacks);
+                getViewJob(meshJob);
+                ImGui::CloseCurrentPopup();
+                resetPopupVars();
+            }
+            ImGui::SetItemDefaultFocus();
+            ImGui::SameLine();
+            if (ImGui::Button("Cancel")) 
+            {
+                ImGui::CloseCurrentPopup();
+                resetPopupVars();
+            }
+            ImGui::EndPopup();
+        }
+    }
 
     GUIScenegraph(scenegraph);
 
@@ -758,12 +758,12 @@ void GUIView::changeCameraType(int cameraType)
 
 void GUIView::getViewJob(job::IJob* job)
 {
-    controller->receiveJob(job);
+    callbacks->receiveJob(job);
 }
 
-void GUIView::setControllerReference(GUIController* controller)
+void GUIView::setGUICallbackReference(GUICallbacks* callbacks)
 {
-    this->controller = controller;
+    this->callbacks = callbacks;
 }
 
 void GUIView::moveCamera(int forwardDir, int horizontalDir)
@@ -785,4 +785,9 @@ void GUIView::moveCamera(int forwardDir, int horizontalDir)
 void GUIView::rotateCamera(int yawDir, int pitchDir)
 {
     camera->ProcessMouseMovement(yawDir, -pitchDir);
+}
+
+void GUIView::loadMesh(string meshName, util::PolygonMesh<VertexAttrib>& polymesh)
+{
+    pipeline->addMesh(meshName, polymesh);
 }

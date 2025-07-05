@@ -90,6 +90,7 @@ namespace pipeline
 
     void ClassicPipeline::addMesh(string objectName, util::PolygonMesh<VertexAttrib>& mesh)
     {
+        TangentComputer::computeTangents(mesh);
         util::ObjectInstance *obj = new util::ObjectInstance(objectName);
         obj->initPolygonMesh(shaderLocations, shaderVarsToVertexAttribs, mesh);
         objects[objectName] = obj;

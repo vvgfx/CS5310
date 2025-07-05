@@ -99,6 +99,11 @@ namespace sgraph {
     map<string,string> getMeshPaths() {
       return this->meshPaths;
     }
+
+    void addMesh(string meshName, string meshPath)
+    {
+      meshPaths[meshName] = meshPath;
+    }
   };
 }
 #endif

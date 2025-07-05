@@ -161,3 +161,8 @@ void Model::saveTexturePaths(map<string, string> texturePaths)
 {
     this->texturePaths = texturePaths;
 }
+
+void Model::addNewMesh(string meshName, string meshPath, util::PolygonMesh<VertexAttrib>& polymesh)
+{
+    scenegraph->addMesh(meshName, meshPath);    
+}
