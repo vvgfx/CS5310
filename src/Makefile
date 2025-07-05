@@ -1,12 +1,9 @@
-# ImGui objects
-IMGUI_OBJS = imgui.o imgui_draw.o imgui_tables.o imgui_widgets.o imgui_impl_glfw.o imgui_impl_opengl3.o #imgui_demo.o removed demo file
-
 # Original objects plus ImGui
-OBJS = RenderingEngine.o View.o Controller.o Model.o GUIView.o GUIController.o $(IMGUI_OBJS)
+OBJS = RenderingEngine.o View.o Controller.o Model.o GUIView.o GUIController.o 
 
 INCLUDES = -I../include -I../include/Imgui -I../include/Imgui/backends
 LIBS = -L../lib
-LDFLAGS = -lglad -lglfw3
+LDFLAGS = -lglad -lglfw3 -lstb_image -limgui
 CFLAGS = -g -std=c++11
 PROGRAM = Rendering_Engine
 
@@ -39,28 +36,6 @@ Model.o: Model.cpp Model.h
 
 GUIView.o: GUIView.cpp GUIView.h
 	$(COMPILER) $(INCLUDES) $(CFLAGS) -c GUIView.cpp
-
-# ImGui compilation rules
-imgui.o: ../include/Imgui/imgui.cpp
-	$(COMPILER) $(INCLUDES) $(CFLAGS) -c ../include/Imgui/imgui.cpp
-
-# imgui_demo.o: ../include/Imgui/imgui_demo.cpp
-# 	$(COMPILER) $(INCLUDES) $(CFLAGS) -c ../include/Imgui/imgui_demo.cpp
-
-imgui_draw.o: ../include/Imgui/imgui_draw.cpp
-	$(COMPILER) $(INCLUDES) $(CFLAGS) -c ../include/Imgui/imgui_draw.cpp
-
-imgui_tables.o: ../include/Imgui/imgui_tables.cpp
-	$(COMPILER) $(INCLUDES) $(CFLAGS) -c ../include/Imgui/imgui_tables.cpp
-
-imgui_widgets.o: ../include/Imgui/imgui_widgets.cpp
-	$(COMPILER) $(INCLUDES) $(CFLAGS) -c ../include/Imgui/imgui_widgets.cpp
-
-imgui_impl_glfw.o: ../include/Imgui/backends/imgui_impl_glfw.cpp
-	$(COMPILER) $(INCLUDES) $(CFLAGS) -c ../include/Imgui/backends/imgui_impl_glfw.cpp
-
-imgui_impl_opengl3.o: ../include/Imgui/backends/imgui_impl_opengl3.cpp
-	$(COMPILER) $(INCLUDES) $(CFLAGS) -c ../include/Imgui/backends/imgui_impl_opengl3.cpp
 
 RM = rm -f
 ifeq ($(OS),Windows_NT)     # is Windows_NT on XP, 2000, 7, Vista, 10...

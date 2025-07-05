@@ -1,5 +1,6 @@
 *.exe
-*.o
+src/*.o
 Assignments/*
 .vscode
 src/imgui.ini
+archives/*
