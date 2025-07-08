@@ -1,5 +1,5 @@
 # Original objects plus ImGui
-OBJS = RenderingEngine.o View.o Controller.o Model.o GUIView.o GUIController.o 
+OBJS = RenderingEngine.o View.o Controller.o Model.o GUIView.o GUIController.o
 
 INCLUDES = -I../include -I../include/Imgui -I../include/Imgui/backends
 LIBS = -L../lib
@@ -39,7 +39,7 @@ GUIView.o: GUIView.cpp GUIView.h
 
 RM = rm -f
 ifeq ($(OS),Windows_NT)     # is Windows_NT on XP, 2000, 7, Vista, 10...
-    RM := del
+    RM := cmd /c del
 endif
 
 clean:

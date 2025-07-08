@@ -23,6 +23,8 @@
 #include "TangentComputer.h"
 #include <iostream>
 
+#include "../sgraph/PNGImageLoader.h"
+
 namespace pipeline
 {
     /**
@@ -44,12 +46,18 @@ namespace pipeline
         inline void ambientPass(sgraph::IScenegraph *scenegraph, glm::mat4 &viewMat);
         inline void updateProjection(glm::mat4& newProjection);
 
+        //testing cubemaps
+        inline void cubeMapInit();
+        inline void cubeMapDraw( glm::mat4 &viewMat);
+
     private:
+        util::ShaderProgram cubeMapProgram;
         util::ShaderProgram renderProgram;
         util::ShaderProgram depthProgram;
         util::ShaderProgram ambientProgram;
         util::ShaderGeoProgram shadowProgram;
 
+        util::ShaderLocationsVault cubeMapShaderLocations;
         util::ShaderLocationsVault renderShaderLocations;
         util::ShaderLocationsVault depthShaderLocations;
         util::ShaderLocationsVault ambientShaderLocations;
@@ -74,6 +82,8 @@ namespace pipeline
         int frames;
         double time;
         map<string, string> shaderVarsToVertexAttribs;
+
+        unsigned int cubemapTextureId;
     };
 
     void TexturedPBRSVPipeline::init(map<string, util::PolygonMesh<VertexAttrib>> &meshes, glm::mat4 &proj, map<string, unsigned int>& texMap)
@@ -133,6 +143,9 @@ namespace pipeline
         depthRenderer = new sgraph::DepthRenderer(modelview, objects, depthShaderLocations);
         ambientRenderer = new sgraph::TexturedPBRAmbientRenderer(modelview, objects, ambientShaderLocations, *textureIdMap);
         initialized = true;
+
+        // cubemap stuff
+        cubeMapInit();
     }
 
     void TexturedPBRSVPipeline::addMesh(string objectName, util::PolygonMesh<VertexAttrib>& mesh)
@@ -147,6 +160,9 @@ namespace pipeline
     {
         if (!initialized)
             throw runtime_error("pipeline has not been initialized.");
+
+        //test cubemap draw
+        cubeMapDraw(viewMat);
 
         // Light traversal
         modelview.push(glm::mat4(1.0f));
@@ -300,6 +316,66 @@ namespace pipeline
     void TexturedPBRSVPipeline::updateProjection(glm::mat4& newProjection)
     {
         projection = glm::mat4(newProjection);
+    }
+
+    void TexturedPBRSVPipeline::cubeMapInit()
+    {
+        cout<<"testing cubemap!!"<<endl;
+        vector<string> textureNames = {"textures/skybox/right.jpg","textures/skybox/left.jpg", "textures/skybox/top.jpg",
+                                         "textures/skybox/bottom.jpg", "textures/skybox/front.jpg", "textures/skybox/back.jpg"};
+        //note : rename PNGImageLoader to generic
+        sgraph::PNGImageLoader* imageLoader = new sgraph::PNGImageLoader();
+
+        // generate cubemap texture
+
+        glGenTextures(1, &cubemapTextureId);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTextureId);
+        for(int i = 0; i < textureNames.size(); i++)
+        {
+            imageLoader->load(textureNames[i]);
+            util::TextureImage* texImage = new util::TextureImage(imageLoader->getPixels(), imageLoader->getWidth(), imageLoader->getHeight(), textureNames[i]);
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, texImage->getWidth(), texImage->getHeight(), 0, GL_RGB, GL_UNSIGNED_BYTE, texImage->getImage());
+
+            // default texture params
+            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+        }
+
+        // initialize the shaders
+
+        cubeMapProgram.createProgram("shaders/cubemap/cubemap.vert", "shaders/cubemap/cubemap.frag");
+        cubeMapProgram.enable();
+        cubeMapShaderLocations = cubeMapProgram.getAllShaderVariables();
+        cubeMapProgram.disable();
+    }
+
+    void TexturedPBRSVPipeline::cubeMapDraw( glm::mat4 &viewMat)
+    {
+
+        glDepthMask(GL_FALSE);
+        cubeMapProgram.enable();
+        
+        // required params:
+        // mapping should be present in the programs already.
+        // need projection, modelview and texture id
+        modelview.push(glm::mat4(glm::mat3(viewMat))); // doing this to remove translations by extracting the upper-left 3x3 matrix.
+        glUniformMatrix4fv(cubeMapShaderLocations.getLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
+        glUniformMatrix4fv(cubeMapShaderLocations.getLocation("modelview"), 1, GL_FALSE, glm::value_ptr(modelview.top()));
+
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, cubemapTextureId);
+        glUniform1i(cubeMapShaderLocations.getLocation("skybox"), 1);
+
+        objects["cube"]->draw();
+
+        modelview.pop();
+        cubeMapProgram.disable();
+
+        glDepthMask(GL_TRUE);
     }
 }
 
