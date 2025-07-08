@@ -37,11 +37,11 @@ public:
     void addNewMesh(string meshName, string meshPath, util::PolygonMesh<VertexAttrib>& polymesh);
 
     //cubemap stuff
-    void saveCubeMapTextures(vector<util::TextureImage*>& cubeMapTextures);
-    void saveCubeMapTexPaths(map<string, string> cubeMapTexPaths);
+    void saveCubeMapTextures(vector<util::TextureImage*> cubeMapTextures);
+    void saveCubeMapTexPaths(vector<string> cubeMapTexPaths);
 
     vector<util::TextureImage*>& getCubeMapTextures();
-    map<string, string>& getCubeMapTexPaths();
+    vector<string>& getCubeMapTexPaths();
 
 private:
     
@@ -60,6 +60,6 @@ private:
 
     // cubemap textures here
     vector<util::TextureImage*> cubeMapTextures;
-    map<string, string> cubeMapTexPaths;
+    vector<string> cubeMapTexPaths;
 };
 #endif

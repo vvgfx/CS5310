@@ -54,10 +54,8 @@ void GUIController::initScenegraph() {
     model->saveTextureMap(textureMap); // this should also be copied, the source of truth is the model!
 
     model->saveTexturePaths(texturePaths);
-
-    vector<util::TextureImage*> cubeMapImages = importer.getCubeMap();
     // now save the cubemap references
-    model->saveCubeMapTextures(cubeMapImages);
+    model->saveCubeMapTextures(importer.getCubeMap());
     model->saveCubeMapTexPaths(importer.getCubeMapPaths());
     // ugly code, can fix later??
     reinterpret_cast<GUIView*>(view)->setGUICallbackReference(this);
@@ -196,7 +194,7 @@ void GUIController::loadScene(string newScenegraphName)
 void GUIController::saveScene(string name)
 {
     ofstream file(name);
-    sgraph::ScenegraphExporter* exporter = new sgraph::ScenegraphExporter(model->getScenegraph()->getMeshPaths(), model->getTexturePaths());
+    sgraph::ScenegraphExporter* exporter = new sgraph::ScenegraphExporter(model->getScenegraph()->getMeshPaths(), model->getTexturePaths(), model->getCubeMapTexPaths());
     model->getScenegraph()->getRoot()->accept(exporter);
     file << exporter->getOutput();
     file.close();

@@ -161,7 +161,7 @@ namespace sgraph {
                 return this->cubeMap;
             }
 
-            map<string, string> getCubeMapPaths()
+            vector<string> getCubeMapPaths()
             {
                 return this->cubeMapPaths;
             }
@@ -220,7 +220,7 @@ namespace sgraph {
                         }
                         util::TextureImage* texImage = new util::TextureImage(pixels, width, height, names[i]); 
                         cubeMap.push_back(texImage);
-                        cubeMapPaths[names[i]] = texture;
+                        cubeMapPaths.push_back(texture);
                     }
 
                     cout<<"Finished reading cubemap textures!"<<endl;
@@ -552,7 +552,7 @@ namespace sgraph {
                 map<string, util::Light> lights;
                 map<string,util::TextureImage*> textureMap;
                 vector<util::TextureImage*> cubeMap; // need to keep this separate because GPU transfer is done differently.
-                map<string,string> cubeMapPaths;
+                vector<string> cubeMapPaths;
                 // map<string,util::TextureImage*> normalMap; // for bump mapping.
                 //removed references to defaultTexturePath and defaultNormalPath because its not needed after the constructor :)
     };
