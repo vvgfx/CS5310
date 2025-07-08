@@ -23,7 +23,7 @@
 #include "TangentComputer.h"
 #include <iostream>
 
-#include "../sgraph/PNGImageLoader.h"
+#include "../sgraph/STBImageLoader.h"
 
 namespace pipeline
 {
@@ -324,7 +324,7 @@ namespace pipeline
         vector<string> textureNames = {"textures/skybox/right.jpg","textures/skybox/left.jpg", "textures/skybox/top.jpg",
                                          "textures/skybox/bottom.jpg", "textures/skybox/front.jpg", "textures/skybox/back.jpg"};
         //note : rename PNGImageLoader to generic
-        sgraph::PNGImageLoader* imageLoader = new sgraph::PNGImageLoader();
+        sgraph::STBImageLoader* imageLoader = new sgraph::STBImageLoader();
         glGenTextures(1, &cubemapTextureId);
         glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTextureId);
         for(int i = 0; i < textureNames.size(); i++)
