@@ -161,9 +161,6 @@ namespace pipeline
         if (!initialized)
             throw runtime_error("pipeline has not been initialized.");
 
-        //test cubemap draw
-        cubeMapDraw(viewMat);
-
         // Light traversal
         modelview.push(glm::mat4(1.0f));
         modelview.top() = modelview.top() * viewMat;
@@ -193,6 +190,9 @@ namespace pipeline
         ambientPass(scenegraph, viewMat); // ambient pass for all objects.
         // Note to self: In order to do postprocessing, I might need to write the output to a different framebuffer and then read that as a texture to my post-processing pass
         // cout<<"Errors :"<<glGetError()<<endl;
+
+        //test cubemap draw
+        cubeMapDraw(viewMat);
     }
 
     void TexturedPBRSVPipeline::initLights(sgraph::IScenegraph *scenegraph)
@@ -325,9 +325,6 @@ namespace pipeline
                                          "textures/skybox/bottom.jpg", "textures/skybox/front.jpg", "textures/skybox/back.jpg"};
         //note : rename PNGImageLoader to generic
         sgraph::PNGImageLoader* imageLoader = new sgraph::PNGImageLoader();
-
-        // generate cubemap texture
-
         glGenTextures(1, &cubemapTextureId);
         glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTextureId);
         for(int i = 0; i < textureNames.size(); i++)
@@ -367,15 +364,18 @@ namespace pipeline
         glUniformMatrix4fv(cubeMapShaderLocations.getLocation("modelview"), 1, GL_FALSE, glm::value_ptr(modelview.top()));
 
         glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, cubemapTextureId);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTextureId);
         glUniform1i(cubeMapShaderLocations.getLocation("skybox"), 1);
 
-        objects["cube"]->draw();
+        objects["skybox"]->draw();
+        glDepthFunc(GL_LESS);
 
         modelview.pop();
         cubeMapProgram.disable();
 
         glDepthMask(GL_TRUE);
+
+        // cout<<"finished drawing box!"<<endl;
     }
 }
 

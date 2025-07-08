@@ -8,6 +8,7 @@ out vec3 texCoord;
 
 void main()
 {
-    gl_Position = projection * modelview * vPosition;
+    vec4 pos = projection * modelview * vPosition;
     texCoord = vec3(vPosition);
+    gl_Position = pos.xyww;
 }

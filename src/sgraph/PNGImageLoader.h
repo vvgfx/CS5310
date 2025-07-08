@@ -23,7 +23,7 @@ namespace sgraph
         public:
             PNGImageLoader() {
                 //vertical flip to match OpenGL's bottom-left origin
-                stbi_set_flip_vertically_on_load(true);
+                // stbi_set_flip_vertically_on_load(true); // commenting this out for now because the cubemaps look inverted
             }
    
             void load(string filename) {
