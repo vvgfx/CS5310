@@ -121,6 +121,10 @@ namespace sgraph {
                     else if (command == "assign-root") {
                         parseSetRoot(inputWithOutComments);
                     }
+                    else if (command == "cubemap") 
+                    {
+                        parseCubeMap(inputWithOutComments);
+                    }
                     else {
                         throw runtime_error("Unrecognized or out-of-place command: "+command);
                     }
@@ -152,10 +156,15 @@ namespace sgraph {
                 return this->nodes;
             }
 
-            // map<string, util::TextureImage*> getNormalMap()
-            // {
-            //     return this->normalMap;
-            // }
+            map<string, util::TextureImage*> getCubeMap()
+            {
+                return this->cubeMap;
+            }
+
+            map<string, string> getCubeMapPaths()
+            {
+                return this->cubeMapPaths;
+            }
             protected:
 
                 virtual void parseTexture(istream& input)
@@ -172,6 +181,49 @@ namespace sgraph {
                     util::TextureImage* texImage = new util::TextureImage(textureLoader->getPixels(), textureLoader->getWidth(), textureLoader->getHeight(), texName); // directly converting to reference. Hope this works.
                     textureMap[texName] = texImage;
                     texturePaths[texName] = texPath;
+                }
+
+
+                virtual void parseCubeMap(istream& input)
+                {
+                    string textures[6];
+                    input >> textures[0] >> textures[1] >> textures[2] >> textures[3] >> textures[4] >> textures[5];
+                    string names[] = {
+                        "skybox-right",
+                        "skybox-left",
+                        "skybox-top",
+                        "skybox-bottom",
+                        "skybox-front",
+                        "skybox-back",
+                    }; // this is the exact order that must be followed.
+                    cout << "Read cubemap" << endl;
+                    PPMImageLoader* ppmLoader = new PPMImageLoader();
+                    STBImageLoader* stbLoader = new STBImageLoader();
+                    GLubyte* pixels;
+                    int width, height;
+                    for(int i = 0; i < 6; i++)
+                    {
+                        string texture = textures[i];
+                        if(texture.find(".ppm") != string::npos)
+                        {
+                            ppmLoader->load(texture);
+                            pixels = ppmLoader->getPixels();
+                            width = ppmLoader->getWidth();
+                            height = ppmLoader->getHeight();
+                        }
+                        else
+                        {
+                            stbLoader->load(texture);
+                            pixels = stbLoader->getPixels();
+                            width = stbLoader->getWidth();
+                            height = stbLoader->getHeight();
+                        }
+                        util::TextureImage* texImage = new util::TextureImage(pixels, width, height, names[i]); 
+                        cubeMap[names[i]] = texImage;
+                        cubeMapPaths[names[i]] = texture;
+                    }
+
+                    cout<<"Finished reading cubemap textures!"<<endl;
                 }
 
                 virtual void parseAssignNormal(istream& input)
@@ -499,6 +551,8 @@ namespace sgraph {
                 SGNode *root;
                 map<string, util::Light> lights;
                 map<string,util::TextureImage*> textureMap;
+                map<string,util::TextureImage*> cubeMap; // need to keep this separate because GPU transfer is done differently.
+                map<string,string> cubeMapPaths;
                 // map<string,util::TextureImage*> normalMap; // for bump mapping.
                 //removed references to defaultTexturePath and defaultNormalPath because its not needed after the constructor :)
     };

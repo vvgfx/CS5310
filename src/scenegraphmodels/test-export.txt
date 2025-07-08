@@ -20,7 +20,8 @@ image sphere-metallic textures/peeling-painted-metal_metallic.png
 image sphere-normal textures/peeling-painted-metal_normal-ogl.png
 image sphere-roughness textures/peeling-painted-metal_roughness.png
 
-
+# cubemaps now
+cubemap textures/skybox/right.jpg textures/skybox/left.jpg textures/skybox/top.jpg textures/skybox/bottom.jpg textures/skybox/front.jpg textures/skybox/back.jpg
 
 group root root
 light one-light
