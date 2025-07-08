@@ -279,7 +279,7 @@ namespace sgraph
                     float spotAngle = lights[i].getSpotCutoff();
                     bool changed  = false;
                     string lightText = "Light name : "  + lightName;
-                    ImGui::Text(lightText.c_str(), lightName);
+                    ImGui::Text(lightText.c_str(), lightName.c_str());
                     if (ImGui::DragFloat3("Color", colorFloat))
                     {
                         changed = true;
