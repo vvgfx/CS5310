@@ -4,7 +4,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include "IPipeline.h"
+#include "AbstractPipeline.h"
 #include "../sgraph/IScenegraph.h"
 #include <ShaderProgram.h>
 #include <ShaderGeoProgram.h>
@@ -28,7 +28,7 @@ namespace pipeline
      * An implementation the pipeline interface. This pipeline features lights (directional and spotlights), textures and shadow volumes.
      * To use this pipeline, initalize it using init() and draw a single frame using drawFrame()
      */
-    class ShadowVolumePipeline : public IPipeline
+    class ShadowVolumePipeline : public AbstractPipeline
     {
 
     public:
@@ -41,7 +41,6 @@ namespace pipeline
         inline void shadowStencilPass(sgraph::IScenegraph *scenegraph, glm::mat4 &viewMat, int lightIndex);
         inline void renderObjectPass(sgraph::IScenegraph *scenegraph, glm::mat4 &viewMat, int lightIndex);
         inline void ambientPass(sgraph::IScenegraph *scenegraph, glm::mat4 &viewMat);
-        inline void updateProjection(glm::mat4& newProjection);
 
     private:
         util::ShaderProgram renderProgram;
@@ -57,12 +56,10 @@ namespace pipeline
         sgraph::SGNodeVisitor *shadowRenderer;
         sgraph::SGNodeVisitor *depthRenderer;
         sgraph::SGNodeVisitor *ambientRenderer;
-        map<string, util::ObjectInstance *> objects;
+
         map<string, unsigned int> textureIdMap;
         vector<util::Light> lights;
         vector<glm::mat4> lightTransformations;
-        glm::mat4 projection;
-        stack<glm::mat4> modelview;
         std::map<string, sgraph::TransformNode *> cachedNodes;
         vector<LightLocation> lightLocations;
         bool initialized = false;
@@ -354,12 +351,6 @@ namespace pipeline
         scenegraph->getRoot()->accept(lightRetriever);
         lights = lightsParser->getLights();
         lightTransformations = lightsParser->getLightTransformations();
-    }
-
-
-    void ShadowVolumePipeline::updateProjection(glm::mat4& newProjection)
-    {
-        projection = glm::mat4(newProjection);
     }
 
 }

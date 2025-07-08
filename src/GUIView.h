@@ -45,6 +45,9 @@ public:
 
     // runtime meshes
     void loadMesh(string meshName, util::PolygonMesh<VertexAttrib>& polymesh);
+
+    // cubemap stuff here
+    void loadCubeMaps(vector<util::TextureImage*>& cubeMap);
     
     protected: 
     void resetPopupVars();

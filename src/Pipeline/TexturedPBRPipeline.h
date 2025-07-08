@@ -4,7 +4,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include "IPipeline.h"
+#include "AbstractPipeline.h"
 #include "../sgraph/IScenegraph.h"
 #include <ShaderProgram.h>
 #include <ShaderGeoProgram.h>
@@ -26,7 +26,7 @@ namespace pipeline
      * Note that this pipeline REQUIRES PBR materials to be defined to work properly, and does NOT support ANY texture.
      * To use this pipeline, initalize it using init() and draw a single frame using drawFrame()
      */
-    class TexturedPBRPipeline : public IPipeline
+    class TexturedPBRPipeline : public AbstractPipeline
     {
 
     public:
@@ -35,22 +35,17 @@ namespace pipeline
         inline void drawFrame(sgraph::IScenegraph *scenegraph, glm::mat4 &viewMat);
         inline void initLights(sgraph::IScenegraph *scenegraph);
         inline void initShaderVars();
-        inline void updateProjection(glm::mat4& newProjection);
 
     private:
         util::ShaderProgram shaderProgram;
         util::ShaderLocationsVault shaderLocations;
         sgraph::SGNodeVisitor *renderer;
         sgraph::SGNodeVisitor *lightRetriever;
-        map<string, util::ObjectInstance *> objects;
         map<string, unsigned int>* textureIdMap;
         vector<util::Light> lights;
         vector<glm::mat4> lightTransformations;
-        glm::mat4 projection;
-        stack<glm::mat4> modelview;
         std::map<string, sgraph::TransformNode *> cachedNodes;
         vector<LightLocation> lightLocations;
-        glm::vec3 cameraPos;
         bool initialized = false;
         int frames;
         double time;
@@ -171,12 +166,6 @@ namespace pipeline
             lightLocations.push_back(ll);
         }
     }
-
-    void TexturedPBRPipeline::updateProjection(glm::mat4& newProjection)
-    {
-        projection = glm::mat4(newProjection);
-    }
-
 }
 
 #endif

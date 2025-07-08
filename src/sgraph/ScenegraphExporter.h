@@ -16,7 +16,7 @@ using namespace std;
 namespace sgraph {
     class ScenegraphExporter: public SGNodeVisitor {
         public:
-            ScenegraphExporter(map<string,string> meshPaths, map<string, string> texPaths) {
+            ScenegraphExporter(map<string,string> meshPaths, map<string, string> texPaths, vector<string> cubeMapPaths) {
                 level = 1;
                 number = 0;
 
@@ -27,6 +27,15 @@ namespace sgraph {
                 append("\n\n# textures");
                 for (map<string,string>::iterator it=texPaths.begin(); it!=texPaths.end();it++) {
                     append("image "+it->first + " " + it->second);
+                }
+                append("\n\n");
+                if(cubeMapPaths.size() > 0)
+                {
+                    append("# cubemap");
+                    string valToAppend = "cubemap ";
+                    for(string currPath : cubeMapPaths)
+                        valToAppend+= (currPath + " ");
+                    append(valToAppend);
                 }
                 append("\n\n");
             }

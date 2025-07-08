@@ -791,3 +791,8 @@ void GUIView::loadMesh(string meshName, util::PolygonMesh<VertexAttrib>& polymes
 {
     pipeline->addMesh(meshName, polymesh);
 }
+
+void GUIView::loadCubeMaps(vector<util::TextureImage*>& cubeMap)
+{
+    pipeline->loadCubeMap(cubeMap);
+}

@@ -4,7 +4,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include "IPipeline.h"
+#include "AbstractPipeline.h"
 #include "../sgraph/IScenegraph.h"
 #include <ShaderProgram.h>
 #include <ShaderGeoProgram.h>
@@ -23,6 +23,8 @@
 #include "TangentComputer.h"
 #include <iostream>
 
+#include "../sgraph/STBImageLoader.h"
+
 namespace pipeline
 {
     /**
@@ -30,7 +32,7 @@ namespace pipeline
      * Note that this pipeline REQUIRES PBR materials to be defined to work properly, and supports (and requires) textures.
      * To use this pipeline, initalize it using init() and draw a single frame using drawFrame()
      */
-    class TexturedPBRSVPipeline : public IPipeline
+    class TexturedPBRSVPipeline : public AbstractPipeline
     {
 
     public:
@@ -42,14 +44,15 @@ namespace pipeline
         inline void shadowStencilPass(sgraph::IScenegraph *scenegraph, glm::mat4 &viewMat, int lightIndex);
         inline void renderObjectPass(sgraph::IScenegraph *scenegraph, glm::mat4 &viewMat, int lightIndex);
         inline void ambientPass(sgraph::IScenegraph *scenegraph, glm::mat4 &viewMat);
-        inline void updateProjection(glm::mat4& newProjection);
-
+        //testing cubemaps
     private:
+        
         util::ShaderProgram renderProgram;
         util::ShaderProgram depthProgram;
         util::ShaderProgram ambientProgram;
         util::ShaderGeoProgram shadowProgram;
 
+        
         util::ShaderLocationsVault renderShaderLocations;
         util::ShaderLocationsVault depthShaderLocations;
         util::ShaderLocationsVault ambientShaderLocations;
@@ -61,19 +64,19 @@ namespace pipeline
         sgraph::SGNodeVisitor *depthRenderer;
         sgraph::SGNodeVisitor *ambientRenderer;
 
-        map<string, util::ObjectInstance *> objects;
         map<string, unsigned int>* textureIdMap;
         vector<util::Light> lights;
         vector<glm::mat4> lightTransformations;
-        glm::mat4 projection;
-        stack<glm::mat4> modelview;
+        
+        
         std::map<string, sgraph::TransformNode *> cachedNodes;
         vector<LightLocation> lightLocations;
-        glm::vec3 cameraPos;
+        
         bool initialized = false;
         int frames;
         double time;
         map<string, string> shaderVarsToVertexAttribs;
+
     };
 
     void TexturedPBRSVPipeline::init(map<string, util::PolygonMesh<VertexAttrib>> &meshes, glm::mat4 &proj, map<string, unsigned int>& texMap)
@@ -133,6 +136,9 @@ namespace pipeline
         depthRenderer = new sgraph::DepthRenderer(modelview, objects, depthShaderLocations);
         ambientRenderer = new sgraph::TexturedPBRAmbientRenderer(modelview, objects, ambientShaderLocations, *textureIdMap);
         initialized = true;
+
+        // cubemap stuff - dont need to do this anymore, should be initialized from the controller
+        // cubeMapInit();
     }
 
     void TexturedPBRSVPipeline::addMesh(string objectName, util::PolygonMesh<VertexAttrib>& mesh)
@@ -177,6 +183,11 @@ namespace pipeline
         ambientPass(scenegraph, viewMat); // ambient pass for all objects.
         // Note to self: In order to do postprocessing, I might need to write the output to a different framebuffer and then read that as a texture to my post-processing pass
         // cout<<"Errors :"<<glGetError()<<endl;
+
+        //test cubemap draw
+        // cubeMapDraw(viewMat);
+        if(cubeMapLoaded)
+            drawCubeMap(viewMat);
     }
 
     void TexturedPBRSVPipeline::initLights(sgraph::IScenegraph *scenegraph)
@@ -296,10 +307,6 @@ namespace pipeline
 
         modelview.pop();
         renderProgram.disable();
-    }
-    void TexturedPBRSVPipeline::updateProjection(glm::mat4& newProjection)
-    {
-        projection = glm::mat4(newProjection);
     }
 }
 

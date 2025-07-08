@@ -18,12 +18,12 @@ namespace sgraph
      * - Flips image vertically to match OpenGL texture coordinate system
      * - Converts all images to RGB format for consistency with PPM loader
      */
-    class PNGImageLoader: public ImageLoader {
+    class STBImageLoader: public ImageLoader {
    
         public:
-            PNGImageLoader() {
+            STBImageLoader() {
                 //vertical flip to match OpenGL's bottom-left origin
-                stbi_set_flip_vertically_on_load(true);
+                // stbi_set_flip_vertically_on_load(true); // commenting this out for now because the cubemaps look inverted
             }
    
             void load(string filename) {

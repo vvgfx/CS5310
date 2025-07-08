@@ -4,8 +4,6 @@
 #include <string>
 #include "../../Model.h"
 #include "../../Tasks/AddMeshTask.h"
-#include "../PPMImageLoader.h"
-#include "../PNGImageLoader.h"
 #include "Ijob.h"
 #include "../../GUICallbacks.h"
 #include <fstream>

@@ -3,26 +3,28 @@ instance box models/box-outside-2.obj
 instance skybox models/skybox.obj
 instance sphere models/sphere-3.obj
 
+
 # textures
-image ground-ao textures/damp-block-wall_ao.png
-image ground-base textures/damp-block-wall_albedo.png
-image ground-metallic textures/damp-block-wall_metallic.png
-image ground-normal textures/damp-block-wall_normal-ogl.png
-image ground-roughness textures/damp-block-wall_roughness.png
 image box-ao textures/patched-brickwork_ao.png
 image box-base textures/patched-brickwork_albedo.png
 image box-metallic textures/patched-brickwork_metallic.png
 image box-normal textures/patched-brickwork_normal-ogl.png
 image box-roughness textures/patched-brickwork_roughness.png
+image ground-ao textures/damp-block-wall_ao.png
+image ground-base textures/damp-block-wall_albedo.png
+image ground-metallic textures/damp-block-wall_metallic.png
+image ground-normal textures/damp-block-wall_normal-ogl.png
+image ground-roughness textures/damp-block-wall_roughness.png
 image sphere-ao textures/peeling-painted-metal_ao.png
 image sphere-base textures/peeling-painted-metal_albedo.png
 image sphere-metallic textures/peeling-painted-metal_metallic.png
 image sphere-normal textures/peeling-painted-metal_normal-ogl.png
 image sphere-roughness textures/peeling-painted-metal_roughness.png
 
-# cubemaps now
-cubemap textures/skybox/right.jpg textures/skybox/left.jpg textures/skybox/top.jpg textures/skybox/bottom.jpg textures/skybox/front.jpg textures/skybox/back.jpg
 
+
+# cubemap
+cubemap textures/skybox/right.jpg textures/skybox/left.jpg textures/skybox/top.jpg textures/skybox/bottom.jpg textures/skybox/front.jpg textures/skybox/back.jpg 
 group root root
 light one-light
 ambient 0 0 0

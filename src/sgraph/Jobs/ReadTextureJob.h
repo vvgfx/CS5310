@@ -5,7 +5,7 @@
 #include "../../Model.h"
 #include "../../Tasks/TransferTextureTask.h"
 #include "../PPMImageLoader.h"
-#include "../PNGImageLoader.h"
+#include "../STBImageLoader.h"
 #include "Ijob.h"
 using namespace std;
 
@@ -36,8 +36,8 @@ namespace job
             sgraph::ImageLoader* textureLoader;
             if(texturePath.find(".ppm") != string::npos)
                 textureLoader = new sgraph::PPMImageLoader();
-            else if(texturePath.find(".png") != string::npos)
-                textureLoader = new sgraph::PNGImageLoader();
+            else
+                textureLoader = new sgraph::STBImageLoader();
             textureLoader->load(texturePath);
             util::TextureImage* texImage = new util::TextureImage(textureLoader->getPixels(), textureLoader->getWidth(), textureLoader->getHeight(), textureName);
             cout<<"Loaded textures!"<<endl;

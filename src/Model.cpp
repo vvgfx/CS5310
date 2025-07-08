@@ -166,3 +166,21 @@ void Model::addNewMesh(string meshName, string meshPath, util::PolygonMesh<Verte
 {
     scenegraph->addMesh(meshName, meshPath);    
 }
+
+void Model::saveCubeMapTextures(vector<util::TextureImage*> cubeMapTextures)
+{
+    this->cubeMapTextures = cubeMapTextures;
+}
+void Model::saveCubeMapTexPaths(vector<string> cubeMapTexPaths)
+{
+    this->cubeMapTexPaths = cubeMapTexPaths;
+}
+
+vector<util::TextureImage*>& Model::getCubeMapTextures()
+{
+    return this->cubeMapTextures;
+}
+vector<string>& Model::getCubeMapTexPaths()
+{
+    return this->cubeMapTexPaths;
+}
