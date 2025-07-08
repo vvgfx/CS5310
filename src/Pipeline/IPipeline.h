@@ -39,6 +39,10 @@ namespace pipeline
         // add mesh here, then implement in all the pipelines.
 
         virtual void addMesh(string objectName, util::PolygonMesh<VertexAttrib>& mesh)=0;
+
+        virtual void loadCubeMap(vector<util::TextureImage*>& cubeMap)=0;
+        virtual void drawCubeMap(glm::mat4& viewMat)=0;
+
     };
 
 }

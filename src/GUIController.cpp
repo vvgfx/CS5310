@@ -54,6 +54,11 @@ void GUIController::initScenegraph() {
     model->saveTextureMap(textureMap); // this should also be copied, the source of truth is the model!
 
     model->saveTexturePaths(texturePaths);
+
+    vector<util::TextureImage*> cubeMapImages = importer.getCubeMap();
+    // now save the cubemap references
+    model->saveCubeMapTextures(cubeMapImages);
+    model->saveCubeMapTexPaths(importer.getCubeMapPaths());
     // ugly code, can fix later??
     reinterpret_cast<GUIView*>(view)->setGUICallbackReference(this);
 
@@ -74,6 +79,10 @@ void GUIController::run()
 
     map<string, unsigned int>& texIdMap = model->getTextureIdMap(); // not copied! reference to the model variable.
     view->init(this,meshes, texIdMap, scenegraph);
+
+    // initialize the cubemap as well!
+    reinterpret_cast<GUIView*>(view)->loadCubeMaps(model->getCubeMapTextures());
+
     // creating the texture Id maps AFTER init. This is because the OpenGL initialization needs to occur before the textures can be loaded
     model->initTextures(model->getTextureMap());
     //Save the nodes required for transformation when running!

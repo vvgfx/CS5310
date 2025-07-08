@@ -36,6 +36,13 @@ public:
     // new model at runtime
     void addNewMesh(string meshName, string meshPath, util::PolygonMesh<VertexAttrib>& polymesh);
 
+    //cubemap stuff
+    void saveCubeMapTextures(vector<util::TextureImage*>& cubeMapTextures);
+    void saveCubeMapTexPaths(map<string, string> cubeMapTexPaths);
+
+    vector<util::TextureImage*>& getCubeMapTextures();
+    map<string, string>& getCubeMapTexPaths();
+
 private:
     
     sgraph::IScenegraph *scenegraph;
@@ -50,5 +57,9 @@ private:
 
     // save textures
     map<string, string> texturePaths;
+
+    // cubemap textures here
+    vector<util::TextureImage*> cubeMapTextures;
+    map<string, string> cubeMapTexPaths;
 };
 #endif

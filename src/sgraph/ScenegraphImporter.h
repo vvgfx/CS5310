@@ -156,7 +156,7 @@ namespace sgraph {
                 return this->nodes;
             }
 
-            map<string, util::TextureImage*> getCubeMap()
+            vector<util::TextureImage*> getCubeMap()
             {
                 return this->cubeMap;
             }
@@ -219,7 +219,7 @@ namespace sgraph {
                             height = stbLoader->getHeight();
                         }
                         util::TextureImage* texImage = new util::TextureImage(pixels, width, height, names[i]); 
-                        cubeMap[names[i]] = texImage;
+                        cubeMap.push_back(texImage);
                         cubeMapPaths[names[i]] = texture;
                     }
 
@@ -551,7 +551,7 @@ namespace sgraph {
                 SGNode *root;
                 map<string, util::Light> lights;
                 map<string,util::TextureImage*> textureMap;
-                map<string,util::TextureImage*> cubeMap; // need to keep this separate because GPU transfer is done differently.
+                vector<util::TextureImage*> cubeMap; // need to keep this separate because GPU transfer is done differently.
                 map<string,string> cubeMapPaths;
                 // map<string,util::TextureImage*> normalMap; // for bump mapping.
                 //removed references to defaultTexturePath and defaultNormalPath because its not needed after the constructor :)
