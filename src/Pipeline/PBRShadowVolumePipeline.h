@@ -4,7 +4,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include "IPipeline.h"
+#include "AbstractPipeline.h"
 #include "../sgraph/IScenegraph.h"
 #include <ShaderProgram.h>
 #include <ShaderGeoProgram.h>
@@ -30,7 +30,7 @@ namespace pipeline
      * Note that this pipeline REQUIRES PBR materials to be defined to work properly, and does NOT support ANY texture.
      * To use this pipeline, initalize it using init() and draw a single frame using drawFrame()
      */
-    class PBRShadowVolumePipeline : public IPipeline
+    class PBRShadowVolumePipeline : public AbstractPipeline
     {
 
     public:
@@ -42,7 +42,6 @@ namespace pipeline
         inline void shadowStencilPass(sgraph::IScenegraph *scenegraph, glm::mat4 &viewMat, int lightIndex);
         inline void renderObjectPass(sgraph::IScenegraph *scenegraph, glm::mat4 &viewMat, int lightIndex);
         inline void ambientPass(sgraph::IScenegraph *scenegraph, glm::mat4 &viewMat);
-        inline void updateProjection(glm::mat4& newProjection);
 
     private:
         util::ShaderProgram renderProgram;
@@ -61,15 +60,11 @@ namespace pipeline
         sgraph::SGNodeVisitor *depthRenderer;
         sgraph::SGNodeVisitor *ambientRenderer;
 
-        map<string, util::ObjectInstance *> objects;
         map<string, unsigned int> textureIdMap;
         vector<util::Light> lights;
         vector<glm::mat4> lightTransformations;
-        glm::mat4 projection;
-        stack<glm::mat4> modelview;
         std::map<string, sgraph::TransformNode *> cachedNodes;
         vector<LightLocation> lightLocations;
-        glm::vec3 cameraPos;
         bool initialized = false;
         int frames;
         double time;
@@ -292,11 +287,6 @@ namespace pipeline
 
         modelview.pop();
         renderProgram.disable();
-    }
-
-    void PBRShadowVolumePipeline::updateProjection(glm::mat4& newProjection)
-    {
-        projection = glm::mat4(newProjection);
     }
 }
 

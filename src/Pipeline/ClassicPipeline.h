@@ -4,7 +4,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include "IPipeline.h"
+#include "AbstractPipeline.h"
 #include "../sgraph/IScenegraph.h"
 #include <ShaderProgram.h>
 #include <ShaderGeoProgram.h>
@@ -25,7 +25,7 @@ namespace pipeline
      * An implementation the pipeline interface. This pipeline features lights (directional and spotlights) and textures.
      * To use this pipeline, initalize it using init() and draw a single frame using drawFrame()
      */
-    class ClassicPipeline : public IPipeline
+    class ClassicPipeline : public AbstractPipeline
     {
 
     public:
@@ -35,19 +35,15 @@ namespace pipeline
         inline void drawFrame(sgraph::IScenegraph *scenegraph, glm::mat4 &viewMat);
         inline void initLights(sgraph::IScenegraph *scenegraph);
         inline void initShaderVars();
-        inline void updateProjection(glm::mat4& newProjection);
 
     private:
         util::ShaderProgram shaderProgram;
         util::ShaderLocationsVault shaderLocations;
         sgraph::SGNodeVisitor *renderer;
         sgraph::SGNodeVisitor *lightRetriever;
-        map<string, util::ObjectInstance *> objects;
         map<string, unsigned int> textureIdMap;
         vector<util::Light> lights;
         vector<glm::mat4> lightTransformations;
-        glm::mat4 projection;
-        stack<glm::mat4> modelview;
         std::map<string, sgraph::TransformNode *> cachedNodes;
         vector<LightLocation> lightLocations;
         bool initialized = false;
@@ -195,11 +191,6 @@ namespace pipeline
             ll.spotAngle = shaderLocations.getLocation(name.str() + ".spotAngle");
             lightLocations.push_back(ll);
         }
-    }
-
-    void ClassicPipeline::updateProjection(glm::mat4& newProjection)
-    {
-        projection = glm::mat4(newProjection);
     }
 }
 
