@@ -144,6 +144,9 @@ void main()
         spotAttenuation = 1.0 - (1.0 - angle) * 1.0 / (1.0 - light.spotAngleCosine);
     }
 
+
+    spotAttenuation = clamp(spotAttenuation, 0.0f, 1.0f);
+
     halfwayVec = normalize(viewVec + lightVec); // already in tangent space
 
     // for the distance, I.m converting to tangent space first and then taking the distance.

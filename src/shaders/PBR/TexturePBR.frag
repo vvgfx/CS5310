@@ -154,6 +154,8 @@ void main()
             spotAttenuation = 1.0 - (1.0 - angle) * 1.0/(1.0 - light[i].spotAngleCosine);
         }
 
+        spotAttenuation = clamp(spotAttenuation, 0.0f, 1.0f);
+
         halfwayVec = normalize(viewVec + lightVec); // already in tangent space
 
         // for the distance, I.m converting to tangent space first and then taking the distance. 
@@ -191,10 +193,10 @@ void main()
 
     vec3 color = ambient + Lo;
 
-    // // HDR tonemapping
-    // color = color / (color + vec3(1.0));
-    // // gamma correct
-    // color = pow(color, vec3(1.0/2.2)); 
+    // HDR tonemapping
+    color = color / (color + vec3(1.0));
+    // gamma correct
+    color = pow(color, vec3(1.0/2.2)); 
 
     fColor = vec4(color, 1.0);
 
