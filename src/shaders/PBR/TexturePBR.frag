@@ -114,8 +114,8 @@ void main()
     tNormal = normalize(tNormal);
 
     // getting required values from the input textures
-    // vec3 albedo     = pow(texture(albedoMap, vec2(fTexCoord.s,fTexCoord.t)).rgb, vec3(2.2)); // conversion from sRGB to linear space
-    vec3 albedo     = texture(albedoMap, fTexCoord.st).rgb;
+    vec3 albedo     = pow(texture(albedoMap, vec2(fTexCoord.s,fTexCoord.t)).rgb, vec3(2.2)); // conversion from sRGB to linear space
+    // vec3 albedo     = texture(albedoMap, fTexCoord.st).rgb; // turns out the albedo was in srgb space, needed to convert to linear, so that the tonemapping converts it back to srgb later.
     vec3 normal     = tNormal;
     float metallic  = texture(metallicMap, vec2(fTexCoord.s,fTexCoord.t)).r;
     float roughness = texture(roughnessMap, vec2(fTexCoord.s,fTexCoord.t)).r;
