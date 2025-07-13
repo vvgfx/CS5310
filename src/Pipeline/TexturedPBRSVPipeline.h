@@ -44,6 +44,7 @@ namespace pipeline
         inline void shadowStencilPass(sgraph::IScenegraph *scenegraph, glm::mat4 &viewMat, int lightIndex);
         inline void renderObjectPass(sgraph::IScenegraph *scenegraph, glm::mat4 &viewMat, int lightIndex);
         inline void ambientPass(sgraph::IScenegraph *scenegraph, glm::mat4 &viewMat);
+        inline void updateProjection(glm::mat4& newProjection);
         //testing cubemaps
     private:
         
@@ -80,7 +81,10 @@ namespace pipeline
         map<string, string> shaderVarsToVertexAttribs;
 
         // hdr stuff
-        unsigned int hdrFBO, hdrColorBuffer, hdrDepthBuffer;
+        unsigned int hdrFBO, hdrColorBuffer, hdrDepthBuffer, hdrStencilBuffer;
+
+        unsigned int quadVAO = 0;
+        unsigned int quadVBO;
 
 
     };
@@ -172,10 +176,16 @@ namespace pipeline
         glBindRenderbuffer(GL_RENDERBUFFER, hdrDepthBuffer);
         glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, viewport[2], viewport[3]); // marks this as a depth render buffer
 
+        // stencil buffer
+        glGenRenderbuffers(1, &hdrStencilBuffer);
+        glBindRenderbuffer(GL_RENDERBUFFER, hdrStencilBuffer);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_STENCIL_INDEX8, viewport[2], viewport[3]);
+
         // attach to custom framebuffer now.
         glBindFramebuffer(GL_FRAMEBUFFER, hdrFBO);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, hdrColorBuffer, 0); // sets color texture as color attachment
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, hdrDepthBuffer); // sets depth render buffer as depth attachment
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, hdrStencilBuffer); // stencil buffer
         if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
             throw runtime_error("custom framebuffer is not complete!");
         
@@ -248,7 +258,31 @@ namespace pipeline
         glUniform1f(hdrShaderLocations.getLocation("exposure"), exposure);
 
         // draw screen space quad
-        objects["post-process"]->draw();
+        // objects["post-process"]->draw();
+
+        if (quadVAO == 0)
+        {
+            float quadVertices[] = {
+                // positions        // texture Coords
+                -1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
+                -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+                1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
+                1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+            };
+            // setup plane VAO
+            glGenVertexArrays(1, &quadVAO);
+            glGenBuffers(1, &quadVBO);
+            glBindVertexArray(quadVAO);
+            glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+            glEnableVertexAttribArray(0);
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+            glEnableVertexAttribArray(1);
+            glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+        }
+        glBindVertexArray(quadVAO);
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+        glBindVertexArray(0);
         hdrShaderProgram.disable();
 
     }
@@ -340,7 +374,7 @@ namespace pipeline
     {
 
         renderProgram.enable();
-        glDrawBuffer(GL_BACK);                                   // Enable writing to the color buffer. This was disabled in the depth pass.
+        glDrawBuffer(GL_COLOR_ATTACHMENT0); // enable writing to the color buffer. This was disabled earlier. Update - change this to color-attachment because I'm using PBR with HDR now.
         glStencilFunc(GL_EQUAL, 0x0, 0xFF);                      // draw only if stencil value is 0
         glStencilOpSeparate(GL_BACK, GL_KEEP, GL_KEEP, GL_KEEP); // do not write to the stencil buffer.
 
@@ -370,6 +404,43 @@ namespace pipeline
 
         modelview.pop();
         renderProgram.disable();
+    }
+
+    void TexturedPBRSVPipeline::updateProjection(glm::mat4& newProjection)
+    {
+        projection = glm::mat4(newProjection);
+
+        // need to create different textures when the screen is resized!
+
+        GLint viewport[4];
+        glGetIntegerv(GL_VIEWPORT, viewport);
+
+        glDeleteTextures(1, &hdrColorBuffer);
+        glDeleteRenderbuffers(1, &hdrDepthBuffer);
+
+
+        glGenTextures(1, &hdrColorBuffer);
+        glBindTexture(GL_TEXTURE_2D, hdrColorBuffer);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, viewport[2], viewport[3], 0, GL_RGBA, GL_FLOAT, NULL);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        glGenRenderbuffers(1, &hdrDepthBuffer);
+        glBindRenderbuffer(GL_RENDERBUFFER, hdrDepthBuffer);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, viewport[2], viewport[3]);
+
+        glGenRenderbuffers(1, &hdrStencilBuffer);
+        glBindRenderbuffer(GL_RENDERBUFFER, hdrStencilBuffer);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_STENCIL_INDEX8, viewport[2], viewport[3]);
+        
+        glBindFramebuffer(GL_FRAMEBUFFER, hdrFBO);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, hdrColorBuffer, 0); // sets color texture as color attachment
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, hdrDepthBuffer); // sets depth render buffer as depth attachment
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, hdrStencilBuffer); // stencil buffer
+        if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+            throw runtime_error("Resized framebuffer is not complete!");
+        
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
 }
 
