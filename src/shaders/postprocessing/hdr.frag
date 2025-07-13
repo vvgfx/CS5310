@@ -11,7 +11,9 @@ void main()
     const float gamma = 2.2; // standard for sRGB space
     vec3 hdrColor = texture(hdrColorBuffer, fTexCoords).rgb;
 
-    vec3 result = vec3(1.0) - exp(-hdrColor * exposure);
+    vec3 result = vec3(1.0) - exp(-hdrColor * 0.5); // second term is exposure.
+
+    // gamma correction
     result = pow(result , vec3(1.0 / gamma));
     fragColor = vec4(result, 1.0);
 }
