@@ -85,6 +85,9 @@ void View::init(Callbacks *callbacks,map<string,util::PolygonMesh<VertexAttrib>>
     int window_width,window_height;
     glfwGetFramebufferSize(window,&window_width,&window_height);
     projection = glm::perspective(glm::radians(60.0f),(float)window_width/window_height,0.1f,10000.0f);
+
+    // need to move this to before the pipeline initialization because its queried in the initialization.
+    glViewport(0, 0, window_width,window_height);
     #pragma region Pipeline init
     // pipeline = new pipeline::PBRShadowVolumePipeline();
     // reinterpret_cast<pipeline::PBRShadowVolumePipeline*>(pipeline)->init(meshes, projection);
@@ -95,8 +98,6 @@ void View::init(Callbacks *callbacks,map<string,util::PolygonMesh<VertexAttrib>>
     // pipeline = new pipeline::BasicPBRPipeline();
     // reinterpret_cast<pipeline::BasicPBRPipeline*>(pipeline)->init(meshes, projection);
     #pragma endregion
-	
-    glViewport(0, 0, window_width,window_height);
 
     frames = 0;
     time = glfwGetTime();

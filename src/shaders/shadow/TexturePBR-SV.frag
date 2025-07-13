@@ -110,7 +110,7 @@ void main()
 
     // getting required values from the input textures
     vec3 albedo     = pow(texture(albedoMap, vec2(fTexCoord.s,fTexCoord.t)).rgb, vec3(2.2)); // conversion from sRGB to linear space
-    // vec3 albedo = texture(albedoMap, fTexCoord.st).rgb;
+    // vec3 albedo = texture(albedoMap, fTexCoord.st).rgb; // this just samples in linear spaces
     vec3 normal = tNormal;
     float metallic = texture(metallicMap, vec2(fTexCoord.s, fTexCoord.t)).r;
     float roughness = texture(roughnessMap, vec2(fTexCoord.s, fTexCoord.t)).r;
@@ -179,6 +179,7 @@ void main()
 
     // vec3 color = ambient + Lo;
 
+    // HDR and tonemapping is done in a separate pass.
     // // HDR tonemapping
     // color = color / (color + vec3(1.0));
     // // gamma correct

@@ -2,6 +2,7 @@
 instance box models/box-outside-2.obj
 instance skybox models/skybox.obj
 instance sphere models/sphere-3.obj
+instance post-process models/post-process.obj
 
 # textures
 image ground-ao textures/damp-block-wall_ao.png
