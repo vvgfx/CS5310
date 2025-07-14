@@ -44,14 +44,7 @@ namespace sgraph {
                         meshPaths[name] = path;
                         ifstream in(path);
                        if (in.is_open()) {
-                        util::PolygonMesh<VertexAttrib> mesh;
-                        if(name.find("Process") != string::npos)
-                        {
-                            cout<<"postprocess found!!"<<endl;
-                            mesh = util::ObjImporter<VertexAttrib>::importFile(in,false);
-                        }
-                        else
-                            mesh = util::ObjAdjImporter<VertexAttrib>::importFile(in,false);
+                        util::PolygonMesh<VertexAttrib> mesh = util::ObjAdjImporter<VertexAttrib>::importFile(in,false);
                         meshes[name] = mesh;         
                        } 
                     }

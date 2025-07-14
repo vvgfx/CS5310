@@ -111,8 +111,8 @@ namespace pipeline
     
                 glm::vec3 b = glm::cross(n, t);
                 t = glm::cross(b, n);
-    
-                t = glm::normalize(t);
+                if(glm::length(t) > 0.0001f) // adding this check for zero vector normalization.
+                    t = glm::normalize(t);
     
                 tangents[i] = glm::vec4(t, 0.0f);
             }

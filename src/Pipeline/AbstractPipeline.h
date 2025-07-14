@@ -66,7 +66,7 @@ namespace pipeline
                 i++;
             }
             
-            cubeMapProgram.createProgram("shaders/cubemap/cubemap.vert", "shaders/cubemap/cubemap.frag");
+            cubeMapProgram.createProgram("shaders/cubemap/cubemap.vert", "shaders/cubemap/cubemapHDR.frag");
             cubeMapProgram.enable();
             cubeMapShaderLocations = cubeMapProgram.getAllShaderVariables();
             cubeMapProgram.disable();
