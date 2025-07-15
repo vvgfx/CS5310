@@ -198,7 +198,7 @@ namespace sgraph {
                     }; // this is the exact order that must be followed.
                     cout << "Read cubemap" << endl;
                     PPMImageLoader* ppmLoader = new PPMImageLoader();
-                    STBImageLoader* stbLoader = new STBImageLoader();
+                    STBImageLoader* stbLoader = new STBImageLoader(false);
                     GLubyte* pixels;
                     int width, height;
                     for(int i = 0; i < 6; i++)

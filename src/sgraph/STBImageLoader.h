@@ -21,9 +21,9 @@ namespace sgraph
     class STBImageLoader: public ImageLoader {
    
         public:
-            STBImageLoader() {
+            STBImageLoader(bool flip = true) {
                 //vertical flip to match OpenGL's bottom-left origin
-                // stbi_set_flip_vertically_on_load(true); // commenting this out for now because the cubemaps look inverted
+                stbi_set_flip_vertically_on_load(flip);
             }
    
             void load(string filename) {
