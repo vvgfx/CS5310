@@ -55,6 +55,7 @@ void Model::clearQueues()
             task::ITask* task = frontTaskQueue.front();
             task->execute();
             frontTaskQueue.pop();
+            delete task;
         }
     }
 
@@ -76,6 +77,7 @@ void Model::clearQueues()
             (*nodes)[nodeName]->accept(command);
         }
         frontCommandQueue.pop();
+        delete command;
     }
 }
 

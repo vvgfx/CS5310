@@ -24,3 +24,8 @@ Requirements :
 All textures used in the sample scene are from https://freestylized.com . They have a royalty free license for all commercial and non-commercial purposes. They were converted to PPM P3 using GIMP (with ASCII export option.)
 stylized wall: https://freestylized.com/material/stones_bricks_wall_01/
 metal plates : https://freestylized.com/material/metal_plates_01/
+
+
+Models:
+Suzanne (monkey) : Default blender model
+Helmet : Khronos group git repo (https://github.com/KhronosGroup/glTF-Sample-Models/tree/main/2.0/DamagedHelmet)

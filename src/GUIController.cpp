@@ -38,7 +38,7 @@ void GUIController::initScenegraph() {
     //read in the file of commands
     ifstream inFile;
     if(textfile == "")
-        inFile = ifstream("scenegraphmodels/test-export.txt");
+        inFile = ifstream("scenegraphmodels/test-export-4.txt");
     else
         inFile = ifstream(textfile);
     sgraph::ScenegraphImporter importer;
@@ -170,6 +170,7 @@ void GUIController::receiveJob(job::IJob* job)
     thread t([this, job]()
     {
         job->execute(model);
+        delete job;
     });
     t.detach();
     

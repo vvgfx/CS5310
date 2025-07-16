@@ -5,11 +5,11 @@ instance sphere models/sphere-3.obj
 instance postProcess models/post-process.obj
 
 # textures
-image ground-ao textures/damp-block-wall_ao.png
-image ground-base textures/damp-block-wall_albedo.png
-image ground-metallic textures/damp-block-wall_metallic.png
-image ground-normal textures/damp-block-wall_normal-ogl.png
-image ground-roughness textures/damp-block-wall_roughness.png
+image ground-ao textures/asphalt/grey-asphalt-ao.png
+image ground-base textures/asphalt/grey-asphalt-albedo.png
+image ground-metallic textures/asphalt/grey-asphalt-metallic.png
+image ground-normal textures/asphalt/grey-asphalt-normal.png
+image ground-roughness textures/asphalt/grey-asphalt-roughness.png
 image box-ao textures/patched-brickwork_ao.png
 image box-base textures/patched-brickwork_albedo.png
 image box-metallic textures/patched-brickwork_metallic.png
