@@ -1,8 +1,8 @@
-This program implements a stencil shadow volume demo.
+This program implements a Rendering engine.
 
 It uses multiple render passes, with blending shadows to support multiple lights.
 
-Features:
+Features: (This is outdated, refer to the main readme!)
 - Hierarchial Scenegraphs : The 3d world is saved in a tree data structure.(Scenegraph)
 - Text parser : Make changes/build a new world by writing a scenegraph in text. (Look at scenegraphmodels folder for examples.)
 - Obj loader : This program can load Obj models. (saves them with adjacency data)
@@ -13,19 +13,9 @@ Features:
     - Textures : Support for textures with mip-mapping. The program can import only PPM P3 Images.
 
 Note:
-- By default, the program runs the "test.txt" scene.
+- To load a new scenegraph txt file, either use the load option in the GUI or pass the file name as an argument to the executable.
 
 Requirements :
-- Platform that can run OpenGL 3.3
+- Platform that can run OpenGL 4.5
 - C++ compiler
 - Make utility
-
-
-All textures used in the sample scene are from https://freestylized.com . They have a royalty free license for all commercial and non-commercial purposes. They were converted to PPM P3 using GIMP (with ASCII export option.)
-stylized wall: https://freestylized.com/material/stones_bricks_wall_01/
-metal plates : https://freestylized.com/material/metal_plates_01/
-
-
-Models:
-Suzanne (monkey) : Default blender model
-Helmet : Khronos group git repo (https://github.com/KhronosGroup/glTF-Sample-Models/tree/main/2.0/DamagedHelmet)
