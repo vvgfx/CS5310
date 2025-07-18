@@ -134,6 +134,9 @@ namespace pipeline
         glUniformMatrix4fv(shaderLocations.getLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
         scenegraph->getRoot()->accept(renderer);
+
+        if(cubeMapLoaded)
+            drawCubeMap(viewMat);
         // cout<<"Errors: "<<glGetError()<<endl;
         modelview.pop();
         glFlush();

@@ -47,7 +47,7 @@ namespace pipeline
         inline void updateProjection(glm::mat4& newProjection);
         //testing hdr cubemaps
         inline void hdrCubemapInit();
-        inline void hdrCubemapDraw();
+        inline void hdrCubemapDraw(glm::mat4 view);
 
     private:
         
@@ -137,6 +137,14 @@ namespace pipeline
         hdrShaderLocations = hdrShaderProgram.getAllShaderVariables();
         hdrShaderProgram.disable();
 
+        // hdr skybox initialization
+
+        hdrSkyboxShaderProgram.createProgram("shaders/cubemap/hdrCubemap.vert",
+                                             "shaders/cubemap/hdrCubemap.frag");
+
+        hdrSkyboxShaderProgram.enable();
+        hdrSkyboxShaderLocations = hdrSkyboxShaderProgram.getAllShaderVariables();
+        hdrSkyboxShaderProgram.disable();
 
         // Mapping of shader variables to vertex attributes
         
@@ -205,6 +213,28 @@ namespace pipeline
 
     }
 
+    void PBRSVIBLPipeline::hdrCubemapDraw(glm::mat4 view)
+    {
+        // initialize the viewmat, then draw the cube with the custom shader!
+        hdrSkyboxShaderProgram.enable();
+        glm::mat4 modelview = glm::scale(view, glm::vec3(10, 10, 10));
+
+        glUniformMatrix4fv(hdrSkyboxShaderLocations.getLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
+        glUniformMatrix4fv(hdrSkyboxShaderLocations.getLocation("modelview"), 1, GL_FALSE, glm::value_ptr(modelview));
+
+        //skybox sampler2d
+        glActiveTexture(GL_TEXTURE0);
+        unsigned int texID = (*textureIdMap)["hdr-skybox"];
+        glBindTexture(GL_TEXTURE_2D, texID);
+        glUniform1i(hdrSkyboxShaderLocations.getLocation("hdrMap"), 0);
+
+        objects["box"]->draw();
+
+        hdrSkyboxShaderProgram.disable();
+
+
+    }
+
 
     void PBRSVIBLPipeline::addMesh(string objectName, util::PolygonMesh<VertexAttrib>& mesh)
     {
@@ -256,6 +286,10 @@ namespace pipeline
         // cubeMapDraw(viewMat);
         // if(cubeMapLoaded)
         //     drawCubeMap(viewMat);
+
+        // test hdr cubemap
+
+        hdrCubemapDraw(viewMat);
         
         // swap to default buffer, with the old color-buffer as input.
         glBindFramebuffer(GL_FRAMEBUFFER, 0);

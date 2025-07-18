@@ -41,8 +41,8 @@ namespace pipeline
             glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTextureId);
             glUniform1i(cubeMapShaderLocations.getLocation("skybox"), 1);
 
+            glDepthFunc(GL_LEQUAL);
             objects["skybox"]->draw();
-            glDepthFunc(GL_LESS);
 
             modelview.pop();
             cubeMapProgram.disable();
