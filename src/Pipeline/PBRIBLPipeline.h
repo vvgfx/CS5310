@@ -114,17 +114,19 @@ namespace pipeline
     void PBRIBLPipeline::hdrCubemapInit()
     {
         // draw the cubemap and save to memory.
-
+        glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_LEQUAL);
         // generate new framebuffer.
         glGenFramebuffers(1, &captureFBO);
         glGenRenderbuffers(1, &captureRBO);
         glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
         glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, GL_RENDERBUFFER, captureRBO);// format for the render buffer.
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 1024, 1024);// format for the render buffer.
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, captureRBO); // use this render buffer as an attachment.
 
         util::ShaderProgram equiRectangularShader;
-        equiRectangularShader.createProgram("shaders/cubemap/HDR/equiRectangular.vert", "shaders/cubemap/HDR/equiRectangular.frag"); // create these!!
+        equiRectangularShader.createProgram("shaders/cubemap/HDR/equiRectangular.vert", 
+                                            "shaders/cubemap/HDR/equiRectangular.frag"); // create these!!
 
         // get shader locations
         equiRectangularShader.enable();
@@ -134,6 +136,11 @@ namespace pipeline
         // for now, just directly use the imports with stb_image. Will need to rethink this very soon.
         stbi_set_flip_vertically_on_load(true);
         float *data = stbi_loadf("textures/hdr/newport_loft.hdr", &width, &height, &nrComponents, 0);
+
+        glGenTextures(1, &hdrTexture);
+        glBindTexture(GL_TEXTURE_2D, hdrTexture);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width, height, 0, GL_RGB, GL_FLOAT, data);
+
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -146,7 +153,7 @@ namespace pipeline
         glBindTexture(GL_TEXTURE_CUBE_MAP, envCubemap);
         for(unsigned int i = 0; i < 6; i++)
         {
-            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, 512, 512, 0, GL_RGB, GL_FLOAT, nullptr);
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, 1024, 1024, 0, GL_RGB, GL_FLOAT, nullptr);
         }
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -175,7 +182,7 @@ namespace pipeline
         GLint viewport[4];
         glGetIntegerv(GL_VIEWPORT, viewport);
 
-        glViewport(0, 0, 512, 512); // don't forget to configure the viewport to the capture dimensions.
+        glViewport(0, 0, 1024, 1024); // don't forget to configure the viewport to the capture dimensions.
         glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
 
         for (unsigned int i = 0; i < 6; ++i)
@@ -186,6 +193,7 @@ namespace pipeline
 
             renderCube();
         }
+        equiRectangularShader.disable();
 
         // reset to original viewport!
         glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
@@ -211,17 +219,18 @@ namespace pipeline
 
         // hdrSkyboxShaderProgram.disable();
 
-        // hdrSkyboxShaderProgram.enable();
-        // // backgroundShader.setMat4("view", view);
-        // glUniformMatrix4fv(hdrSkyboxShaderLocations.getLocation("view"), 1, GL_FALSE, glm::value_ptr(view));
-        // glActiveTexture(GL_TEXTURE0);
-        // glBindTexture(GL_TEXTURE_CUBE_MAP, envCubemap);
-        // glUniform1i(hdrSkyboxShaderLocations.getLocation("environmentMap"), 0);
-        // renderCube();
-        // hdrSkyboxShaderProgram.disable();
+        hdrSkyboxShaderProgram.enable();
+        // backgroundShader.setMat4("view", view);
+        glUniformMatrix4fv(hdrSkyboxShaderLocations.getLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
+        glUniformMatrix4fv(hdrSkyboxShaderLocations.getLocation("view"), 1, GL_FALSE, glm::value_ptr(view));
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, envCubemap);
+        glUniform1i(hdrSkyboxShaderLocations.getLocation("environmentMap"), 0);
+        renderCube();
+        hdrSkyboxShaderProgram.disable();
 
-        cubemapTextureId =  envCubemap;
-        drawCubeMap(view);
+        // cubemapTextureId =  envCubemap;
+        // drawCubeMap(view);
 
 
     }
