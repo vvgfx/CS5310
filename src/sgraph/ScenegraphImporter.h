@@ -186,41 +186,61 @@ namespace sgraph {
 
                 virtual void parseCubeMap(istream& input)
                 {
-                    string textures[6];
-                    input >> textures[0] >> textures[1] >> textures[2] >> textures[3] >> textures[4] >> textures[5];
-                    string names[] = {
-                        "skybox-right",
-                        "skybox-left",
-                        "skybox-top",
-                        "skybox-bottom",
-                        "skybox-front",
-                        "skybox-back",
-                    }; // this is the exact order that must be followed.
-                    cout << "Read cubemap" << endl;
-                    PPMImageLoader* ppmLoader = new PPMImageLoader();
-                    STBImageLoader* stbLoader = new STBImageLoader(false);
-                    GLubyte* pixels;
-                    int width, height;
-                    for(int i = 0; i < 6; i++)
+                    vector<string> textures;
+                    string line, word;
+                    // gymnastics to get split words :(
+                    getline(input, line);
+                    stringstream linestream;
+
+                    linestream << line;
+                    while(linestream  >> word)
+                        textures.push_back(word);
+
+                    if(textures.size() == 1)
                     {
-                        string texture = textures[i];
-                        if(texture.find(".ppm") != string::npos)
-                        {
-                            ppmLoader->load(texture);
-                            pixels = ppmLoader->getPixels();
-                            width = ppmLoader->getWidth();
-                            height = ppmLoader->getHeight();
-                        }
-                        else
-                        {
-                            stbLoader->load(texture);
-                            pixels = stbLoader->getPixels();
-                            width = stbLoader->getWidth();
-                            height = stbLoader->getHeight();
-                        }
-                        util::TextureImage* texImage = new util::TextureImage(pixels, width, height, names[i]); 
+                        // hdr map
+                        STBImageLoader* stbLoader  = new STBImageLoader(true); // flip for HDR.
+                        stbLoader->load(textures[0]);
+                        util::TextureImage* texImage = new util::TextureImage(stbLoader->getFPixels(), stbLoader->getWidth(), stbLoader->getHeight(), "skybox-hdr");
                         cubeMap.push_back(texImage);
-                        cubeMapPaths.push_back(texture);
+                        cubeMapPaths.push_back(textures[0]);
+                    }
+                    else
+                    {
+                        string names[] = {
+                            "skybox-right",
+                            "skybox-left",
+                            "skybox-top",
+                            "skybox-bottom",
+                            "skybox-front",
+                            "skybox-back",
+                        }; // this is the exact order that must be followed.
+                        cout << "Read cubemap" << endl;
+                        PPMImageLoader* ppmLoader = new PPMImageLoader();
+                        STBImageLoader* stbLoader = new STBImageLoader(false);
+                        GLubyte* pixels;
+                        int width, height;
+                        for(int i = 0; i < 6; i++)
+                        {
+                            string texture = textures[i];
+                            if(texture.find(".ppm") != string::npos)
+                            {
+                                ppmLoader->load(texture);
+                                pixels = ppmLoader->getPixels();
+                                width = ppmLoader->getWidth();
+                                height = ppmLoader->getHeight();
+                            }
+                            else
+                            {
+                                stbLoader->load(texture);
+                                pixels = stbLoader->getPixels();
+                                width = stbLoader->getWidth();
+                                height = stbLoader->getHeight();
+                            }
+                            util::TextureImage* texImage = new util::TextureImage(pixels, width, height, names[i]); 
+                            cubeMap.push_back(texImage);
+                            cubeMapPaths.push_back(texture);
+                        }
                     }
 
                     cout<<"Finished reading cubemap textures!"<<endl;

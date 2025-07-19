@@ -38,8 +38,8 @@ namespace pipeline
         inline void drawFrame(sgraph::IScenegraph *scenegraph, glm::mat4 &viewMat);
         inline void initLights(sgraph::IScenegraph *scenegraph);
         inline void initShaderVars();
-        inline void hdrCubemapDraw(glm::mat4 view);
-        inline void hdrCubemapInit();
+        inline void loadCubeMap(vector<util::TextureImage*>& cubeMap);
+        inline void drawCubeMap(glm::mat4 &viewMat);
 
     private:
         util::ShaderProgram shaderProgram;
@@ -59,9 +59,11 @@ namespace pipeline
 
         map<string, string> shaderVarsToVertexAttribs;
 
+        bool hdrCubemap = false;
+
         // HDR cubemap stuff here
-        unsigned int captureFBO, captureRBO, hdrTexture, envCubemap, cubeVAO, cubeVBO;
-        int width, height, nrComponents;
+        unsigned int captureFBO, captureRBO, hdrTexture, envCubemap;
+        int skyboxWidth, skyboxHeight;
     };
 
     void PBRIBLPipeline::init(map<string, util::PolygonMesh<VertexAttrib>>& meshes, glm::mat4 &proj, map<string, unsigned int>& texMap)
@@ -100,18 +102,22 @@ namespace pipeline
         renderer = new sgraph::TexturedPBRRenderer(modelview, objects, shaderLocations, *textureIdMap);
         lightRetriever = new sgraph::LightRetriever(modelview);
 
-        hdrCubemapInit();
-        // hdr stuff here
-
         initialized = true;
     }
 
 
     /**
-     * Testing method to see if hdr maps work.
+     * Need to override this because this should support hdr images and the implementation is too specific!
      */
-    void PBRIBLPipeline::hdrCubemapInit()
+    void PBRIBLPipeline::loadCubeMap(vector<util::TextureImage*>& cubeMap)
     {
+        if(cubeMap.size() > 1)  // ldr
+        {
+            AbstractPipeline::loadCubeMap(cubeMap);
+            return;
+        }
+        cout<<"Loading HDR cubemap"<<endl;
+        hdrCubemap = true;
         // draw the cubemap and save to memory.
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LEQUAL);
@@ -134,11 +140,13 @@ namespace pipeline
 
         // for now, just directly use the imports with stb_image. Will need to rethink this very soon.
         stbi_set_flip_vertically_on_load(true);
-        float *data = stbi_loadf("textures/hdr/newport_loft.hdr", &width, &height, &nrComponents, 0);
-
+        // float *data = stbi_loadf("textures/hdr/newport_loft.hdr", &width, &height, &nrComponents, 0);
+        float *data = cubeMap[0]->getFloatImage();
+        skyboxWidth = cubeMap[0]->getWidth();
+        skyboxHeight = cubeMap[0]->getHeight();
         glGenTextures(1, &hdrTexture);
         glBindTexture(GL_TEXTURE_2D, hdrTexture);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width, height, 0, GL_RGB, GL_FLOAT, data);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, skyboxWidth, skyboxHeight, 0, GL_RGB, GL_FLOAT, data);
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -197,41 +205,24 @@ namespace pipeline
         // reset to original viewport!
         glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        cubeMapLoaded = true;
     }
 
-    void PBRIBLPipeline::hdrCubemapDraw(glm::mat4 view)
+    void PBRIBLPipeline::drawCubeMap(glm::mat4 &viewMat)
     {
-        // initialize the viewmat, then draw the cube with the custom shader!
-        // hdrSkyboxShaderProgram.enable();
-        // glm::mat4 modelview = glm::scale(view, glm::vec3(10, 10, 10));
-
-        // glUniformMatrix4fv(hdrSkyboxShaderLocations.getLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
-        // glUniformMatrix4fv(hdrSkyboxShaderLocations.getLocation("modelview"), 1, GL_FALSE, glm::value_ptr(modelview));
-
-        // //skybox sampler2d
-        // glActiveTexture(GL_TEXTURE0);
-        // unsigned int texID = (*textureIdMap)["hdr-skybox"];
-        // glBindTexture(GL_TEXTURE_2D, texID);
-        // glUniform1i(hdrSkyboxShaderLocations.getLocation("hdrMap"), 0);
-
-        // objects["box"]->draw();
-
-        // hdrSkyboxShaderProgram.disable();
-
+        if(!hdrCubemap)
+        {
+            AbstractPipeline::drawCubeMap(viewMat);
+            return;
+        }
         hdrSkyboxShaderProgram.enable();
-        // backgroundShader.setMat4("view", view);
         glUniformMatrix4fv(hdrSkyboxShaderLocations.getLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
-        glUniformMatrix4fv(hdrSkyboxShaderLocations.getLocation("view"), 1, GL_FALSE, glm::value_ptr(view));
+        glUniformMatrix4fv(hdrSkyboxShaderLocations.getLocation("view"), 1, GL_FALSE, glm::value_ptr(viewMat));
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_CUBE_MAP, envCubemap);
         glUniform1i(hdrSkyboxShaderLocations.getLocation("environmentMap"), 0);
         objects["hdr-skybox"]->draw();
         hdrSkyboxShaderProgram.disable();
-
-        // cubemapTextureId =  envCubemap;
-        // drawCubeMap(view);
-
-
     }
 
     void PBRIBLPipeline::addMesh(string objectName, util::PolygonMesh<VertexAttrib>& mesh)
@@ -285,11 +276,10 @@ namespace pipeline
 
         scenegraph->getRoot()->accept(renderer);
 
-        // if(cubeMapLoaded)
-        //     drawCubeMap(viewMat);
+        if(cubeMapLoaded)
+            drawCubeMap(viewMat);
 
         // test hdr cubemap
-        hdrCubemapDraw(viewMat);
         // cout<<"Errors: "<<glGetError()<<endl;
         modelview.pop();
         glFlush();

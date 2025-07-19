@@ -108,7 +108,11 @@ void Model::initTextures(map<string, util::TextureImage*>& textureMap)
 	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,GL_LINEAR); // Mipmaps are not available for maximization
         
         //copy texture to GPU
-	    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, textureObject->getWidth(),textureObject->getHeight(), 0, GL_RGB, GL_UNSIGNED_BYTE,textureObject->getImage()); // TODO: create a new map for GL_RGB16F images here. Might be useful later
+        if(textureObject->getIsFloat())
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, textureObject->getWidth(),textureObject->getHeight(), 0, GL_RGB, GL_FLOAT,textureObject->getFloatImage());
+        else
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, textureObject->getWidth(),textureObject->getHeight(), 0, GL_RGB, GL_UNSIGNED_BYTE,textureObject->getImage()); 
+
         glGenerateMipmap(GL_TEXTURE_2D);
         
         //save id in map
@@ -136,7 +140,11 @@ void Model::addTexture(string name, string path, util::TextureImage* textureObje
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,GL_LINEAR); // Mipmaps are not available for maximization
     
     //copy texture to GPU
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, textureObject->getWidth(),textureObject->getHeight(), 0, GL_RGB, GL_UNSIGNED_BYTE,textureObject->getImage());
+    if(textureObject->getIsFloat())
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, textureObject->getWidth(),textureObject->getHeight(), 0, GL_RGB, GL_FLOAT,textureObject->getFloatImage());
+    else
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, textureObject->getWidth(),textureObject->getHeight(), 0, GL_RGB, GL_UNSIGNED_BYTE,textureObject->getImage());
+        
     glGenerateMipmap(GL_TEXTURE_2D);
     
     // worried about race/starvation here. Might need to add a mutex and pass it all the way to pipeline (model->controller->view->pipline)

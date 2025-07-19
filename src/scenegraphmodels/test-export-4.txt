@@ -30,13 +30,13 @@ image sphere-metallic textures/peeling-painted-metal_metallic.png
 image sphere-normal textures/peeling-painted-metal_normal-ogl.png
 image sphere-roughness textures/peeling-painted-metal_roughness.png
 
-# hdr image
-image hdr-skybox textures/hdr/newport_loft.hdr
+# hdr cubemap
+cubemap textures/hdr/newport_loft.hdr
 
 
 
 # cubemap
-cubemap textures/skybox/right.jpg textures/skybox/left.jpg textures/skybox/top.jpg textures/skybox/bottom.jpg textures/skybox/front.jpg textures/skybox/back.jpg 
+# cubemap textures/skybox/right.jpg textures/skybox/left.jpg textures/skybox/top.jpg textures/skybox/bottom.jpg textures/skybox/front.jpg textures/skybox/back.jpg 
 
 
 

@@ -39,12 +39,20 @@ namespace util
       isFloat = false;
     }
 
+    /**
+     * Adding a second constructor to get textures via float*
+     * This is useful for hdr images.
+     */
     TextureImage(float* image,int width,int height,string name) {
       this->floatImage = image;
       this->width = width;
       this->height = height;
       isFloat = true;
 
+    }
+
+    bool getIsFloat()  {
+      return isFloat;
     }
 
 
@@ -54,6 +62,10 @@ namespace util
 
     GLubyte *getImage() {
       return image;
+    }
+
+    float* getFloatImage()  {
+      return floatImage;
     }
 
     int getWidth() {

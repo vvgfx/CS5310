@@ -17,6 +17,7 @@ namespace sgraph
      * Features:
      * - Flips image vertically to match OpenGL texture coordinate system
      * - Converts all images to RGB format for consistency with PPM loader
+     * - HDR images are automatically loaded as float* instead of GLubyte
      */
     class STBImageLoader: public ImageLoader {
    
@@ -29,8 +30,8 @@ namespace sgraph
             void load(string filename) {
                 int channels;
                 bool useFloatImage = false;
-                // if(filename.find(".hdr") != string::npos)
-                //     useFloatImage = true;
+                if(filename.find(".hdr") != string::npos)
+                    useFloatImage = true;
                 float* loadedFloatImage;
                 GLubyte* loaded_image;
 
@@ -70,8 +71,8 @@ namespace sgraph
             void loadWithAlpha(string filename) {
                 int channels;
                 bool useFloatImage = false;
-                // if(filename.find(".hdr") != string::npos)
-                //     useFloatImage = true;
+                if(filename.find(".hdr") != string::npos)
+                    useFloatImage = true;
                 float* loadedFloatImage;
                 GLubyte* loaded_image;
 

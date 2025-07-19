@@ -12,11 +12,7 @@ using namespace std;
 namespace pipeline
 {
     /**
-     * This class represents a render pipeline. Each pipeline will implement certain rendering features
-     * The pupose of this abstraction is to provide a general framework for building new render pipelines
-     * that may or may not choose to implement certain features.
-     * 
-     * At any point of time, only one pipeline should be active.
+     * This class holds common functions in a render pipeline.
      */
 
     class AbstractPipeline : public IPipeline
@@ -52,6 +48,9 @@ namespace pipeline
 
         virtual void loadCubeMap(vector<util::TextureImage*>& cubeMap)
         {
+            if(cubeMap.size() !=  6)
+                throw runtime_error("cubemap size is not 6! likely missing an overriddden implementation");
+            
             glGenTextures(1, &cubemapTextureId);
             glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTextureId);
             int i = 0;
