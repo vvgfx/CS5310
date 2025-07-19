@@ -23,7 +23,7 @@ namespace pipeline
 {
     /**
      * An implementation the pipeline interface. This pipeline features lights (directional and spotlights), textures and PBR workflow.
-     * Note that this pipeline REQUIRES PBR materials to be defined to work properly, and does NOT support ANY texture.
+     * Note that this pipeline REQUIRES PBR textures to be defined to work properly.
      * To use this pipeline, initalize it using init() and draw a single frame using drawFrame()
      */
     class TexturedPBRPipeline : public AbstractPipeline

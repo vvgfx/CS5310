@@ -28,23 +28,40 @@ namespace sgraph
    
             void load(string filename) {
                 int channels;
+                bool useFloatImage = false;
+                // if(filename.find(".hdr") != string::npos)
+                //     useFloatImage = true;
+                float* loadedFloatImage;
+                GLubyte* loaded_image;
+
+                if(useFloatImage)
+                    loadedFloatImage = stbi_loadf(filename.c_str(), &width, &height, &channels, 0); // keep original channel count
+                else
+                    loaded_image = stbi_load(filename.c_str(), &width, &height, &channels, 3);
                 
-                GLubyte* loaded_image = stbi_load(filename.c_str(), &width, &height, &channels, 3);
-                
-                if (!loaded_image) {
+                if (!loaded_image && !loadedFloatImage) {
                     throw std::invalid_argument("Failed to load image: " + string(stbi_failure_reason()));
                 }
                 
                 std::cout << "Image file loaded: " << filename << std::endl;
                 std::cout << "Dimensions: " << width << "x" << height << std::endl;
                 
-                image = new GLubyte[3 * width * height];
-                
-                for (int i = 0; i < 3 * width * height; i++) {
-                    image[i] = loaded_image[i];
+                if(useFloatImage)
+                {
+                    floatImage = new float[3 * width * height];
+                    for (int i = 0; i < 3 * width * height; i++) {
+                        floatImage[i] = loadedFloatImage[i];
+                    }
+                    stbi_image_free(loadedFloatImage);
                 }
-                
-                stbi_image_free(loaded_image);
+                else
+                {
+                    image = new GLubyte[3 * width * height];
+                    for (int i = 0; i < 3 * width * height; i++) {
+                        image[i] = loaded_image[i];
+                    }
+                    stbi_image_free(loaded_image);
+                }
             }
             
             /**
@@ -52,26 +69,44 @@ namespace sgraph
              */
             void loadWithAlpha(string filename) {
                 int channels;
+                bool useFloatImage = false;
+                // if(filename.find(".hdr") != string::npos)
+                //     useFloatImage = true;
+                float* loadedFloatImage;
+                GLubyte* loaded_image;
+
+                if(useFloatImage)
+                    loadedFloatImage = stbi_loadf(filename.c_str(), &width, &height, &channels, 0); // keep original channel count always
+                else
+                    loaded_image = stbi_load(filename.c_str(), &width, &height, &channels, 0); // keep 0 here as well to preserve alpha
                 
-                // Load image with original channel count
-                GLubyte* loaded_image = stbi_load(filename.c_str(), &width, &height, &channels, 0);
-                
-                if (!loaded_image) {
+                if (!loaded_image && !loadedFloatImage) {
                     throw std::invalid_argument("Failed to load image: " + string(stbi_failure_reason()));
                 }
                 
                 std::cout << "Image file loaded: " << filename << std::endl;
                 std::cout << "Dimensions: " << width << "x" << height << std::endl;
                 
-                image = new GLubyte[channels * width * height];
-                
-                for (int i = 0; i < channels * width * height; i++) {
-                    image[i] = loaded_image[i];
+                if(useFloatImage)
+                {
+                    floatImage = new float[3 * width * height];
+                    for (int i = 0; i < 3 * width * height; i++) {
+                        floatImage[i] = loadedFloatImage[i];
+                    }
+                    stbi_image_free(loadedFloatImage);
+                }
+                else
+                {
+                    image = new GLubyte[3 * width * height];
+                    for (int i = 0; i < 3 * width * height; i++) {
+                        image[i] = loaded_image[i];
+                    }
+                    stbi_image_free(loaded_image);
                 }
                 
-                this->channels = channels;
                 
-                stbi_image_free(loaded_image);
+                
+                
             }
             
         private:

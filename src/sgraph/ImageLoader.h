@@ -13,12 +13,14 @@ namespace sgraph
         public:
             ImageLoader() {}
             inline GLubyte* getPixels() {return image;}
+            inline float* getFPixels() { return floatImage;}
             inline int getWidth() {return width;}
             inline int getHeight() {return height;}        
             virtual void load(string filename)=0;
     
         protected:
             GLubyte *image;
+            float* floatImage;
             int width;
             int height;
     

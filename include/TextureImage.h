@@ -13,8 +13,10 @@ namespace util
   {
   protected:
     GLubyte *image;
+    float* floatImage;
     int width,height;
     string name;
+    bool isFloat;
   protected:
   void deleteImage()
   {
@@ -34,6 +36,14 @@ namespace util
       this->image = image;
       this->width = width;
       this->height = height;
+      isFloat = false;
+    }
+
+    TextureImage(float* image,int width,int height,string name) {
+      this->floatImage = image;
+      this->width = width;
+      this->height = height;
+      isFloat = true;
 
     }
 
@@ -93,6 +103,8 @@ namespace util
 
   private:
     glm::vec3 getColor(int x,int y) {
+      if(isFloat)
+        return glm::vec3((float)floatImage[3*(y*width+x)],(float)floatImage[3*(y*width+x)+1],(float)floatImage[3*(y*width+x)+2]);
       return glm::vec3((float)image[3*(y*width+x)],(float)image[3*(y*width+x)+1],(float)image[3*(y*width+x)+2]);
     }
 
