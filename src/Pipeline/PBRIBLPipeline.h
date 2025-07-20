@@ -62,15 +62,18 @@ namespace pipeline
         bool hdrCubemap = false;
 
         // HDR cubemap stuff here
-        unsigned int captureFBO, captureRBO, hdrTexture, envCubemap;
+        unsigned int captureFBO, captureRBO, hdrSkyboxTexture, envCubemap;
         int skyboxWidth, skyboxHeight;
+
+        // irradiance map stuff here
+        unsigned int irradianceMap;
     };
 
     void PBRIBLPipeline::init(map<string, util::PolygonMesh<VertexAttrib>>& meshes, glm::mat4 &proj, map<string, unsigned int>& texMap)
     {
         this->projection = proj;
-        shaderProgram.createProgram("shaders/PBR/TexturePBR.vert",
-                                    "shaders/PBR/TexturePBR.frag");
+        shaderProgram.createProgram("shaders/PBR/TexturePBR-IBL.vert",
+                                    "shaders/PBR/TexturePBR-IBL.frag");
         shaderProgram.enable();
         shaderLocations = shaderProgram.getAllShaderVariables();
         shaderProgram.disable();
@@ -144,8 +147,8 @@ namespace pipeline
         float *data = cubeMap[0]->getFloatImage();
         skyboxWidth = cubeMap[0]->getWidth();
         skyboxHeight = cubeMap[0]->getHeight();
-        glGenTextures(1, &hdrTexture);
-        glBindTexture(GL_TEXTURE_2D, hdrTexture);
+        glGenTextures(1, &hdrSkyboxTexture);
+        glBindTexture(GL_TEXTURE_2D, hdrSkyboxTexture);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, skyboxWidth, skyboxHeight, 0, GL_RGB, GL_FLOAT, data);
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -184,7 +187,7 @@ namespace pipeline
         glUniform1i(equiRectShaderLocations.getLocation("equirectangularMap"), 0); // use TEXTURE0
         glUniformMatrix4fv(equiRectShaderLocations.getLocation("projection"), 1, GL_FALSE, glm::value_ptr(captureProjection));
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, hdrTexture);
+        glBindTexture(GL_TEXTURE_2D, hdrSkyboxTexture);
 
         GLint viewport[4];
         glGetIntegerv(GL_VIEWPORT, viewport);
@@ -201,6 +204,51 @@ namespace pipeline
             objects["hdr-skybox"]->draw();
         }
         equiRectangularShader.disable();
+
+
+        // At this point, we have the hdr texture mapped to a cubemap. Now we need to build the irradiance map.
+        util::ShaderProgram irradianceShaderProgram;
+        irradianceShaderProgram.createProgram("shaders/cubemap/HDR/irradiance.vert",
+                                            "shaders/cubemap/HDR/irradiance.frag");
+        util::ShaderLocationsVault irradianceShaderLocations;
+        irradianceShaderProgram.enable();
+        irradianceShaderLocations = irradianceShaderProgram.getAllShaderVariables();
+        irradianceShaderProgram.disable();
+
+        glGenTextures(1, &irradianceMap);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, irradianceMap);
+        // set all sides as GL_RGB16F
+        for(unsigned int i = 0; i < 6; i++)
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, 32, 32, 0, GL_RGB, GL_FLOAT, nullptr); // note : each side is of size 32
+
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+
+        // reuse the same framebuffer!
+        glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
+        glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 32, 32); // same size 32 here!
+
+        irradianceShaderProgram.enable();
+        glUniform1i(irradianceShaderLocations.getLocation("environmentMap"), 0); // send environment map as TEXTURE0
+        glUniformMatrix4fv(irradianceShaderLocations.getLocation("projection"), 1, GL_FALSE, glm::value_ptr(captureProjection));
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, envCubemap);
+
+        glViewport(0, 0, 32, 32); // once again, 32 here!
+        glBindFramebuffer(GL_FRAMEBUFFER, captureFBO); // this shouldn't be required, but playing it safe!
+        for(unsigned int i = 0; i < 6; i++)
+        {
+            glUniformMatrix4fv(equiRectShaderLocations.getLocation("view"), 1, GL_FALSE, glm::value_ptr(captureViews[i]));
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, irradianceMap, 0);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            objects["hdr-skybox"]->draw();
+        }
 
         // reset to original viewport!
         glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
@@ -273,6 +321,11 @@ namespace pipeline
         }
 
         glUniformMatrix4fv(shaderLocations.getLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
+
+        // pass the irradiance map!
+        glActiveTexture(GL_TEXTURE8);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, irradianceMap);
+        glUniform1i(shaderLocations.getLocation("irradianceMap"), 8);
 
         scenegraph->getRoot()->accept(renderer);
 
