@@ -40,6 +40,8 @@ uniform sampler2D aoMap;
 
 // adding the irradiance IBL here
 uniform samplerCube irradianceMap;
+uniform samplerCube prefilterMap;
+uniform sampler2D brdfLUT;
 
 out vec4 fColor;
 
@@ -97,13 +99,17 @@ void main()
     float G;
     vec3 F;
 
-    tempNormal = normalize(fNormal); // world space -> this world space equivalent is required to 
+    tempNormal = normalize(fNormal); // world space -> this world space equivalent is required for IBL
 
     // normalize the tangent and bitangents because of bilinear interpolation.
     tempTangent = normalize(fTangent);
     tempBiTangent = normalize(fBiTangent);
 
     viewVec = normalize(cameraPos - fPosition.xyz); // world space
+
+    // calculating the reflection vector before converting to tangent space!
+    vec3 reflectionVec = reflect(-viewVec, tempNormal);
+
     // transform the viewVec to the tangent space
     viewVec = vec3(dot(viewVec,tempTangent),dot(viewVec,tempBiTangent),dot(viewVec,tempNormal));
     viewVec = normalize(viewVec);
@@ -190,12 +196,21 @@ void main()
 
     // instead of using albedo for the ambient, we are using the irradiance map now.
     // vec3 ambient = vec3(0.03f) * albedo * ao;
-    kS = FresnelSchlick(max(dot(normal, viewVec), 0.0), F0); // both in tangent space
+    F = FresnelSchlick(max(dot(normal, viewVec), 0.0), F0); // both in tangent space
+    kS = F;
     kD = 1.0 - kS;
     kD *= (1.0 - metallic);
     vec3 irradiance = texture(irradianceMap, tempNormal).rgb; // need this in world space, so using tempNormal!
     vec3 diffuse = irradiance * albedo;
-    vec3 ambient = (kD * diffuse) * ao;
+    const float MAX_REFLECTION_LOD = 4.0;
+    vec3 prefilteredColor = textureLod(prefilterMap, reflectionVec,  roughness * MAX_REFLECTION_LOD).rgb;
+
+    vec2 brdf  = texture(brdfLUT, vec2(max(dot(normal, viewVec), 0.0), roughness)).rg;
+    vec3 specularIBL = prefilteredColor * (F * brdf.x + brdf.y);
+
+
+
+    vec3 ambient = (kD * diffuse + specularIBL) * ao;
     vec3 color = ambient + Lo;
 
     // HDR tonemapping

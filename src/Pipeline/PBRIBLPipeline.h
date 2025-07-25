@@ -67,6 +67,9 @@ namespace pipeline
 
         // irradiance map stuff here
         unsigned int irradianceMap;
+
+        // specular stuff here
+        unsigned int prefilterMap, brdfLUTTexture;
     };
 
     void PBRIBLPipeline::init(map<string, util::PolygonMesh<VertexAttrib>>& meshes, glm::mat4 &proj, map<string, unsigned int>& texMap)
@@ -129,7 +132,7 @@ namespace pipeline
         glGenRenderbuffers(1, &captureRBO);
         glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
         glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 1024, 1024);// format for the render buffer.
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 512, 512);// format for the render buffer.
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, captureRBO); // use this render buffer as an attachment.
 
         util::ShaderProgram equiRectangularShader;
@@ -141,9 +144,7 @@ namespace pipeline
         util::ShaderLocationsVault equiRectShaderLocations = equiRectangularShader.getAllShaderVariables();
         equiRectangularShader.disable();
 
-        // for now, just directly use the imports with stb_image. Will need to rethink this very soon.
-        stbi_set_flip_vertically_on_load(true);
-        // float *data = stbi_loadf("textures/hdr/newport_loft.hdr", &width, &height, &nrComponents, 0);
+
         float *data = cubeMap[0]->getFloatImage();
         skyboxWidth = cubeMap[0]->getWidth();
         skyboxHeight = cubeMap[0]->getHeight();
@@ -156,14 +157,12 @@ namespace pipeline
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-        stbi_image_free(data);
-
         // set up the cubemap
         glGenTextures(1, &envCubemap);
         glBindTexture(GL_TEXTURE_CUBE_MAP, envCubemap);
         for(unsigned int i = 0; i < 6; i++)
         {
-            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, 1024, 1024, 0, GL_RGB, GL_FLOAT, nullptr);
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, 512, 512, 0, GL_RGB, GL_FLOAT, nullptr);
         }
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -192,7 +191,7 @@ namespace pipeline
         GLint viewport[4];
         glGetIntegerv(GL_VIEWPORT, viewport);
 
-        glViewport(0, 0, 1024, 1024); // don't forget to configure the viewport to the capture dimensions.
+        glViewport(0, 0, 512, 512); // don't forget to configure the viewport to the capture dimensions.
         glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
 
         for (unsigned int i = 0; i < 6; ++i)
@@ -205,8 +204,13 @@ namespace pipeline
         }
         equiRectangularShader.disable();
 
+        // create mipmaps to stop visible dot artifacts from occuring.
+        glBindTexture(GL_TEXTURE_CUBE_MAP, envCubemap);
+        glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 
-        // At this point, we have the hdr texture mapped to a cubemap. Now we need to build the irradiance map.
+        // -------------------------------------------------------------------------------------------------------------
+        // At this point, we have the hdr texture mapped to a cubemap. Now we need to build the irradiance map for the diffuse part.
+        cout<<"Building diffuse irradiance cubemap!"<<endl;
         util::ShaderProgram irradianceShaderProgram;
         irradianceShaderProgram.createProgram("shaders/cubemap/HDR/irradiance.vert",
                                             "shaders/cubemap/HDR/irradiance.frag");
@@ -250,6 +254,107 @@ namespace pipeline
             objects["hdr-skybox"]->draw();
         }
 
+        irradianceShaderProgram.disable();
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+        //---------------------------------------------------------------------------------------------------------------
+        // Moving on to specular highlights.
+        // Creating the pre-filter cubemap for the first half of the split-sum approximation.
+        cout<<"Building specular pre-filter map!"<<endl;
+        glGenTextures(1, &prefilterMap);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, prefilterMap);
+         for (unsigned int i = 0; i < 6; ++i)
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, 128, 128, 0, GL_RGB, GL_FLOAT, nullptr);
+        
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR); // be sure to set minification filter to mip_linear 
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        // generate mipmaps for the cubemap so OpenGL automatically allocates the required memory.
+        glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+
+        //------------------------------------------------------------------------------------------
+        // run quasi monte-carlo simulation on environment lighting to create the pre-filter cubemap
+        util::ShaderProgram prefilterShaderProgram;
+        prefilterShaderProgram.createProgram("shaders/cubemap/HDR/prefilter.vert",
+                                    "shaders/cubemap/HDR/prefilter.frag");
+        util::ShaderLocationsVault prefilterShaderLocations;
+        prefilterShaderProgram.enable();
+        prefilterShaderLocations  = prefilterShaderProgram.getAllShaderVariables();
+        prefilterShaderProgram.disable();
+
+        prefilterShaderProgram.enable();
+        glUniformMatrix4fv(prefilterShaderLocations.getLocation("projection"), 1, GL_FALSE, glm::value_ptr(captureProjection));
+        glActiveTexture(GL_TEXTURE0);  // using texture 0 as the environment map.
+        glBindTexture(GL_TEXTURE_CUBE_MAP, envCubemap);
+        glUniform1i(prefilterShaderLocations.getLocation("environmentMap"), 0);
+        glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
+        unsigned int maxMipLevels =   5;
+        for(unsigned int mip  = 0; mip < maxMipLevels; mip++)
+        {
+            unsigned int mipWidth = static_cast<unsigned int>(128 * std::pow(0.5, mip));
+            unsigned int mipHeight = static_cast<unsigned int>(128 * std::pow(0.5, mip));
+            glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
+            glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, mipWidth, mipHeight);
+            glViewport(0, 0, mipWidth, mipHeight);
+
+            float roughness = (float)mip / (float)(maxMipLevels - 1);
+            glUniform1f(prefilterShaderLocations.getLocation("roughness"), roughness);
+            for (unsigned int i = 0; i < 6; ++i)
+            {
+                glUniformMatrix4fv(prefilterShaderLocations.getLocation("view"), 1, GL_FALSE, glm::value_ptr(captureViews[i]));
+                glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, prefilterMap, mip);
+
+                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+                objects["hdr-skybox"]->draw();
+            }
+        }
+
+        prefilterShaderProgram.disable();
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+        //------------------------------------------------------------------------------------------
+        // generate 2d LUT from BRDF.
+        cout<<"Building LUT from BRDF!"<<endl;
+        util::ShaderProgram brdfShader;
+        brdfShader.createProgram("shaders/cubemap/HDR/brdf.vert", 
+                                "shaders/cubemap/HDR/brdf.frag");
+
+        util::ShaderLocationsVault brdfShaderLocations;
+
+        brdfShader.enable();
+        brdfShaderLocations = brdfShader.getAllShaderVariables();
+        brdfShader.disable();
+
+
+        
+        brdfShader.enable();
+        glGenTextures(1, &brdfLUTTexture);
+        glBindTexture(GL_TEXTURE_2D, brdfLUTTexture);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, 512, 512, 0, GL_RG, GL_FLOAT, 0);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+
+        // once again, using the same framebuffer xD
+
+        glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
+        glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 512, 512);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, brdfLUTTexture, 0);
+
+        glViewport(0, 0, 512, 512);
+
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        objects["postProcess"]->draw();
+        
+
+        brdfShader.disable();
         // reset to original viewport!
         glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -326,6 +431,15 @@ namespace pipeline
         glActiveTexture(GL_TEXTURE8);
         glBindTexture(GL_TEXTURE_CUBE_MAP, irradianceMap);
         glUniform1i(shaderLocations.getLocation("irradianceMap"), 8);
+
+        // pass the 
+        glActiveTexture(GL_TEXTURE7);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, prefilterMap);
+        glUniform1i(shaderLocations.getLocation("prefilterMap"), 7);
+
+        glActiveTexture(GL_TEXTURE6);
+        glBindTexture(GL_TEXTURE_2D, brdfLUTTexture);
+        glUniform1i(shaderLocations.getLocation("brdfLUT"), 6);
 
         scenegraph->getRoot()->accept(renderer);
 

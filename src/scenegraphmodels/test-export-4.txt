@@ -31,7 +31,7 @@ image sphere-normal textures/peeling-painted-metal_normal-ogl.png
 image sphere-roughness textures/peeling-painted-metal_roughness.png
 
 # hdr cubemap
-cubemap textures/hdr/newport_loft.hdr
+cubemap textures/hdr/winter.hdr
 
 
 
