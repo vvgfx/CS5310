@@ -90,7 +90,7 @@ vec3 FresnelSchlick(float cosTheta, vec3 F0)
 void main()
 {
     vec3 viewVec, lightVec, halfwayVec;
-    vec3 tempNormal, tempTangent, tempBiTangent, tNormal;
+    vec3 tempNormal, tempTangent, tempBiTangent, tNormal, worldNormal;
     float dist, attenuation;
     vec3 radiance, specular;
     vec3 kS, kD;
@@ -99,7 +99,7 @@ void main()
     float G;
     vec3 F;
 
-    tempNormal = normalize(fNormal); // world space -> this world space equivalent is required for IBL
+    tempNormal = normalize(fNormal); // world space -> this is required for tangent space transformations
 
     // normalize the tangent and bitangents because of bilinear interpolation.
     tempTangent = normalize(fTangent);
@@ -107,17 +107,21 @@ void main()
 
     viewVec = normalize(cameraPos - fPosition.xyz); // world space
 
-    // calculating the reflection vector before converting to tangent space!
-    vec3 reflectionVec = reflect(-viewVec, tempNormal);
+    // get normal coordinates in tangent space
+    tNormal = texture(normalMap,vec2(fTexCoord.s,fTexCoord.t)).rgb;
+    tNormal = 2* tNormal - 1; // [0,1] to [-1,1]
+    tNormal = normalize(tNormal);
+
+    // need to convert tNnormal to worldNormal to use in IBL later
+    worldNormal = tNormal.x * tempTangent + tNormal.y * tempBiTangent + tNormal.z * tempNormal;
+
+    // calculating the reflection vector for IBL before converting to tangent space!
+    vec3 reflectionVec = reflect(-viewVec, worldNormal); // this is in world space
 
     // transform the viewVec to the tangent space
     viewVec = vec3(dot(viewVec,tempTangent),dot(viewVec,tempBiTangent),dot(viewVec,tempNormal));
     viewVec = normalize(viewVec);
 
-    // get normal coordinates in tangent space
-    tNormal = texture(normalMap,vec2(fTexCoord.s,fTexCoord.t)).rgb;
-    tNormal = 2* tNormal - 1; // [0,1] to [-1,1]
-    tNormal = normalize(tNormal);
 
     // getting required values from the input textures
     vec3 albedo     = pow(texture(albedoMap, vec2(fTexCoord.s,fTexCoord.t)).rgb, vec3(2.2)); // conversion from sRGB to linear space
@@ -200,7 +204,7 @@ void main()
     kS = F;
     kD = 1.0 - kS;
     kD *= (1.0 - metallic);
-    vec3 irradiance = texture(irradianceMap, tempNormal).rgb; // need this in world space, so using tempNormal!
+    vec3 irradiance = texture(irradianceMap, worldNormal).rgb; // need this in world space, so using worldNormal!
     vec3 diffuse = irradiance * albedo;
     const float MAX_REFLECTION_LOD = 4.0;
     vec3 prefilteredColor = textureLod(prefilterMap, reflectionVec,  roughness * MAX_REFLECTION_LOD).rgb;

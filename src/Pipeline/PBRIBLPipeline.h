@@ -38,8 +38,8 @@ namespace pipeline
         inline void drawFrame(sgraph::IScenegraph *scenegraph, glm::mat4 &viewMat);
         inline void initLights(sgraph::IScenegraph *scenegraph);
         inline void initShaderVars();
-        inline void loadCubeMap(vector<util::TextureImage*>& cubeMap);
-        inline void drawCubeMap(glm::mat4 &viewMat);
+        inline void loadCubeMap(vector<util::TextureImage*>& cubeMap) override;
+        inline void drawCubeMap(glm::mat4 &viewMat) override;
 
     private:
         util::ShaderProgram shaderProgram;

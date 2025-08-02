@@ -38,9 +38,9 @@ GUIView.o: GUIView.cpp GUIView.h
 	$(COMPILER) $(INCLUDES) $(CFLAGS) -c GUIView.cpp
 
 RM = rm -f
-ifeq ($(OS),Windows_NT)     # is Windows_NT on XP, 2000, 7, Vista, 10...
-    RM := cmd /c del
-endif
+# ifeq ($(OS),Windows_NT)     # is Windows_NT on XP, 2000, 7, Vista, 10...
+#     RM := rm -f
+# endif
 
 clean:
 	$(RM) $(OBJS) $(PROGRAM)
