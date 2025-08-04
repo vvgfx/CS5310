@@ -10,10 +10,10 @@ in vec3 fNormal;
 
 uniform samplerCube irradianceMap;
 uniform samplerCube prefilterMap;
-
-uniform sampler2D normalMap;
 uniform sampler2D brdfLUT;
+
 uniform sampler2D albedoMap;
+uniform sampler2D normalMap;
 uniform sampler2D metallicMap;
 uniform sampler2D roughnessMap;
 uniform sampler2D aoMap;

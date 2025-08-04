@@ -19,7 +19,7 @@
 #include "../sgraph/LightRetriever.h"
 #include "../sgraph/ShadowRenderer.h"
 #include "../sgraph/DepthRenderer.h"
-#include "../sgraph/TexturedPBRAmbientRenderer.h"
+#include "../sgraph/PBRSVIBLAmbientRenderer.h"
 #include "TangentComputer.h"
 #include <iostream>
 
@@ -183,7 +183,7 @@ namespace pipeline
         lightRetriever = new sgraph::LightRetriever(modelview);
         shadowRenderer = new sgraph::ShadowRenderer(modelview, objects, shadowShaderLocations);
         depthRenderer = new sgraph::DepthRenderer(modelview, objects, depthShaderLocations);
-        ambientRenderer = new sgraph::TexturedPBRAmbientRenderer(modelview, objects, ambientShaderLocations, *textureIdMap);
+        ambientRenderer = new sgraph::PBRSVIBLAmbientRenderer(modelview, objects, ambientShaderLocations, *textureIdMap);
         initialized = true;
 
         // getting the screen dimensions from the viewport!
@@ -617,15 +617,6 @@ namespace pipeline
         glDisable(GL_CULL_FACE);           // Don't want the back-facing polygons to get culled. need them to increment the stencil buffer.
         glStencilFunc(GL_ALWAYS, 0, 0xff); // Always pass the stencil test, reference value 0,mask value 1(should probably use ~0)
 
-        // For some reason, the depth-fail method breaks down for some fragments of the sphere.
-        // depth fail
-        // glStencilOpSeparate(GL_BACK, // for backfacing polygons
-        //                     GL_KEEP, // stencil test fails - doesnt happen because stencil function is set to always pass
-        //                     GL_INCR_WRAP, // stencil passes but depth fails - our required condition - increment the stencil buffer value
-        //                     GL_KEEP); // both stencil and depth passes - not relevant; do nothing.
-
-        // glStencilOpSeparate(GL_FRONT, GL_KEEP, GL_DECR_WRAP, GL_KEEP); // similarly, for front facing polygons, decrement the stencil buffer
-
         // These are for depth pass. This works for now, but will fail when the camera is placed inside a shadow.
         glStencilOpSeparate(GL_FRONT, GL_KEEP, GL_KEEP, GL_INCR_WRAP);
         glStencilOpSeparate(GL_BACK, GL_KEEP, GL_KEEP, GL_DECR_WRAP);
@@ -661,9 +652,22 @@ namespace pipeline
         glBlendEquation(GL_FUNC_ADD); 
         glBlendFunc(GL_ONE, GL_ONE);  
         modelview.push(glm::mat4(1.0));
-        modelview.top() = modelview.top() * viewMat;
+        // modelview.top() = modelview.top() * viewMat;  // don't use the view matrix for the ambient pass as the values are required to be in the world space.
         glUniformMatrix4fv(ambientShaderLocations.getLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
-        // This uses only the material's ambient. Ideally it should use each light's ambient as well. Maybe later tho.
+
+        glActiveTexture(GL_TEXTURE8);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, irradianceMap);
+        glUniform1i(ambientShaderLocations.getLocation("irradianceMap"), 8);
+
+        // pass the 
+        glActiveTexture(GL_TEXTURE7);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, prefilterMap);
+        glUniform1i(ambientShaderLocations.getLocation("prefilterMap"), 7);
+
+        glActiveTexture(GL_TEXTURE6);
+        glBindTexture(GL_TEXTURE_2D, brdfLUTTexture);
+        glUniform1i(ambientShaderLocations.getLocation("brdfLUT"), 6);
+
         scenegraph->getRoot()->accept(ambientRenderer);
         modelview.pop();
         ambientProgram.disable();
