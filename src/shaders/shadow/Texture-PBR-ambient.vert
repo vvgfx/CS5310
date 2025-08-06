@@ -1,7 +1,7 @@
 #version 330
 
-in vec4 vPosition;
-in vec4 vTexCoord;
+layout(location = 0) in vec4 vPosition;
+layout(location = 3) in vec4 vTexCoord;
 uniform mat4 modelview;
 uniform mat4 projection;
 uniform mat4 texturematrix;
