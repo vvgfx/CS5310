@@ -581,7 +581,7 @@ namespace pipeline
         // set exposure here later.
         float exposure = 1.0f;
         glUniform1f(hdrShaderLocations.getLocation("exposure"), exposure);
-
+        glDisable(GL_DEPTH_TEST);
         // draw screen space quad
         objects["postProcess"]->draw();
         hdrShaderProgram.disable();
@@ -652,7 +652,7 @@ namespace pipeline
         glBlendEquation(GL_FUNC_ADD); 
         glBlendFunc(GL_ONE, GL_ONE);  
         modelview.push(glm::mat4(1.0));
-        // modelview.top() = modelview.top() * viewMat;  // don't use the view matrix for the ambient pass as the values are required to be in the world space.
+        modelview.top() = modelview.top() * viewMat;  // don't use the view matrix for the ambient pass as the values are required to be in the world space.
         glUniformMatrix4fv(ambientShaderLocations.getLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
         glActiveTexture(GL_TEXTURE8);
