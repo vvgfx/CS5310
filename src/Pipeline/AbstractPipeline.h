@@ -48,6 +48,8 @@ namespace pipeline
 
         virtual void loadCubeMap(vector<util::TextureImage*>& cubeMap)
         {
+            if(cubeMap.size() ==  0 || cubeMap.size() == 1) // default implementation does not support HDR images.
+                return;
             if(cubeMap.size() !=  6)
                 throw runtime_error("cubemap size is not 6! likely missing an overriddden implementation");
             

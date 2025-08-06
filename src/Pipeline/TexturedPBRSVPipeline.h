@@ -256,7 +256,7 @@ namespace pipeline
         // set exposure here later.
         float exposure = 1.0f;
         glUniform1f(hdrShaderLocations.getLocation("exposure"), exposure);
-
+        glDisable(GL_DEPTH_TEST);
         // draw screen space quad
         objects["postProcess"]->draw();
 
