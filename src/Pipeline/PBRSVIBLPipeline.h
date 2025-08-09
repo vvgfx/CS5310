@@ -512,6 +512,9 @@ namespace pipeline
     {
         if (!initialized)
             throw runtime_error("pipeline has not been initialized.");
+        
+        if(!cubeMapLoaded)
+            throw runtime_error("skybox has not been provided! This pipeline requires a skybox");
 
         // set current frame buffer as HDR buffer
         glBindFramebuffer(GL_FRAMEBUFFER, hdrFBO);

@@ -29,6 +29,11 @@ image sphere-base textures/peeling-painted-metal_albedo.png
 image sphere-metallic textures/peeling-painted-metal_metallic.png
 image sphere-normal textures/peeling-painted-metal_normal-ogl.png
 image sphere-roughness textures/peeling-painted-metal_roughness.png
+image metalFloor-ao textures/metalFloor/metalFloor_ao.jpg
+image metalFloor-base textures/metalFloor/metalFloor_albedo.jpg
+image metalFloor-metallic textures/metalFloor/metalFloor_metallic.jpg
+image metalFloor-normal textures/metalFloor/metalFloor_normal.jpg
+image metalFloor-roughness textures/metalFloor/metalFloor_roughness.jpg
 
 # hdr cubemap
 cubemap textures/hdr/winter.hdr

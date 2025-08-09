@@ -38,7 +38,7 @@ void GUIController::initScenegraph() {
     //read in the file of commands
     ifstream inFile;
     if(textfile == "")
-        inFile = ifstream("scenegraphmodels/test-export-4.txt");
+        inFile = ifstream("scenegraphmodels/GI-export.txt");
     else
         inFile = ifstream(textfile);
     sgraph::ScenegraphImporter importer;
@@ -79,7 +79,9 @@ void GUIController::run()
     view->init(this,meshes, texIdMap, scenegraph);
 
     // initialize the cubemap as well!
-    reinterpret_cast<GUIView*>(view)->loadCubeMaps(model->getCubeMapTextures());
+    vector<util::TextureImage*>& cubeMaps = model->getCubeMapTextures();
+    if(!(cubeMaps.size() < 1))
+        reinterpret_cast<GUIView*>(view)->loadCubeMaps(cubeMaps);
 
     // creating the texture Id maps AFTER init. This is because the OpenGL initialization needs to occur before the textures can be loaded
     model->initTextures(model->getTextureMap());

@@ -390,6 +390,9 @@ namespace pipeline
     {
         if (!initialized)
             throw runtime_error("pipeline has not been initialized.");
+
+        if(!cubeMapLoaded)
+            throw runtime_error("skybox has not been provided! This pipeline requires a skybox");
         // can't pass the view vec3 directly so doing this.
         glm::mat4 inverseView = glm::inverse(viewMat);
         cameraPos = glm::vec3(inverseView[3]);

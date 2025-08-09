@@ -1,0 +1,107 @@
+# meshes
+instance box models/box-outside-2.obj
+instance hdr-skybox models/hdr-skybox.obj
+instance helmet models/helmet.obj
+instance monkey models/monkey.obj
+instance postProcess models/post-process.obj
+instance skybox models/skybox.obj
+instance sphere models/sphere-3.obj
+
+
+# textures
+image box-ao textures/patched-brickwork_ao.png
+image box-base textures/patched-brickwork_albedo.png
+image box-metallic textures/patched-brickwork_metallic.png
+image box-normal textures/patched-brickwork_normal-ogl.png
+image box-roughness textures/patched-brickwork_roughness.png
+image ground-ao textures/asphalt/grey-asphalt-ao.png
+image ground-base textures/asphalt/grey-asphalt-albedo.png
+image ground-metallic textures/asphalt/grey-asphalt-metallic.png
+image ground-normal textures/asphalt/grey-asphalt-normal.png
+image ground-roughness textures/asphalt/grey-asphalt-roughness.png
+image helmet-ao textures/helmet/ao.jpg
+image helmet-base textures/helmet/albedo.jpg
+image helmet-metallic textures/helmet/metal.jpg
+image helmet-normal textures/helmet/normal.jpg
+image helmet-roughness textures/helmet/roughness.jpg
+image metalFloor-ao textures/metalFloor/metalFloor_ao.jpg
+image metalFloor-base textures/metalFloor/metalFloor_albedo.jpg
+image metalFloor-metallic textures/metalFloor/metalFloor_metallic.jpg
+image metalFloor-normal textures/metalFloor/metalFloor_normal.jpg
+image metalFloor-roughness textures/metalFloor/metalFloor_roughness.jpg
+image sphere-ao textures/peeling-painted-metal_ao.png
+image sphere-base textures/peeling-painted-metal_albedo.png
+image sphere-metallic textures/peeling-painted-metal_metallic.png
+image sphere-normal textures/peeling-painted-metal_normal-ogl.png
+image sphere-roughness textures/peeling-painted-metal_roughness.png
+
+
+
+# cubemap
+cubemap textures/hdr/winter.hdr 
+
+
+
+group root root
+light two-light
+ambient 0 0 0
+diffuse 0 0 0
+specular 0 0 0
+position 0 10 30
+spot-direction 0 -1 -3.5
+spot-angle 20
+color 500 500 500
+end-light
+assign-light two-light root
+
+srt ground-srt ground-srt 80 5 80 0 0 0 0 -25 0
+
+leaf ground-box ground-box instanceof box
+material mat-ground-box
+emission 0 0 0
+ambient 0 0 0
+diffuse 0 0 0
+specular 0 0 0
+shininess 0
+#PBR
+albedo 0.9 0.9 0.9
+metallic 0.2
+roughness 0.95
+ao 1
+end-material 
+
+assign-material ground-box mat-ground-box 
+
+assign-texture ground-box ground-base
+assign-normal ground-box ground-normal
+assign-metallic ground-box ground-metallic
+assign-roughness ground-box ground-roughness
+assign-ao ground-box ground-ao
+add-child ground-box ground-srt
+add-child ground-srt root
+srt monkey-srt monkey-srt 10 10 10 0 0 0 0 0 0
+
+leaf monkey-leaf monkey-leaf instanceof monkey
+material mat-monkey-leaf
+emission 0 0 0
+ambient 0 0 0
+diffuse 0 0 0
+specular 0 0 0
+shininess 0
+#PBR
+albedo 0 0 0
+metallic 0
+roughness 0
+ao 0
+end-material 
+
+assign-material monkey-leaf mat-monkey-leaf 
+
+assign-texture monkey-leaf sphere-base
+assign-normal monkey-leaf sphere-normal
+assign-metallic monkey-leaf sphere-metallic
+assign-roughness monkey-leaf sphere-roughness
+assign-ao monkey-leaf sphere-ao
+add-child monkey-leaf monkey-srt
+add-child monkey-srt root
+assign-root root
