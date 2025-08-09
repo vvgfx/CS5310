@@ -38,6 +38,7 @@ public:
     void getViewJob(job::IJob* job);
     void setGUICallbackReference(GUICallbacks* controller); // Ask for solutions next time :)
     void showPopups();
+    void guiSwitch();
 
     // camera
     void moveCamera(int forwardDir, int horizontalDr);
@@ -82,6 +83,8 @@ public:
     char texName[100];
     char texPath[100];
     bool loadTexture;
+
+    bool showGui = true;
 
     bool loadModel;
     char modelName[100];

@@ -114,11 +114,8 @@ void GUIView::display(sgraph::IScenegraph *scenegraph)
     
 
     // Draw GUI here
-
-    ImGUIView(scenegraph);
-
-    
-    
+    if(showGui)
+        ImGUIView(scenegraph);
     
     glFlush();
     glfwSwapBuffers(window);
@@ -130,6 +127,12 @@ void GUIView::display(sgraph::IScenegraph *scenegraph)
         frames = 0;
         time = currenttime;
     }
+}
+
+
+void GUIView::guiSwitch()
+{
+    showGui = !showGui;
 }
 
 void GUIView::ImGUIView(sgraph::IScenegraph *scenegraph)

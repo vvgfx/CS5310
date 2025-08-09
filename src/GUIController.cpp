@@ -123,8 +123,11 @@ void GUIController::onkey(int key, int scancode, int action, int mods)
         case GLFW_KEY_RIGHT://rotate the drone right
             reinterpret_cast<GUIView*>(view)->rotateCamera(-1.0f, 0.0f);
             break;
-        case GLFW_KEY_0://rotate the drone right
+        case GLFW_KEY_0:
             saveScene("scenegraphmodels/test-export.txt");
+            break;
+        case GLFW_KEY_G:
+            reinterpret_cast<GUIView*>(view)->guiSwitch();
             break;
 
     }

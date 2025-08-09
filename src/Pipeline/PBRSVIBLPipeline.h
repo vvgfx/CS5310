@@ -46,10 +46,6 @@ namespace pipeline
         inline void ambientPass(sgraph::IScenegraph *scenegraph, glm::mat4 &viewMat);
         inline void updateProjection(glm::mat4& newProjection);
 
-        //testing hdr cubemaps
-        // inline void hdrCubemapInit();
-        // inline void hdrCubemapDraw(glm::mat4 view);
-
         // IBL stuff
         inline void loadCubeMap(vector<util::TextureImage*>& cubeMap) override;
         inline void drawCubeMap(glm::mat4 &viewMat) override;
@@ -237,33 +233,6 @@ namespace pipeline
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     }
-
-    // void PBRSVIBLPipeline::hdrCubemapInit()
-    // {
-
-    // }
-
-    // void PBRSVIBLPipeline::hdrCubemapDraw(glm::mat4 view)
-    // {
-    //     // initialize the viewmat, then draw the cube with the custom shader!
-    //     hdrSkyboxShaderProgram.enable();
-    //     glm::mat4 modelview = glm::scale(view, glm::vec3(10, 10, 10));
-
-    //     glUniformMatrix4fv(hdrSkyboxShaderLocations.getLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
-    //     glUniformMatrix4fv(hdrSkyboxShaderLocations.getLocation("modelview"), 1, GL_FALSE, glm::value_ptr(modelview));
-
-    //     //skybox sampler2d
-    //     glActiveTexture(GL_TEXTURE0);
-    //     unsigned int texID = (*textureIdMap)["hdr-skybox"];
-    //     glBindTexture(GL_TEXTURE_2D, texID);
-    //     glUniform1i(hdrSkyboxShaderLocations.getLocation("hdrMap"), 0);
-
-    //     objects["box"]->draw();
-
-    //     hdrSkyboxShaderProgram.disable();
-
-
-    // }
 
     void PBRSVIBLPipeline::loadCubeMap(vector<util::TextureImage*>& cubeMap)
     {
@@ -576,9 +545,6 @@ namespace pipeline
         ambientPass(scenegraph, viewMat); // ambient pass for all objects.
         // Note to self: In order to do postprocessing, I might need to write the output to a different framebuffer and then read that as a texture to my post-processing pass -  DONE
         // cout<<"Errors :"<<glGetError()<<endl;
-
-        //test cubemap draw
-        // cubeMapDraw(viewMat);
         if(cubeMapLoaded)
             drawCubeMap(viewMat);
         
