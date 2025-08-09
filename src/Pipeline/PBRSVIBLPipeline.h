@@ -103,7 +103,7 @@ namespace pipeline
         map<string, string> shaderVarsToVertexAttribs;
 
         // hdr stuff
-        unsigned int hdrFBO, hdrColorBuffer, hdrDepthBuffer, hdrStencilBuffer;
+        unsigned int hdrFBO, hdrColorBuffer, hdrDepthBuffer, hdrStencilBuffer, depthStencilBuffer;
 
         unsigned int quadVAO = 0;
         unsigned int quadVBO;
@@ -202,6 +202,9 @@ namespace pipeline
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
+        // -------------------------------------------------------------------------------------------------------------------------------
+        // FOR SOME UNKNOWN REASON, KEEPING THE DEPTH AND STENCIL BUFFERS SEPARATELY DOESN'T LET RENDERDOC CAPTURE PIXEL HISTORY!!!!!
+        /*
         // depth render buffer.
         glGenRenderbuffers(1, &hdrDepthBuffer);
         glBindRenderbuffer(GL_RENDERBUFFER, hdrDepthBuffer);
@@ -211,12 +214,22 @@ namespace pipeline
         glGenRenderbuffers(1, &hdrStencilBuffer);
         glBindRenderbuffer(GL_RENDERBUFFER, hdrStencilBuffer);
         glRenderbufferStorage(GL_RENDERBUFFER, GL_STENCIL_INDEX8, viewport[2], viewport[3]);
+        */
+       // -------------------------------------------------------------------------------------------------------------------------------
+
+        glGenRenderbuffers(1, &depthStencilBuffer);
+        glBindRenderbuffer(GL_RENDERBUFFER, depthStencilBuffer);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, viewport[2], viewport[3]);
 
         // attach to custom framebuffer now.
         glBindFramebuffer(GL_FRAMEBUFFER, hdrFBO);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, hdrColorBuffer, 0); // sets color texture as color attachment
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, hdrDepthBuffer); // sets depth render buffer as depth attachment
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, hdrStencilBuffer); // stencil buffer
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depthStencilBuffer); // USING THIS INSTEAD OF SEPARATE DEPTH AND STENCIL ATTACHMENTS
+        // -------------------------------------------------------------------------------------------------------------------------------
+        // glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, hdrDepthBuffer); // sets depth render buffer as depth attachment
+        // glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, hdrStencilBuffer); // stencil buffer
+        // -------------------------------------------------------------------------------------------------------------------------------
+
         if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
             throw runtime_error("custom framebuffer is not complete!");
         
@@ -512,6 +525,7 @@ namespace pipeline
         glBindTexture(GL_TEXTURE_CUBE_MAP, envCubemap);
         glUniform1i(hdrSkyboxShaderLocations.getLocation("environmentMap"), 0);
         glDepthFunc(GL_LEQUAL);
+        glDisable(GL_CULL_FACE);
         objects["hdr-skybox"]->draw();
         hdrSkyboxShaderProgram.disable();
     }
@@ -709,7 +723,7 @@ namespace pipeline
     {
 
         renderProgram.enable();
-        glDrawBuffer(GL_COLOR_ATTACHMENT0); // enable writing to the color buffer. This was disabled earlier. Update - change this to color-attachment because I'm using PBR with HDR now.
+        glDrawBuffer(GL_BACK); // enable writing to the color buffer. This was disabled earlier. Update - change this to color-attachment because I'm using PBR with HDR now.
         glStencilFunc(GL_EQUAL, 0x0, 0xFF);                      // draw only if stencil value is 0
         glStencilOpSeparate(GL_BACK, GL_KEEP, GL_KEEP, GL_KEEP); // do not write to the stencil buffer.
 
