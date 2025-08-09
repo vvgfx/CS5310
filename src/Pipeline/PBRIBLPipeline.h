@@ -81,8 +81,8 @@ namespace pipeline
         shaderLocations = shaderProgram.getAllShaderVariables();
         shaderProgram.disable();
 
-        hdrSkyboxShaderProgram.createProgram("shaders/cubemap/HDR/background.vert",
-                                             "shaders/cubemap/HDR/background.frag");
+        hdrSkyboxShaderProgram.createProgram("shaders/cubemap/HDR/hdrSkyboxToneMapping.vert",
+                                             "shaders/cubemap/HDR/hdrSkyboxToneMapping.frag");
 
         hdrSkyboxShaderProgram.enable();
         hdrSkyboxShaderLocations = hdrSkyboxShaderProgram.getAllShaderVariables();

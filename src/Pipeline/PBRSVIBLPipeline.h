@@ -45,9 +45,10 @@ namespace pipeline
         inline void renderObjectPass(sgraph::IScenegraph *scenegraph, glm::mat4 &viewMat, int lightIndex);
         inline void ambientPass(sgraph::IScenegraph *scenegraph, glm::mat4 &viewMat);
         inline void updateProjection(glm::mat4& newProjection);
+
         //testing hdr cubemaps
-        inline void hdrCubemapInit();
-        inline void hdrCubemapDraw(glm::mat4 view);
+        // inline void hdrCubemapInit();
+        // inline void hdrCubemapDraw(glm::mat4 view);
 
         // IBL stuff
         inline void loadCubeMap(vector<util::TextureImage*>& cubeMap) override;
@@ -155,8 +156,8 @@ namespace pipeline
 
         // hdr skybox initialization
 
-        hdrSkyboxShaderProgram.createProgram("shaders/cubemap/hdrCubemap.vert",
-                                             "shaders/cubemap/hdrCubemap.frag");
+        hdrSkyboxShaderProgram.createProgram("shaders/cubemap/HDR/hdrSkyboxToneMapping.vert",
+                                             "shaders/cubemap/HDR/hdrSkyboxToneMapping.frag");
 
         hdrSkyboxShaderProgram.enable();
         hdrSkyboxShaderLocations = hdrSkyboxShaderProgram.getAllShaderVariables();
@@ -224,32 +225,32 @@ namespace pipeline
 
     }
 
-    void PBRSVIBLPipeline::hdrCubemapInit()
-    {
+    // void PBRSVIBLPipeline::hdrCubemapInit()
+    // {
 
-    }
+    // }
 
-    void PBRSVIBLPipeline::hdrCubemapDraw(glm::mat4 view)
-    {
-        // initialize the viewmat, then draw the cube with the custom shader!
-        hdrSkyboxShaderProgram.enable();
-        glm::mat4 modelview = glm::scale(view, glm::vec3(10, 10, 10));
+    // void PBRSVIBLPipeline::hdrCubemapDraw(glm::mat4 view)
+    // {
+    //     // initialize the viewmat, then draw the cube with the custom shader!
+    //     hdrSkyboxShaderProgram.enable();
+    //     glm::mat4 modelview = glm::scale(view, glm::vec3(10, 10, 10));
 
-        glUniformMatrix4fv(hdrSkyboxShaderLocations.getLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
-        glUniformMatrix4fv(hdrSkyboxShaderLocations.getLocation("modelview"), 1, GL_FALSE, glm::value_ptr(modelview));
+    //     glUniformMatrix4fv(hdrSkyboxShaderLocations.getLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
+    //     glUniformMatrix4fv(hdrSkyboxShaderLocations.getLocation("modelview"), 1, GL_FALSE, glm::value_ptr(modelview));
 
-        //skybox sampler2d
-        glActiveTexture(GL_TEXTURE0);
-        unsigned int texID = (*textureIdMap)["hdr-skybox"];
-        glBindTexture(GL_TEXTURE_2D, texID);
-        glUniform1i(hdrSkyboxShaderLocations.getLocation("hdrMap"), 0);
+    //     //skybox sampler2d
+    //     glActiveTexture(GL_TEXTURE0);
+    //     unsigned int texID = (*textureIdMap)["hdr-skybox"];
+    //     glBindTexture(GL_TEXTURE_2D, texID);
+    //     glUniform1i(hdrSkyboxShaderLocations.getLocation("hdrMap"), 0);
 
-        objects["box"]->draw();
+    //     objects["box"]->draw();
 
-        hdrSkyboxShaderProgram.disable();
+    //     hdrSkyboxShaderProgram.disable();
 
 
-    }
+    // }
 
     void PBRSVIBLPipeline::loadCubeMap(vector<util::TextureImage*>& cubeMap)
     {
@@ -510,6 +511,7 @@ namespace pipeline
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_CUBE_MAP, envCubemap);
         glUniform1i(hdrSkyboxShaderLocations.getLocation("environmentMap"), 0);
+        glDepthFunc(GL_LEQUAL);
         objects["hdr-skybox"]->draw();
         hdrSkyboxShaderProgram.disable();
     }
@@ -559,21 +561,18 @@ namespace pipeline
         glDisable(GL_STENCIL_TEST);       // need to disable the stencil test for the ambient pass because all objects require ambient lighting.
         ambientPass(scenegraph, viewMat); // ambient pass for all objects.
         // Note to self: In order to do postprocessing, I might need to write the output to a different framebuffer and then read that as a texture to my post-processing pass
-        // cout<<"Errors :"<<glGetError()<<endl;
-
-        //test cubemap draw
-        // cubeMapDraw(viewMat);
+        
         if(cubeMapLoaded)
             drawCubeMap(viewMat);
-
-        // test hdr cubemap
-
-        hdrCubemapDraw(viewMat);
         
+        
+        // hdrCubemapDraw(viewMat);
+        
+        // cout<<"Errors :"<<glGetError()<<endl;
         // swap to default buffer, with the old color-buffer as input.
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+        
         hdrShaderProgram.enable();
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, hdrColorBuffer);
@@ -581,7 +580,7 @@ namespace pipeline
         // set exposure here later.
         float exposure = 1.0f;
         glUniform1f(hdrShaderLocations.getLocation("exposure"), exposure);
-        glDisable(GL_DEPTH_TEST);
+        // glDisable(GL_DEPTH_TEST);
         // draw screen space quad
         objects["postProcess"]->draw();
         hdrShaderProgram.disable();
@@ -608,10 +607,12 @@ namespace pipeline
         scenegraph->getRoot()->accept(depthRenderer);
         modelview.pop();
         depthProgram.disable();
+        // glDrawBuffer(GL_COLOR_ATTACHMENT0);
     }
 
     void PBRSVIBLPipeline::shadowStencilPass(sgraph::IScenegraph *scenegraph, glm::mat4 &viewMat, int lightIndex)
     {
+        glDrawBuffer(GL_NONE);
         glDepthMask(GL_FALSE);             // do not write into the depth buffer anymore. This is so that the shadow volumes do not obstruct the actual objects.
         glEnable(GL_DEPTH_CLAMP);          // Don't want to clip the back polygons.
         glDisable(GL_CULL_FACE);           // Don't want the back-facing polygons to get culled. need them to increment the stencil buffer.
@@ -643,6 +644,8 @@ namespace pipeline
         // restore original settings now
         glDisable(GL_DEPTH_CLAMP);
         glEnable(GL_CULL_FACE); // need to enable culling so that the next pass doesn't render all faces.
+        glDepthMask(GL_TRUE);
+        glDrawBuffer(GL_COLOR_ATTACHMENT0);
     }
 
     void PBRSVIBLPipeline::ambientPass(sgraph::IScenegraph *scenegraph, glm::mat4 &viewMat)
