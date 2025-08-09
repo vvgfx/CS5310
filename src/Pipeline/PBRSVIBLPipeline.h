@@ -561,18 +561,17 @@ namespace pipeline
         glDisable(GL_STENCIL_TEST);       // need to disable the stencil test for the ambient pass because all objects require ambient lighting.
         ambientPass(scenegraph, viewMat); // ambient pass for all objects.
         // Note to self: In order to do postprocessing, I might need to write the output to a different framebuffer and then read that as a texture to my post-processing pass
-        
+        // cout<<"Errors :"<<glGetError()<<endl;
+
+        //test cubemap draw
+        // cubeMapDraw(viewMat);
         if(cubeMapLoaded)
             drawCubeMap(viewMat);
         
-        
-        // hdrCubemapDraw(viewMat);
-        
-        // cout<<"Errors :"<<glGetError()<<endl;
         // swap to default buffer, with the old color-buffer as input.
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        
+
         hdrShaderProgram.enable();
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, hdrColorBuffer);
@@ -580,9 +579,33 @@ namespace pipeline
         // set exposure here later.
         float exposure = 1.0f;
         glUniform1f(hdrShaderLocations.getLocation("exposure"), exposure);
-        // glDisable(GL_DEPTH_TEST);
+        // glDisable(GL_DEPTH_TEST); // not sure why this is needed?
         // draw screen space quad
         objects["postProcess"]->draw();
+
+        // if (quadVAO == 0)
+        // {
+        //     float quadVertices[] = {
+        //         // positions        // texture Coords
+        //         -1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
+        //         -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+        //         1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
+        //         1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+        //     };
+        //     // setup plane VAO
+        //     glGenVertexArrays(1, &quadVAO);
+        //     glGenBuffers(1, &quadVBO);
+        //     glBindVertexArray(quadVAO);
+        //     glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+        //     glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+        //     glEnableVertexAttribArray(0);
+        //     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+        //     glEnableVertexAttribArray(1);
+        //     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+        // }
+        // glBindVertexArray(quadVAO);
+        // glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+        // glBindVertexArray(0);
         hdrShaderProgram.disable();
 
     }
@@ -651,12 +674,17 @@ namespace pipeline
     void PBRSVIBLPipeline::ambientPass(sgraph::IScenegraph *scenegraph, glm::mat4 &viewMat)
     {
         ambientProgram.enable();
-        glEnable(GL_BLEND);           
-        glBlendEquation(GL_FUNC_ADD); 
+        glDepthFunc(GL_LEQUAL);
+        glEnable(GL_BLEND);
         glBlendFunc(GL_ONE, GL_ONE);  
         modelview.push(glm::mat4(1.0));
-        modelview.top() = modelview.top() * viewMat;  // don't use the view matrix for the ambient pass as the values are required to be in the world space.
+        // modelview.top() = modelview.top() * viewMat;  // don't use the view matrix for the ambient pass as the values are required to be in the world space.
         glUniformMatrix4fv(ambientShaderLocations.getLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
+        glUniformMatrix4fv(ambientShaderLocations.getLocation("view"), 1, GL_FALSE, glm::value_ptr(viewMat));
+
+        glm::mat4 inverseView = glm::inverse(viewMat);
+        glm::vec3 cameraPos = glm::vec3(inverseView[3]);
+        glUniform3fv(ambientShaderLocations.getLocation("cameraPos"), 1, glm::value_ptr(cameraPos));
 
         glActiveTexture(GL_TEXTURE8);
         glBindTexture(GL_TEXTURE_CUBE_MAP, irradianceMap);
