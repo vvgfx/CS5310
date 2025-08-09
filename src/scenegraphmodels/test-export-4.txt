@@ -59,7 +59,7 @@ spot-direction 0 -1 0
 spot-angle 20
 color 500 500 500
 end-light
-# assign-light two-light root
+assign-light two-light root
 
 srt ground-srt ground-srt 80 5 80 0 0 0 0 -25 0
 

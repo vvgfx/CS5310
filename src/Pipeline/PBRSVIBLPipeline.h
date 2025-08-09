@@ -574,7 +574,7 @@ namespace pipeline
         glDisable(GL_BLEND);
         glDisable(GL_STENCIL_TEST);       // need to disable the stencil test for the ambient pass because all objects require ambient lighting.
         ambientPass(scenegraph, viewMat); // ambient pass for all objects.
-        // Note to self: In order to do postprocessing, I might need to write the output to a different framebuffer and then read that as a texture to my post-processing pass
+        // Note to self: In order to do postprocessing, I might need to write the output to a different framebuffer and then read that as a texture to my post-processing pass -  DONE
         // cout<<"Errors :"<<glGetError()<<endl;
 
         //test cubemap draw
@@ -596,30 +596,6 @@ namespace pipeline
         // glDisable(GL_DEPTH_TEST); // not sure why this is needed?
         // draw screen space quad
         objects["postProcess"]->draw();
-
-        // if (quadVAO == 0)
-        // {
-        //     float quadVertices[] = {
-        //         // positions        // texture Coords
-        //         -1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
-        //         -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
-        //         1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
-        //         1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
-        //     };
-        //     // setup plane VAO
-        //     glGenVertexArrays(1, &quadVAO);
-        //     glGenBuffers(1, &quadVBO);
-        //     glBindVertexArray(quadVAO);
-        //     glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
-        //     glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
-        //     glEnableVertexAttribArray(0);
-        //     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-        //     glEnableVertexAttribArray(1);
-        //     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-        // }
-        // glBindVertexArray(quadVAO);
-        // glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-        // glBindVertexArray(0);
         hdrShaderProgram.disable();
 
     }
@@ -723,7 +699,7 @@ namespace pipeline
     {
 
         renderProgram.enable();
-        glDrawBuffer(GL_BACK); // enable writing to the color buffer. This was disabled earlier. Update - change this to color-attachment because I'm using PBR with HDR now.
+        glDrawBuffer(GL_COLOR_ATTACHMENT0); // enable writing to the color buffer. This was disabled earlier. Update - change this to color-attachment because I'm using PBR with HDR now.
         glStencilFunc(GL_EQUAL, 0x0, 0xFF);                      // draw only if stencil value is 0
         glStencilOpSeparate(GL_BACK, GL_KEEP, GL_KEEP, GL_KEEP); // do not write to the stencil buffer.
 
