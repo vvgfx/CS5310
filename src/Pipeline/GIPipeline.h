@@ -38,7 +38,9 @@ namespace pipeline
 
     private:
         util::ShaderProgram shaderProgram;
+        util::ShaderGeoProgram voxelProgram;
         util::ShaderLocationsVault shaderLocations;
+        util::ShaderLocationsVault voxelShaderLocations;
         sgraph::SGNodeVisitor *renderer;
         sgraph::SGNodeVisitor *lightRetriever;
         map<string, unsigned int>* textureIdMap;
@@ -56,6 +58,13 @@ namespace pipeline
     void GIPipeline::init(map<string, util::PolygonMesh<VertexAttrib>>& meshes, glm::mat4 &proj, map<string, unsigned int>& texMap)
     {
         this->projection = proj;
+        voxelProgram.createProgram("shaders/VXGI/voxelize/voxelize.vert",
+                                    "shaders/VXGI/voxelize/voxelize.frag",
+                                    "shaders/VXGI/voxelize/voxelize.geom");
+        voxelProgram.enable();
+        voxelShaderLocations = voxelProgram.getAllShaderVariables();
+        voxelProgram.disable();
+
         shaderProgram.createProgram("shaders/PBR/TexturePBR.vert",
                                     "shaders/PBR/TexturePBR.frag");
         shaderProgram.enable();

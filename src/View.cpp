@@ -20,6 +20,7 @@ using namespace std;
 #include "Pipeline/TexturedPBRSVPipeline.h"
 #include "Pipeline/PBRSVIBLPipeline.h"
 #include "Pipeline/PBRIBLPipeline.h"
+#include "Pipeline/GIPipeline.h"
 
 
 View::View() {
@@ -93,8 +94,8 @@ void View::init(Callbacks *callbacks,map<string,util::PolygonMesh<VertexAttrib>>
     #pragma region Pipeline init
     // pipeline = new pipeline::PBRShadowVolumePipeline();
     // reinterpret_cast<pipeline::PBRShadowVolumePipeline*>(pipeline)->init(meshes, projection);
-    pipeline = new pipeline::TexturedPBRSVPipeline();
-    reinterpret_cast<pipeline::TexturedPBRSVPipeline*>(pipeline)->init(meshes, projection, texIdMap);
+    // pipeline = new pipeline::TexturedPBRSVPipeline();
+    // reinterpret_cast<pipeline::TexturedPBRSVPipeline*>(pipeline)->init(meshes, projection, texIdMap);
     // pipeline = new pipeline::TexturedPBRPipeline();
     // reinterpret_cast<pipeline::TexturedPBRPipeline*>(pipeline)->init(meshes, projection, texIdMap);
     // pipeline = new pipeline::PBRIBLPipeline();
@@ -103,6 +104,8 @@ void View::init(Callbacks *callbacks,map<string,util::PolygonMesh<VertexAttrib>>
     // reinterpret_cast<pipeline::PBRSVIBLPipeline*>(pipeline)->init(meshes, projection, texIdMap);
     // pipeline = new pipeline::BasicPBRPipeline();
     // reinterpret_cast<pipeline::BasicPBRPipeline*>(pipeline)->init(meshes, projection);
+    pipeline = new pipeline::GIPipeline();
+    reinterpret_cast<pipeline::GIPipeline*>(pipeline)->init(meshes, projection, texIdMap);
     #pragma endregion
 
     frames = 0;
