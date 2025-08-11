@@ -29,6 +29,7 @@ using namespace std;
 
 GUIController::GUIController(Model* m,View* v, string textfile) :
     Controller(m,v, textfile) {
+        wFlag = sFlag = aFlag = dFlag = false;
 }
 
 void GUIController::initScenegraph() {
@@ -88,6 +89,7 @@ void GUIController::run()
     //Save the nodes required for transformation when running!
     // view->initScenegraphNodes(scenegraph);
     while (!view->shouldWindowClose()) {
+        processInputs();
         model->clearQueues();
         view->display(scenegraph);
     }
@@ -100,25 +102,21 @@ void GUIController::onkey(int key, int scancode, int action, int mods)
     ImGuiIO& io = ImGui::GetIO();
     if(io.WantCaptureKeyboard)
         return;
-    if(action != GLFW_PRESS && action != GLFW_REPEAT)
-        return;
     cout << (char)key << " pressed on GUIController" << endl;
     switch(key)
     {
-    //     case GLFW_KEY_W:
-    //         // reinterpret_cast<GUIView*>(view)->moveCamera(-1, 0);
-    //         reinterpret_cast<GUIView*>(view)->moveCamera(1, 0);
-    //         break;
-    //     case GLFW_KEY_S://translate the drone backward
-    //         // reinterpret_cast<GUIView*>(view)->moveCamera(1, 0);
-    //         reinterpret_cast<GUIView*>(view)->moveCamera(-1, 0);
-    //         break;
-    //     case GLFW_KEY_A:
-    //         reinterpret_cast<GUIView*>(view)->moveCamera(0, -1);
-    //         break;
-    //     case GLFW_KEY_D:
-    //         reinterpret_cast<GUIView*>(view)->moveCamera(0, 1);
-    //         break;
+        case GLFW_KEY_W:
+            wFlag = !wFlag;
+            break;
+        case GLFW_KEY_S:
+            sFlag = !sFlag;
+            break;
+        case GLFW_KEY_A:
+            aFlag = !aFlag;
+            break;
+        case GLFW_KEY_D:
+            dFlag = !dFlag;
+            break;
         case GLFW_KEY_LEFT://rotate the drone left
             reinterpret_cast<GUIView*>(view)->rotateCamera(1.0f, 0.0f);
             break;
@@ -126,13 +124,26 @@ void GUIController::onkey(int key, int scancode, int action, int mods)
             reinterpret_cast<GUIView*>(view)->rotateCamera(-1.0f, 0.0f);
             break;
         case GLFW_KEY_0:
-            saveScene("scenegraphmodels/test-export.txt");
+            if(action == GLFW_PRESS)
+                saveScene("scenegraphmodels/test-export.txt");
             break;
         case GLFW_KEY_G:
-            reinterpret_cast<GUIView*>(view)->guiSwitch();
+            if(action == GLFW_PRESS)
+                reinterpret_cast<GUIView*>(view)->guiSwitch();
             break;
-
     }
+}
+
+void GUIController::processInputs()
+{
+    if(wFlag)
+        reinterpret_cast<GUIView*>(view)->moveCamera(1, 0);
+    if(sFlag)
+        reinterpret_cast<GUIView*>(view)->moveCamera(-1, 0);
+    if(aFlag)
+        reinterpret_cast<GUIView*>(view)->moveCamera(0, -1);
+    if(dFlag)
+        reinterpret_cast<GUIView*>(view)->moveCamera(0, 1);
 }
 
 void GUIController::onMouseInput(int button, int action, int mods)

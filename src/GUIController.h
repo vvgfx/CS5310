@@ -21,6 +21,8 @@ public:
     virtual void onMouseInput(int button, int action, int mods);
     virtual void onCursorMove(double newXPos, double newYPos);
     virtual void saveScene(string fileName);
+
+    virtual void processInputs();
     void initScenegraph() override;
 
     virtual void receiveJob(job::IJob* job);
@@ -32,6 +34,8 @@ public:
     virtual void loadMesh(string meshName, util::PolygonMesh<VertexAttrib>& polymesh);
 
 protected:
+
+    bool wFlag, sFlag, aFlag, dFlag;
 };
 
 #endif
