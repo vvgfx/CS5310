@@ -103,34 +103,53 @@ void GUIController::onkey(int key, int scancode, int action, int mods)
     if(io.WantCaptureKeyboard)
         return;
     cout << (char)key << " pressed on GUIController" << endl;
-    switch(key)
+    if(action == GLFW_PRESS)
     {
-        case GLFW_KEY_W:
-            wFlag = !wFlag;
-            break;
-        case GLFW_KEY_S:
-            sFlag = !sFlag;
-            break;
-        case GLFW_KEY_A:
-            aFlag = !aFlag;
-            break;
-        case GLFW_KEY_D:
-            dFlag = !dFlag;
-            break;
-        case GLFW_KEY_LEFT://rotate the drone left
-            reinterpret_cast<GUIView*>(view)->rotateCamera(1.0f, 0.0f);
-            break;
-        case GLFW_KEY_RIGHT://rotate the drone right
-            reinterpret_cast<GUIView*>(view)->rotateCamera(-1.0f, 0.0f);
-            break;
-        case GLFW_KEY_0:
-            if(action == GLFW_PRESS)
-                saveScene("scenegraphmodels/test-export.txt");
-            break;
-        case GLFW_KEY_G:
-            if(action == GLFW_PRESS)
-                reinterpret_cast<GUIView*>(view)->guiSwitch();
-            break;
+        switch(key)
+        {
+            case GLFW_KEY_W:
+                wFlag = true;
+                break;
+            case GLFW_KEY_S:
+                sFlag = true;
+                break;
+            case GLFW_KEY_A:
+                aFlag = true;
+                break;
+            case GLFW_KEY_D:
+                dFlag = true;
+                break;
+            case GLFW_KEY_LEFT://rotate the drone left
+                reinterpret_cast<GUIView*>(view)->rotateCamera(1.0f, 0.0f);
+                break;
+            case GLFW_KEY_RIGHT://rotate the drone right
+                reinterpret_cast<GUIView*>(view)->rotateCamera(-1.0f, 0.0f);
+                break;
+            case GLFW_KEY_0:
+                    saveScene("scenegraphmodels/test-export.txt");
+                break;
+            case GLFW_KEY_G:
+                    reinterpret_cast<GUIView*>(view)->guiSwitch();
+                break;
+        }
+    }
+    else if(action == GLFW_RELEASE)
+    {
+        switch(key)
+        {
+            case GLFW_KEY_W:
+                wFlag = false;
+                break;
+            case GLFW_KEY_S:
+                sFlag = false;
+                break;
+            case GLFW_KEY_A:
+                aFlag = false;
+                break;
+            case GLFW_KEY_D:
+                dFlag = false;
+                break;
+        }
     }
 }
 
