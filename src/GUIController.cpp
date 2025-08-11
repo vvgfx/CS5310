@@ -105,20 +105,20 @@ void GUIController::onkey(int key, int scancode, int action, int mods)
     cout << (char)key << " pressed on GUIController" << endl;
     switch(key)
     {
-        case GLFW_KEY_W:
-            // reinterpret_cast<GUIView*>(view)->moveCamera(-1, 0);
-            reinterpret_cast<GUIView*>(view)->moveCamera(1, 0);
-            break;
-        case GLFW_KEY_S://translate the drone backward
-            // reinterpret_cast<GUIView*>(view)->moveCamera(1, 0);
-            reinterpret_cast<GUIView*>(view)->moveCamera(-1, 0);
-            break;
-        case GLFW_KEY_A:
-            reinterpret_cast<GUIView*>(view)->moveCamera(0, -1);
-            break;
-        case GLFW_KEY_D:
-            reinterpret_cast<GUIView*>(view)->moveCamera(0, 1);
-            break;
+    //     case GLFW_KEY_W:
+    //         // reinterpret_cast<GUIView*>(view)->moveCamera(-1, 0);
+    //         reinterpret_cast<GUIView*>(view)->moveCamera(1, 0);
+    //         break;
+    //     case GLFW_KEY_S://translate the drone backward
+    //         // reinterpret_cast<GUIView*>(view)->moveCamera(1, 0);
+    //         reinterpret_cast<GUIView*>(view)->moveCamera(-1, 0);
+    //         break;
+    //     case GLFW_KEY_A:
+    //         reinterpret_cast<GUIView*>(view)->moveCamera(0, -1);
+    //         break;
+    //     case GLFW_KEY_D:
+    //         reinterpret_cast<GUIView*>(view)->moveCamera(0, 1);
+    //         break;
         case GLFW_KEY_LEFT://rotate the drone left
             reinterpret_cast<GUIView*>(view)->rotateCamera(1.0f, 0.0f);
             break;

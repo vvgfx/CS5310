@@ -36,8 +36,8 @@ void View::init(Callbacks *callbacks,map<string,util::PolygonMesh<VertexAttrib>>
     if (!glfwInit())
         exit(EXIT_FAILURE);
 
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
@@ -95,12 +95,12 @@ void View::init(Callbacks *callbacks,map<string,util::PolygonMesh<VertexAttrib>>
     // reinterpret_cast<pipeline::PBRShadowVolumePipeline*>(pipeline)->init(meshes, projection);
     // pipeline = new pipeline::TexturedPBRSVPipeline();
     // reinterpret_cast<pipeline::TexturedPBRSVPipeline*>(pipeline)->init(meshes, projection, texIdMap);
-    // pipeline = new pipeline::TexturedPBRPipeline();
-    // reinterpret_cast<pipeline::TexturedPBRPipeline*>(pipeline)->init(meshes, projection, texIdMap);
+    pipeline = new pipeline::TexturedPBRPipeline();
+    reinterpret_cast<pipeline::TexturedPBRPipeline*>(pipeline)->init(meshes, projection, texIdMap);
     // pipeline = new pipeline::PBRIBLPipeline();
     // reinterpret_cast<pipeline::PBRIBLPipeline*>(pipeline)->init(meshes, projection, texIdMap);
-    pipeline = new pipeline::PBRSVIBLPipeline();
-    reinterpret_cast<pipeline::PBRSVIBLPipeline*>(pipeline)->init(meshes, projection, texIdMap);
+    // pipeline = new pipeline::PBRSVIBLPipeline();
+    // reinterpret_cast<pipeline::PBRSVIBLPipeline*>(pipeline)->init(meshes, projection, texIdMap);
     // pipeline = new pipeline::BasicPBRPipeline();
     // reinterpret_cast<pipeline::BasicPBRPipeline*>(pipeline)->init(meshes, projection);
     #pragma endregion
