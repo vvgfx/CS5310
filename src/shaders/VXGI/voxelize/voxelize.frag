@@ -15,7 +15,7 @@ struct LightProperties
     vec4 position;
     vec3 color;
     vec3 spotDirection;   
-    float spotAngleCosine;   // this is the cosine, not the actual angle itself.
+    float spotAngleCosine;
 };
 
 uniform int numLights;
@@ -25,8 +25,8 @@ uniform LightProperties light[MAXLIGHTS];
 layout(binding = 0, rgba16f) restrict uniform image3D ImgResult;
 
 uniform sampler2D albedoMap;
-uniform sampler2D metallicMap;
-uniform sampler2D roughnessMap;
+// uniform sampler2D metallicMap;
+// uniform sampler2D roughnessMap;
 
 uniform vec4 gridMin;
 uniform vec4 gridMax;
@@ -40,11 +40,6 @@ void main()
     vec4 fTexCoord  = data.worldTexCoord;
     vec3 albedo     = pow(texture(albedoMap, vec2(fTexCoord.s,fTexCoord.t)).rgb, vec3(2.2));
     vec3 normal     = data.worldNormal.xyz;
-    float metallic  = texture(metallicMap, vec2(fTexCoord.s,fTexCoord.t)).r;
-    float roughness = texture(roughnessMap, vec2(fTexCoord.s,fTexCoord.t)).r;
-
-    vec3 F0 = vec3(0.04); 
-    F0 = mix(F0, albedo, metallic);
 
     float spotAttenuation = 1.0f;
     float angle, dist, attenuation, nDotL;
@@ -68,12 +63,12 @@ void main()
 
         spotAttenuation = clamp(spotAttenuation, 0.0f, 1.0f);
 
+        nDotL = max(dot(normal, lightVec), 0.0f);
         dist = length(light[i].position.xyz - fPosition.xyz);
         attenuation = 1.0 / (1.0 + 0.09 * dist + 0.032 * dist * dist);
         radiance = light[i].color * attenuation;
 
-        nDotL = max(dot(normal, lightVec), 0.0f);
-        lightContribution = albedo * (1.0 - metallic) * radiance * nDotL * spotAttenuation;
+        lightContribution = albedo * radiance * nDotL * spotAttenuation;
         Lo += lightContribution;
     }
 

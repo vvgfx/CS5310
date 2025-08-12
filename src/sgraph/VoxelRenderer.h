@@ -75,22 +75,22 @@ namespace sgraph {
             }
 
             // //roughness is texture 2
-            string roughnessMapName = leafNode->getRoughnessMap();
-            if (!roughnessMapName.empty() && textureIdMap.find(roughnessMapName) != textureIdMap.end()) {
-                unsigned int texID = textureIdMap[roughnessMapName];
-                glActiveTexture(GL_TEXTURE2);
-                glBindTexture(GL_TEXTURE_2D, texID);
-                glUniform1i(shaderLocations.getLocation("roughnessMap"), 2);
-            }
+            // string roughnessMapName = leafNode->getRoughnessMap();
+            // if (!roughnessMapName.empty() && textureIdMap.find(roughnessMapName) != textureIdMap.end()) {
+            //     unsigned int texID = textureIdMap[roughnessMapName];
+            //     glActiveTexture(GL_TEXTURE2);
+            //     glBindTexture(GL_TEXTURE_2D, texID);
+            //     glUniform1i(shaderLocations.getLocation("roughnessMap"), 2);
+            // }
 
-            // //metallic is texture 3
-            string metallicMapName = leafNode->getMetallicMap();
-            if (!metallicMapName.empty() && textureIdMap.find(metallicMapName) != textureIdMap.end()) {
-                unsigned int texID = textureIdMap[metallicMapName];
-                glActiveTexture(GL_TEXTURE3);
-                glBindTexture(GL_TEXTURE_2D, texID);
-                glUniform1i(shaderLocations.getLocation("metallicMap"), 3);
-            }
+            // // //metallic is texture 3
+            // string metallicMapName = leafNode->getMetallicMap();
+            // if (!metallicMapName.empty() && textureIdMap.find(metallicMapName) != textureIdMap.end()) {
+            //     unsigned int texID = textureIdMap[metallicMapName];
+            //     glActiveTexture(GL_TEXTURE3);
+            //     glBindTexture(GL_TEXTURE_2D, texID);
+            //     glUniform1i(shaderLocations.getLocation("metallicMap"), 3);
+            // }
 
             objects[leafNode->getInstanceOf()]->draw();
         }
