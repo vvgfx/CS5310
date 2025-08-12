@@ -56,7 +56,7 @@ namespace pipeline
         vector<glm::mat4> lightTransformations;
         std::map<string, sgraph::TransformNode *> cachedNodes;
         vector<LightLocation> lightLocations;
-        bool initialized = false, debugVoxels = true;
+        bool initialized = false, debugVoxels = true, nvidiaGPU = false;
         int frames, voxelResolution;
         double time;
         unsigned int voxelImage, voxelFBO;
@@ -115,7 +115,8 @@ namespace pipeline
         glBindTexture(GL_TEXTURE_3D, voxelImage);
         glTexImage3D(GL_TEXTURE_3D,  0, GL_RGBA16F, voxelResolution, voxelResolution, voxelResolution, 0, GL_RGBA, GL_HALF_FLOAT, nullptr); // allocates empty memory
 
-        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        // glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR); // use this when generating mipmaps
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -184,7 +185,7 @@ namespace pipeline
             
             // mipmap
             glBindTexture(GL_TEXTURE_3D, voxelImage);
-            glGenerateMipmap(GL_TEXTURE_3D);
+            // glGenerateMipmap(GL_TEXTURE_3D); // need to figure out a way to do this without tanking performance!
         }
 
         // restore state
