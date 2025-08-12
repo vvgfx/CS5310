@@ -1,8 +1,8 @@
 #version 460 core
 
-in vec4 vPosition;
-in vec4 vNormal;
-in vec4 vTexCoord;
+layout(location = 0) in vec4 vPosition;
+layout(location = 1) in vec4 vNormal;
+layout(location = 3) in vec4 vTexCoord;  // need to use 3 here.
 
 uniform mat4 model;
 uniform mat4 normalmatrix;

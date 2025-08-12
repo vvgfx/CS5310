@@ -9,13 +9,13 @@ in passThroughData {
     vec4 worldPos;
     vec4 worldNormal;
     vec4 worldTexCoord;
-}inData[];
+} inData[];
 
 out passThroughData {
     vec4 worldPos;
     vec4 worldNormal;
     vec4 worldTexCoord;
-}outData;
+} outData;
 
 
 void main()

@@ -22,7 +22,7 @@ uniform int numLights;
 const int MAXLIGHTS = 10;
 uniform LightProperties light[MAXLIGHTS];
 
-layout(binding = 0, rgba16f) restrict uniform image3D ImgResult;
+layout(binding = 0, rgba16f) uniform image3D ImgResult;
 
 uniform sampler2D albedoMap;
 uniform sampler2D metallicMap;
@@ -83,6 +83,7 @@ void main()
     // convert to voxel space here!
     ivec3 voxelPos = worldToVoxelSpace(fPosition.xyz);
     imageAtomicMax(ImgResult, voxelPos, f16vec4(color , 1.0));
+    // imageAtomicMax(ImgResult, voxelPos, f16vec4(1.0, 0.0, 0.0, 1.0));
 
 }
 
