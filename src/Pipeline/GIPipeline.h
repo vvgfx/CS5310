@@ -113,7 +113,7 @@ namespace pipeline
         voxelResolution = 256;
         glGenTextures(1, &voxelImage);
         glBindTexture(GL_TEXTURE_3D, voxelImage);
-        glTexImage3D(GL_TEXTURE_3D,  0, GL_RGB16F, voxelResolution, voxelResolution, voxelResolution, 0, GL_RGBA, GL_HALF_FLOAT, nullptr); // allocates empty memory
+        glTexImage3D(GL_TEXTURE_3D,  0, GL_RGBA16F, voxelResolution, voxelResolution, voxelResolution, 0, GL_RGBA, GL_HALF_FLOAT, nullptr); // allocates empty memory
 
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -124,6 +124,11 @@ namespace pipeline
 
         // empty framebuffer for voxelization
         glGenFramebuffers(1, &voxelFBO);
+        glBindFramebuffer(GL_FRAMEBUFFER, voxelFBO);
+        glFramebufferParameteri(GL_FRAMEBUFFER, GL_FRAMEBUFFER_DEFAULT_WIDTH, voxelResolution);
+        glFramebufferParameteri(GL_FRAMEBUFFER, GL_FRAMEBUFFER_DEFAULT_HEIGHT, voxelResolution);
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
         initialized = true;
     }
@@ -167,11 +172,13 @@ namespace pipeline
             
             voxelProgram.enable();
             sendLightDetails();
-            glBindImageTexture(0, voxelImage, 0, GL_TRUE, 0, GL_READ_WRITE, GL_RGB16F);
+            glBindImageTexture(0, voxelImage, 0, GL_TRUE, 0, GL_READ_WRITE, GL_RGBA16F);
             glUniform4fv(voxelShaderLocations.getLocation("gridMin"), 1, glm::value_ptr(gridMin));
             glUniform4fv(voxelShaderLocations.getLocation("gridMax"), 1, glm::value_ptr(gridMax));
             scenegraph->getRoot()->accept(voxelRenderer);
             voxelProgram.disable();
+
+            // trying this out to see if I can force the incoherent memory write to work.
             glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT | 
                    GL_TEXTURE_FETCH_BARRIER_BIT);
             
@@ -219,7 +226,7 @@ namespace pipeline
             glUniform3fv(shaderLocations.getLocation("cameraPos"), 1, glm::value_ptr(cameraPos));
             glUniformMatrix4fv(shaderLocations.getLocation("view"), 1, GL_FALSE, glm::value_ptr(viewMat)); // view transformation
             glUniformMatrix4fv(shaderLocations.getLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
-            sendLightDetails();
+            // sendLightDetails();
 
             scenegraph->getRoot()->accept(renderer);
 

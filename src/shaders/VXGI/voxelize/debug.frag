@@ -18,10 +18,14 @@ void main()
         return;
     }
 
+    // fColor = vec4(0,1,0,1);
+    // return;
+
     vec4 voxel = texture(voxelTexture, uvw);
 
     fColor = vec4(voxel.rgb * 5.0, 1.0);
 
-    if (voxel.a > 0.001) 
-        fColor = mix(fColor, vec4(0, 1, 0, 1), 0.3);  // Tint green
+    // if (voxel.a > 0.001) 
+    //     fColor = mix(fColor, vec4(0, 1, 0, 1), 0.3);  // Tint green
+    //     // fColor = vec4(0,1,1,1);
 }
