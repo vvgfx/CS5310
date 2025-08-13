@@ -9,7 +9,9 @@ It has the following features:
 - Multithreaded job-system - a job system that runs on parallel threads. Currently used for asset loading, UI and other updates,etc.
 - Double-buffered command queue - A system where scenegraph updates are added to a queue and processed before the start of the frame. This is used along with jobs to implement asset loading and other heavy tasks
 - Double-buffered Tasks - A system where you can load models and textures in parallel, then transfer to GPU memory in the main thread (this is because openGL is inherently single threaded, so running parallel gl commands on parallel threads will interweave them.)
-- Cubemaps - Skyboxes using cubemaps with HDRI maps in progress!
+- Cubemaps - Skyboxes using cubemaps with HDRI maps.
+- IBL - Image Based lighting
+- VXGI - Voxel Cone Traced Global Illumination for real-time indirect lighting and soft shadows.
 
 
 
@@ -20,13 +22,14 @@ Each pipeline contains different features I've implemented on top of the base so
 
 ### Screenshots:
 
+![image](screenshots/specular-ibl.png)
+
 ![image](screenshots/screenshot-close.png)
 
 ![image](screenshots/screenshot-menu.png)
 
 ### To-do list:
 
-- Importance sampling for image based lighting.
 - MSAA.
 - Deferred rendering / clustered forward rendering.
 - Spatial / Temporal upscaling
@@ -39,9 +42,10 @@ Each pipeline contains different features I've implemented on top of the base so
 
 ### Requirements:
 
-- OpenGL 3.3+
+- OpenGL 4.6+
 - C++ compiler (g++)
 - Make utility
+- The GI pipeline is currently only supported by NVidia GPUs - this is because it requires an extension in OpenGL for floating point image atomic writes that is available only on Nvidia GPUs
 
 
 ### Author's blog post
@@ -54,6 +58,7 @@ https://vv-22.github.io/rendering-with-opengl
 - https://ogldev.org/www/tutorial40/tutorial40.html  - Used this reference for shadow volumes.
 - https://freestylized.com , https://freepbr.com/ - PBR textures. 
 - https://learnopengl.com/ - Multiple references for PBR, Image based lighting, GPU Frustum culling, etc.
+- https://wickedengine.net/2017/08/voxel-based-global-illumination/ , https://github.com/BoyBaykiller/IDKEngine - Global Illumination.
 
 
 

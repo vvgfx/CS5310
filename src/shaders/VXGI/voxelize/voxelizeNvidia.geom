@@ -1,7 +1,7 @@
 #version 460 core
 
 #extension GL_NV_geometry_shader_passthrough : enable // -> only on Nvidia GPUs!
-// need to use triangles adjacency as the models are imported in that format.
+// need to use triangles adjacency as the models are imported in that format, but extension does not support adjacencies :(
 layout(triangles_adjacency) in;
 layout(triangle_strip, max_vertices = 3) out;
 

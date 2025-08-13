@@ -111,7 +111,7 @@ void Model::initTextures(map<string, util::TextureImage*>& textureMap)
         if(textureObject->getIsFloat())
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, textureObject->getWidth(),textureObject->getHeight(), 0, GL_RGB, GL_FLOAT,textureObject->getFloatImage());
         else
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, textureObject->getWidth(),textureObject->getHeight(), 0, GL_RGB, GL_UNSIGNED_BYTE,textureObject->getImage()); 
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, textureObject->getWidth(),textureObject->getHeight(), 0, GL_RGB, GL_UNSIGNED_BYTE,textureObject->getImage()); 
 
         glGenerateMipmap(GL_TEXTURE_2D);
         
