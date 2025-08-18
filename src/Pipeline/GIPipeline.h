@@ -8,6 +8,7 @@
 #include "../sgraph/IScenegraph.h"
 #include <ShaderProgram.h>
 #include <ShaderGeoProgram.h>
+#include <ComputeProgram.h>
 #include <ShaderLocationsVault.h>
 #include "../sgraph/SGNodeVisitor.h"
 #include <ObjectInstance.h>
@@ -39,14 +40,17 @@ namespace pipeline
         inline void initShaderVars();
         inline void sendLightDetails();
         inline void clearVoxelImage();
+        inline void createMipmap();
 
     private:
         util::ShaderProgram shaderProgram;
         util::ShaderGeoProgram voxelProgram;
         util::ShaderProgram voxelDebugProgram;
+        util::ComputeProgram mipmapProgram;
         util::ShaderLocationsVault shaderLocations;
         util::ShaderLocationsVault voxelShaderLocations;
         util::ShaderLocationsVault voxelDebugShaderLocations;
+        util::ShaderLocationsVault mipmapShaderLocations;
         sgraph::SGNodeVisitor *renderer;
         sgraph::SGNodeVisitor *voxelRenderer;
         sgraph::SGNodeVisitor *voxelDebugRenderer;
@@ -85,6 +89,12 @@ namespace pipeline
         shaderLocations = shaderProgram.getAllShaderVariables();
         shaderProgram.disable();
 
+        mipmapProgram.createProgram("shaders/VXGI/mipmap/computeMipmap.comp");
+
+        mipmapProgram.enable();
+        mipmapShaderLocations = mipmapProgram.getAllShaderVariables();
+        mipmapProgram.disable();
+
         // Mapping of shader variables to vertex attributes
         shaderVarsToVertexAttribs["vPosition"] = "position";
         shaderVarsToVertexAttribs["vNormal"] = "normal";
@@ -113,10 +123,12 @@ namespace pipeline
         voxelResolution = 256;
         glGenTextures(1, &voxelImage);
         glBindTexture(GL_TEXTURE_3D, voxelImage);
-        glTexImage3D(GL_TEXTURE_3D,  0, GL_RGBA16F, voxelResolution, voxelResolution, voxelResolution, 0, GL_RGBA, GL_HALF_FLOAT, nullptr); // allocates empty memory
+        // glTexImage3D(GL_TEXTURE_3D,  0, GL_RGBA16F, voxelResolution, voxelResolution, voxelResolution, 0, GL_RGBA, GL_HALF_FLOAT, nullptr); // allocates empty memory
 
-        // glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR); // use this when generating mipmaps
-        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        int mipLevels = 1 + floor(log2(voxelResolution)); // no. of mips required to reach 1x1x1
+        glTexStorage3D(GL_TEXTURE_3D, mipLevels, GL_RGBA16F, voxelResolution, voxelResolution, voxelResolution);
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR); // use this when generating mipmaps
+        // glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -173,7 +185,7 @@ namespace pipeline
             
             voxelProgram.enable();
             sendLightDetails();
-            glBindImageTexture(0, voxelImage, 0, GL_TRUE, 0, GL_READ_WRITE, GL_RGBA16F);
+            glBindImageTexture(0, voxelImage, 0, GL_TRUE, 0, GL_READ_WRITE, GL_RGBA16F); // cannot use shaderLocations for binding!
             glUniform4fv(voxelShaderLocations.getLocation("gridMin"), 1, glm::value_ptr(gridMin));
             glUniform4fv(voxelShaderLocations.getLocation("gridMax"), 1, glm::value_ptr(gridMax));
             scenegraph->getRoot()->accept(voxelRenderer);
@@ -186,6 +198,7 @@ namespace pipeline
             // mipmap
             glBindTexture(GL_TEXTURE_3D, voxelImage);
             // glGenerateMipmap(GL_TEXTURE_3D); // need to figure out a way to do this without tanking performance!
+            createMipmap();
         }
 
         // restore state
@@ -244,6 +257,39 @@ namespace pipeline
     {
         static const GLfloat clearColor[4] = {0.0f, 0.0f, 0.0f, 0.0f};
         glClearTexImage(voxelImage, 0, GL_RGBA, GL_FLOAT, clearColor);
+    }
+
+    void GIPipeline::createMipmap()
+    {
+        mipmapProgram.enable();
+        int mipLevels = 1 + floor(log2(voxelResolution));
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_3D, voxelImage);
+        glUniform1i(mipmapShaderLocations.getLocation("samplerDownsample"), 0);
+
+        for(int i = 1; i < mipLevels; i++)
+        {
+            glUniform1i(mipmapShaderLocations.getLocation("Lod"), i-1);
+
+            int mipWidth  = max(1, voxelResolution >> i);
+            int mipHeight = max(1, voxelResolution >> i);
+            int mipDepth  = max(1, voxelResolution >> i);
+
+            glBindImageTexture(0, voxelImage, i, GL_TRUE, 0, GL_WRITE_ONLY, GL_RGBA16F);// mipmapShaderLocations.getLocation("ImgResult")
+
+            // ceil division
+            int groupsX = (mipWidth  + 3) / 4;
+            int groupsY = (mipHeight + 3) / 4;
+            int groupsZ = (mipDepth  + 3) / 4;
+            glDispatchCompute(groupsX, groupsY, groupsZ);
+
+            glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT | 
+                       GL_TEXTURE_FETCH_BARRIER_BIT);
+        }
+
+
+        mipmapProgram.disable();
     }
 
     void GIPipeline::initLights(sgraph::IScenegraph *scenegraph)
