@@ -18,6 +18,7 @@
 #include <TextureImage.h>
 #include "../sgraph/TexturedPBRRenderer.h"
 #include "../sgraph/VoxelRenderer.h"
+#include "../sgraph/DepthRenderer.h"
 #include "../sgraph/VoxelDebugRenderer.h"
 #include "../sgraph/LightRetriever.h"
 #include "TangentComputer.h"
@@ -41,20 +42,24 @@ namespace pipeline
         inline void sendLightDetails();
         inline void clearVoxelImage();
         inline void createMipmap();
+        inline void depthPass(sgraph::IScenegraph *scenegraph, glm::mat4 &viewMat);
 
     private:
         util::ShaderProgram shaderProgram;
         util::ShaderGeoProgram voxelProgram;
         util::ShaderProgram voxelDebugProgram;
         util::ComputeProgram mipmapProgram;
+        util::ShaderProgram depthProgram;
         util::ShaderLocationsVault shaderLocations;
         util::ShaderLocationsVault voxelShaderLocations;
         util::ShaderLocationsVault voxelDebugShaderLocations;
         util::ShaderLocationsVault mipmapShaderLocations;
+        util::ShaderLocationsVault depthShaderLocations;
         sgraph::SGNodeVisitor *renderer;
         sgraph::SGNodeVisitor *voxelRenderer;
         sgraph::SGNodeVisitor *voxelDebugRenderer;
         sgraph::SGNodeVisitor *lightRetriever;
+        sgraph::SGNodeVisitor *depthRenderer;
         map<string, unsigned int>* textureIdMap;
         vector<util::Light> lights;
         vector<glm::mat4> lightTransformations;
@@ -95,6 +100,12 @@ namespace pipeline
         mipmapShaderLocations = mipmapProgram.getAllShaderVariables();
         mipmapProgram.disable();
 
+        depthProgram.createProgram(string("shaders/shadow/depth.vert"),
+                                   string("shaders/shadow/depth.frag"));
+        depthProgram.enable();
+        depthShaderLocations = depthProgram.getAllShaderVariables();
+        depthProgram.disable();
+
         // Mapping of shader variables to vertex attributes
         shaderVarsToVertexAttribs["vPosition"] = "position";
         shaderVarsToVertexAttribs["vNormal"] = "normal";
@@ -115,7 +126,7 @@ namespace pipeline
         renderer = new sgraph::TexturedPBRRenderer(modelview, objects, shaderLocations, *textureIdMap);
         voxelRenderer = new sgraph::VoxelRenderer(modelview, objects, voxelShaderLocations, *textureIdMap);
         voxelDebugRenderer = new sgraph::VoxelDebugRenderer(modelview, objects, voxelDebugShaderLocations, *textureIdMap);
-        
+        depthRenderer = new sgraph::DepthRenderer(modelview, objects, depthShaderLocations);
         lightRetriever = new sgraph::LightRetriever(modelview);
 
         // allocate memory for voxelization 3d image.
@@ -218,7 +229,12 @@ namespace pipeline
         // use 3d image to lookup in rendering pass for indirect lighting.
         if(debugVoxels)
         {
+            depthPass(scenegraph, viewMat);
             voxelDebugProgram.enable();
+            glDepthMask(GL_FALSE);
+            glDepthFunc(GL_LEQUAL);
+            glEnable(GL_POLYGON_OFFSET_FILL);
+            glPolygonOffset(-0.5f, -0.5f);
             glUniformMatrix4fv(voxelDebugShaderLocations.getLocation("view"), 1, GL_FALSE, glm::value_ptr(viewMat)); // view transformation
             glUniformMatrix4fv(voxelDebugShaderLocations.getLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
             glActiveTexture(GL_TEXTURE0);
@@ -228,13 +244,21 @@ namespace pipeline
             glUniform4fv(voxelDebugShaderLocations.getLocation("gridMax"), 1, glm::value_ptr(gridMax));
 
             scenegraph->getRoot()->accept(voxelDebugRenderer);
-
+            glDepthMask(GL_TRUE);
+            glDisable(GL_POLYGON_OFFSET_FILL);
             voxelDebugProgram.disable();
             
         }
         else
         {
-            
+
+            // depth pass first.
+            depthPass(scenegraph, viewMat);
+
+            glDepthMask(GL_FALSE);
+            glDepthFunc(GL_LEQUAL);
+            glEnable(GL_POLYGON_OFFSET_FILL);
+            glPolygonOffset(-0.5f, -0.5f);
             shaderProgram.enable();
             // passing the camera location to the fragment shader.
             glUniform3fv(shaderLocations.getLocation("cameraPos"), 1, glm::value_ptr(cameraPos));
@@ -244,12 +268,29 @@ namespace pipeline
 
             scenegraph->getRoot()->accept(renderer);
 
+            glDepthMask(GL_TRUE);
+            glDisable(GL_POLYGON_OFFSET_FILL);
+
             if(cubeMapLoaded)
                 drawCubeMap(viewMat);
             modelview.pop();
             glFlush();
             shaderProgram.disable();
         }
+    }
+
+    void GIPipeline::depthPass(sgraph::IScenegraph *scenegraph, glm::mat4 &viewMat)
+    {
+        glDrawBuffer(GL_NONE); // Don't want to draw anything, only fill the depth buffer.
+        depthProgram.enable();
+        modelview.push(glm::mat4(1.0));
+        modelview.top() = modelview.top() * viewMat;
+        glUniformMatrix4fv(depthShaderLocations.getLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
+        // the modelview will be passed by the renderer (hopefully)
+        scenegraph->getRoot()->accept(depthRenderer);
+        modelview.pop();
+        depthProgram.disable();
+        glDrawBuffer(GL_BACK); // reset state.
     }
 
 
