@@ -9,6 +9,7 @@
 #include <cstdio>
 #include <ShaderGeoProgram.h> // This is for silhouettes/shadow volumes/anything that requires geometry shaders.
 #include <ShaderProgram.h> // This is for normal rendering
+#include <ComputeProgram.h> // For compute shaders
 #include "sgraph/SGNodeVisitor.h"
 #include "ObjectInstance.h"
 #include "PolygonMesh.h"
