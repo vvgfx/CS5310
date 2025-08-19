@@ -39,7 +39,7 @@ namespace pipeline
         inline void drawFrame(sgraph::IScenegraph *scenegraph, glm::mat4 &viewMat);
         inline void initLights(sgraph::IScenegraph *scenegraph);
         inline void initShaderVars();
-        inline void sendLightDetails();
+        inline void sendLightDetails(bool voxel);
         inline void clearVoxelImage();
         inline void createMipmap();
         inline void depthPass(sgraph::IScenegraph *scenegraph, glm::mat4 &viewMat);
@@ -64,12 +64,16 @@ namespace pipeline
         vector<util::Light> lights;
         vector<glm::mat4> lightTransformations;
         std::map<string, sgraph::TransformNode *> cachedNodes;
+        vector<LightLocation> voxelLightLocations;
         vector<LightLocation> lightLocations;
-        bool initialized = false, debugVoxels = true, nvidiaGPU = false;
+        bool initialized = false, nvidiaGPU = false;
         int frames, voxelResolution;
         double time;
         unsigned int voxelImage, voxelFBO;
         map<string, string> shaderVarsToVertexAttribs;
+
+
+        bool debugVoxels = false;
     };
 
     void GIPipeline::init(map<string, util::PolygonMesh<VertexAttrib>>& meshes, glm::mat4 &proj, map<string, unsigned int>& texMap)
@@ -90,6 +94,8 @@ namespace pipeline
 
         shaderProgram.createProgram("shaders/PBR/TexturePBR.vert",
                                     "shaders/PBR/TexturePBR.frag");
+        // shaderProgram.createProgram("shaders/VXGI/Render/GIPBR.vert",
+        //                             "shaders/VXGI/Render/GIPBR.frag");
         shaderProgram.enable();
         shaderLocations = shaderProgram.getAllShaderVariables();
         shaderProgram.disable();
@@ -195,7 +201,7 @@ namespace pipeline
             glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
             
             voxelProgram.enable();
-            sendLightDetails();
+            sendLightDetails(true);
             glBindImageTexture(0, voxelImage, 0, GL_TRUE, 0, GL_READ_WRITE, GL_RGBA16F); // cannot use shaderLocations for binding!
             glUniform4fv(voxelShaderLocations.getLocation("gridMin"), 1, glm::value_ptr(gridMin));
             glUniform4fv(voxelShaderLocations.getLocation("gridMax"), 1, glm::value_ptr(gridMax));
@@ -234,7 +240,7 @@ namespace pipeline
             glDepthMask(GL_FALSE);
             glDepthFunc(GL_LEQUAL);
             glEnable(GL_POLYGON_OFFSET_FILL);
-            glPolygonOffset(-0.5f, -0.5f);
+            glPolygonOffset(-0.1f, -0.1f);
             glUniformMatrix4fv(voxelDebugShaderLocations.getLocation("view"), 1, GL_FALSE, glm::value_ptr(viewMat)); // view transformation
             glUniformMatrix4fv(voxelDebugShaderLocations.getLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
             glActiveTexture(GL_TEXTURE0);
@@ -264,7 +270,7 @@ namespace pipeline
             glUniform3fv(shaderLocations.getLocation("cameraPos"), 1, glm::value_ptr(cameraPos));
             glUniformMatrix4fv(shaderLocations.getLocation("view"), 1, GL_FALSE, glm::value_ptr(viewMat)); // view transformation
             glUniformMatrix4fv(shaderLocations.getLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
-            // sendLightDetails();
+            sendLightDetails(false);
 
             scenegraph->getRoot()->accept(renderer);
 
@@ -342,10 +348,15 @@ namespace pipeline
         lightTransformations = lightsParser->getLightTransformations();
     }
 
-    void GIPipeline::sendLightDetails()
+    void GIPipeline::sendLightDetails(bool voxel)
     {
+        vector<LightLocation>& locationsToUse = voxel ? voxelLightLocations : lightLocations;
         modelview.push(glm::mat4(1.0));
-        glUniform1i(voxelShaderLocations.getLocation("numLights"), lights.size());
+        if(voxel)
+            glUniform1i(voxelShaderLocations.getLocation("numLights"), lights.size());
+        else
+            glUniform1i(shaderLocations.getLocation("numLights"), lights.size());
+        
         for (int i = 0; i < lights.size(); i++)
         {
             glm::vec4 pos = lights[i].getPosition();
@@ -353,29 +364,36 @@ namespace pipeline
             glm::vec4 spotDirection = lights[i].getSpotDirection();
             spotDirection = lightTransformations[i] * spotDirection;
             // Set light colors
-            glUniform3fv(lightLocations[i].color, 1, glm::value_ptr(lights[i].getColor()));
-            glUniform4fv(lightLocations[i].position, 1, glm::value_ptr(pos));
+            glUniform3fv(locationsToUse[i].color, 1, glm::value_ptr(lights[i].getColor()));
+            glUniform4fv(locationsToUse[i].position, 1, glm::value_ptr(pos));
             // spotlight stuff here
-            glUniform1f(lightLocations[i].spotAngle, cos(glm::radians(lights[i].getSpotCutoff())));
-            glUniform3fv(lightLocations[i].spotDirection, 1, glm::value_ptr(spotDirection));
+            glUniform1f(locationsToUse[i].spotAngle, cos(glm::radians(lights[i].getSpotCutoff())));
+            glUniform3fv(locationsToUse[i].spotDirection, 1, glm::value_ptr(spotDirection));
         }
     }
 
     void GIPipeline::initShaderVars()
     {
         lightLocations.clear();
+        voxelLightLocations.clear();
         for (int i = 0; i < lights.size(); i++)
         {
-            LightLocation ll;
             stringstream name;
-
+            
+            LightLocation ll;
             name << "light[" << i << "]";
-            ll.position = voxelShaderLocations.getLocation(name.str() + "" + ".position");
-            ll.color = voxelShaderLocations.getLocation(name.str() + ".color");
-            // adding spotDirection and spotAngle.
-            ll.spotDirection = voxelShaderLocations.getLocation(name.str() + ".spotDirection");
-            ll.spotAngle = voxelShaderLocations.getLocation(name.str() + ".spotAngleCosine");
+            ll.position = shaderLocations.getLocation(name.str() + "" + ".position");
+            ll.color = shaderLocations.getLocation(name.str() + ".color");
+            ll.spotDirection = shaderLocations.getLocation(name.str() + ".spotDirection");
+            ll.spotAngle = shaderLocations.getLocation(name.str() + ".spotAngleCosine");
             lightLocations.push_back(ll);
+
+            LightLocation vll;
+            vll.position = voxelShaderLocations.getLocation(name.str() + "" + ".position");
+            vll.color = voxelShaderLocations.getLocation(name.str() + ".color");
+            vll.spotDirection = voxelShaderLocations.getLocation(name.str() + ".spotDirection");
+            vll.spotAngle = voxelShaderLocations.getLocation(name.str() + ".spotAngleCosine");
+            voxelLightLocations.push_back(vll);
         }
     }
 }
