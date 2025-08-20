@@ -43,6 +43,8 @@ namespace pipeline
         virtual void loadCubeMap(vector<util::TextureImage*>& cubeMap)=0;
         virtual void drawCubeMap(glm::mat4& viewMat)=0;
 
+        virtual void keyCallback(int key)=0;
+
     };
 
 }

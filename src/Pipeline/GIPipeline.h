@@ -43,6 +43,7 @@ namespace pipeline
         inline void clearVoxelImage();
         inline void createMipmap();
         inline void depthPass(sgraph::IScenegraph *scenegraph, glm::mat4 &viewMat);
+        inline void keyCallback(int key);
 
     private:
         util::ShaderProgram shaderProgram;
@@ -72,6 +73,8 @@ namespace pipeline
         unsigned int voxelImage, voxelFBO;
         map<string, string> shaderVarsToVertexAttribs;
 
+        int giStatus = 1;
+
 
         bool debugVoxels = false;
     };
@@ -92,10 +95,10 @@ namespace pipeline
         voxelDebugShaderLocations = voxelDebugProgram.getAllShaderVariables();
         voxelDebugProgram.disable();
 
-        shaderProgram.createProgram("shaders/PBR/TexturePBR.vert",
-                                    "shaders/PBR/TexturePBR.frag");
-        // shaderProgram.createProgram("shaders/VXGI/Render/GIPBR.vert",
-        //                             "shaders/VXGI/Render/GIPBR.frag");
+        // shaderProgram.createProgram("shaders/PBR/TexturePBR.vert",
+        //                             "shaders/PBR/TexturePBR.frag");
+        shaderProgram.createProgram("shaders/VXGI/Render/GIPBR.vert",
+                                    "shaders/VXGI/Render/GIPBR.frag");
         shaderProgram.enable();
         shaderLocations = shaderProgram.getAllShaderVariables();
         shaderProgram.disable();
@@ -270,6 +273,15 @@ namespace pipeline
             glUniform3fv(shaderLocations.getLocation("cameraPos"), 1, glm::value_ptr(cameraPos));
             glUniformMatrix4fv(shaderLocations.getLocation("view"), 1, GL_FALSE, glm::value_ptr(viewMat)); // view transformation
             glUniformMatrix4fv(shaderLocations.getLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
+
+            // send the voxel 3d image
+            glActiveTexture(GL_TEXTURE10);
+            glBindTexture(GL_TEXTURE_3D, voxelImage);
+            glUniform1i(shaderLocations.getLocation("voxelTexture"), 10);
+            glUniform4fv(shaderLocations.getLocation("gridMin"), 1, glm::value_ptr(gridMin));
+            glUniform4fv(shaderLocations.getLocation("gridMax"), 1, glm::value_ptr(gridMax));
+            glUniform1f(shaderLocations.getLocation("voxelResolution"), voxelResolution);
+            glUniform1i(shaderLocations.getLocation("useGI"), giStatus);
             sendLightDetails(false);
 
             scenegraph->getRoot()->accept(renderer);
@@ -394,6 +406,15 @@ namespace pipeline
             vll.spotDirection = voxelShaderLocations.getLocation(name.str() + ".spotDirection");
             vll.spotAngle = voxelShaderLocations.getLocation(name.str() + ".spotAngleCosine");
             voxelLightLocations.push_back(vll);
+        }
+    }
+
+    void GIPipeline::keyCallback(int key)
+    {
+        if(key == GLFW_KEY_1)
+        {
+            giStatus *= -1; 
+            cout<<"key 1 received in pipeline, giStatus : "<<giStatus<<endl;
         }
     }
 }

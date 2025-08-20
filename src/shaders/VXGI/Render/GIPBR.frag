@@ -38,6 +38,13 @@ uniform sampler2D metallicMap;
 uniform sampler2D roughnessMap;
 uniform sampler2D aoMap;
 
+// VXGI
+uniform sampler3D voxelTexture;
+uniform vec4 gridMin;
+uniform vec4 gridMax;
+uniform float voxelResolution;
+uniform int useGI;
+
 out vec4 fColor;
 
 // ----------------------------------------------------------------------------
@@ -81,6 +88,90 @@ vec3 FresnelSchlick(float cosTheta, vec3 F0)
     return F0 + (1.0 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
 }
 // ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+// VXGI Methods here.
+
+const float CONE_SPREAD = 0.577; // tan(30) for 60 cone
+const int NUM_CONES = 6;
+const float MAX_TRACE_DISTANCE = 50.0;
+const vec3 CONE_DIRECTIONS[6] = vec3[](
+    vec3( 0.0,  1.0,  0.0),
+    vec3( 0.866,  0.5,  0.0),
+    vec3( 0.267,  0.5,  0.823),
+    vec3(-0.700,  0.5,  0.509),
+    vec3(-0.700,  0.5, -0.509),
+    vec3( 0.267,  0.5, -0.823)
+);
+
+vec3 worldToUVW(vec3 worldPos) 
+{
+    return (worldPos - gridMin.xyz) / (gridMax.xyz - gridMin.xyz);
+}
+
+vec4 traceCone(vec3 origin, vec3 direction, float tanHalfAngle) 
+{
+    vec4 color = vec4(0.0);
+    float voxelSize = (gridMax.x - gridMin.x) / voxelResolution;
+
+    float dist = voxelSize * 2.0;  // prevent self-occlusion
+
+    while (dist < MAX_TRACE_DISTANCE && color.a < 0.95) 
+    {
+        vec3 samplePos = origin + direction * dist;
+        vec3 uvw = worldToUVW(samplePos);
+
+        // exit criteria for outside of grid.
+        if (any(lessThan(uvw, vec3(0.0))) || any(greaterThan(uvw, vec3(1.0))))
+            break;
+
+        float diameter = 2.0 * tanHalfAngle * dist;
+        float mipLevel = log2(max(1.0, diameter / voxelSize));
+
+        vec4 voxelSample = textureLod(voxelTexture, uvw, mipLevel);
+
+        // Front-to-back accumulation
+        float a = 1.0 - color.a;
+        color.rgb += a * voxelSample.rgb;
+        color.a += a * voxelSample.a;
+
+        dist += max(voxelSize, diameter * 0.5);
+    }
+
+    return color;
+}
+
+vec3 calculateGI(vec3 worldPos, vec3 normal)
+{
+    vec3 indirectLight = vec3(0.0);
+    float totalWeight = 0.0;
+
+    vec3 origin = worldPos + normal * (2.0 / voxelResolution);
+    vec3 up = abs(normal.y) < 0.999 ? vec3(0, 1, 0) : vec3(1, 0, 0);
+    vec3 tangent = normalize(cross(up, normal));
+    vec3 bitangent = cross(normal, tangent);
+    mat3 TBN = mat3(tangent, normal, bitangent);
+
+    for (int i = 0; i < NUM_CONES; i++) 
+    {
+        vec3 coneDir = normalize(TBN * CONE_DIRECTIONS[i]);
+
+        // flip direction to make sure the cone is in the proper orientation.
+        if (dot(normal, coneDir) < 0.0)
+            coneDir = -coneDir;
+
+        float NdotL = dot(normal, coneDir);
+
+        vec4 result = traceCone(origin, coneDir, CONE_SPREAD);
+        indirectLight += result.rgb * NdotL;
+        totalWeight += NdotL;
+    }
+
+    if (totalWeight > 0.0)
+        indirectLight /= totalWeight;
+    
+    return indirectLight;
+}
+
 
 void main()
 {
@@ -180,7 +271,11 @@ void main()
     // ambient lighting here
     vec3 ambient = vec3(0.03f) * albedo * ao;
 
-    vec3 color = ambient + Lo;
+    mat3 TBN = mat3(normalize(fTangent), normalize(fBiTangent), normalize(fNormal));
+    vec3 wNormal = normalize(TBN * tangentNormal);
+
+    vec3 gi = useGI > 0 ? calculateGI(fPosition.xyz, worldNormal) : vec3(0.0);
+    vec3 color = ambient + Lo + gi * albedo;
 
     // HDR tonemapping
     color = color / (color + vec3(1.0));

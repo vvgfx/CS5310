@@ -799,3 +799,8 @@ void GUIView::loadCubeMaps(vector<util::TextureImage*>& cubeMap)
 {
     pipeline->loadCubeMap(cubeMap);
 }
+
+void GUIView::pipelineCallbacks(int key)
+{
+    pipeline->keyCallback(key);
+}

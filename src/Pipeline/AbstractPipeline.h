@@ -73,6 +73,11 @@ namespace pipeline
             cubeMapProgram.disable();
             cubeMapLoaded = true;
         }
+
+        virtual void keyCallback(int key)
+        {
+            // do nothing, this should be overridden in the lower classes.
+        }
         
         protected:
         glm::mat4 projection;

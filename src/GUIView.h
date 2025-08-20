@@ -32,6 +32,8 @@ public:
     void initLights(sgraph::IScenegraph *scenegraph) override;
     void switchShaders() override;
 
+    void pipelineCallbacks(int key);
+
     // GUI stuff
     void ImGUIView(sgraph::IScenegraph *scenegraph);
     void GUIScenegraph(sgraph::IScenegraph *scenegraph);

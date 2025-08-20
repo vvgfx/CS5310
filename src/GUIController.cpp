@@ -131,6 +131,9 @@ void GUIController::onkey(int key, int scancode, int action, int mods)
             case GLFW_KEY_G:
                     reinterpret_cast<GUIView*>(view)->guiSwitch();
                 break;
+            case GLFW_KEY_1:
+                    reinterpret_cast<GUIView*>(view)->pipelineCallbacks(key);
+                break;
         }
     }
     else if(action == GLFW_RELEASE)
