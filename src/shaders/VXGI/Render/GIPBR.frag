@@ -334,7 +334,7 @@ void main()
     }
 
     // ambient lighting here
-    vec3 ambient = vec3(0.03f) * albedo * ao;
+    vec3 ambient = vec3(0.001f) * albedo * ao;
     vec3 indirectDiffuse = vec3(0.0);
     vec3 indirectSpecular = vec3(0.0);
     if(useGI > 0)

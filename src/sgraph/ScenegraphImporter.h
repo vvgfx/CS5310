@@ -310,7 +310,7 @@ namespace sgraph {
                     input >> varname >> name;
                     cout << "Read " << varname << " " << name << endl;
                     input >> sx >> sy >> sz >> rx >> ry >> rz >> tx >> ty >> tz;
-                    SGNode *srtNode = new SRTNode(tx, ty, tz, rx, ry, rz, sx, sy, sz, name, scenegraph);
+                    SGNode *srtNode = new SRTNode(tx, ty, tz, glm::radians(rx), glm::radians(ry), glm::radians(rz), sx, sy, sz, name, scenegraph);
                     nodes[varname] = srtNode;
                 }
 
