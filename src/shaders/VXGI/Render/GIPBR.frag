@@ -172,6 +172,53 @@ vec3 calculateGI(vec3 worldPos, vec3 normal)
     return indirectLight;
 }
 
+float traceOcclusion(vec3 origin, vec3 lightDir, float maxDist) 
+{
+    float occlusion = 0.0;
+    float voxelSize = (gridMax.x - gridMin.x) / voxelResolution;
+    float dist = voxelSize * 4.0;  // Start offset
+    
+    // Narrower cone for shadows (5-10° vs 60° for GI)
+    float tanHalfAngle = 0.0875;  // tan(5°) for sharper shadows
+    
+    while (dist < maxDist && occlusion < 1.0) 
+    {
+        vec3 pos = origin + lightDir * dist;
+        vec3 uvw = worldToUVW(pos);
+        
+        if (any(lessThan(uvw, vec3(0.0))) || any(greaterThan(uvw, vec3(1.0))))
+            break;
+        
+        float diameter = 2.0 * tanHalfAngle * dist;
+        float mipLevel = log2(max(1.0, diameter / voxelSize));
+        
+        float alpha = textureLod(voxelTexture, uvw, mipLevel).a;
+        
+        // Accumulate occlusion
+        occlusion += (1.0 - occlusion) * alpha;
+        
+        dist += max(voxelSize, diameter * 0.5);
+    }
+    
+    return 1.0 - occlusion;  // Return visibility (0=blocked, 1=visible)
+}
+
+vec3 traceReflection(vec3 origin, vec3 normal, vec3 viewDir, float roughness)
+{
+    vec3 reflectDir = reflect(-viewDir, normal);
+    
+    // Wider cone for rougher surfaces
+    float tanHalfAngle = mix(0.0, CONE_SPREAD, roughness);
+    
+    vec4 result = traceCone(
+        origin + normal * (2.0 / voxelResolution),
+        reflectDir,
+        tanHalfAngle
+    );
+    
+    return result.rgb;
+}
+
 
 void main()
 {
@@ -216,6 +263,10 @@ void main()
     // spotlight stuff
     float spotAttenuation = 1.0f;
     float angle;
+
+    mat3 TBN = mat3(normalize(fTangent), normalize(fBiTangent), normalize(fNormal));
+    vec3 wNormal = normalize(TBN * tangentNormal);
+
     for(int i = 0; i < numLights; i++)
     {
         if (light[i].position.w!=0)
@@ -264,18 +315,39 @@ void main()
 
         nDotL = max(dot(tangentNormal, tangentLightvec), 0.0f);
 
-        Lo += (kD * albedo / PI + specular) * radiance * nDotL * spotAttenuation;
+        // vx occlusion
+        float visibility = 1.0;
+        if(useGI > 0)
+        {
+            vec3 lightDir = normalize(light[i].position.xyz - fPosition.xyz);
+            float lightDist = distance(light[i].position.xyz, fPosition.xyz);
+            visibility = traceOcclusion(
+                fPosition.xyz + wNormal * (2.0 / voxelResolution),
+                lightDir,
+                lightDist
+            );
+        }
+
+
+        Lo += (kD * albedo / PI + specular) * radiance * nDotL * spotAttenuation * visibility;
 
     }
 
     // ambient lighting here
     vec3 ambient = vec3(0.03f) * albedo * ao;
+    vec3 indirectDiffuse = vec3(0.0);
+    vec3 indirectSpecular = vec3(0.0);
+    if(useGI > 0)
+    {
+        indirectDiffuse = calculateGI(fPosition.xyz, wNormal);      // Once
+        indirectSpecular = traceReflection(fPosition.xyz, wNormal, viewVec, roughness);         // Once
+    }
+    
+    F = FresnelSchlick(max(dot(worldNormal, viewVec), 0.0), F0);
+    kS = F;
+    kD = (1.0 - kS) * (1.0 - metallic);
 
-    mat3 TBN = mat3(normalize(fTangent), normalize(fBiTangent), normalize(fNormal));
-    vec3 wNormal = normalize(TBN * tangentNormal);
-
-    vec3 gi = useGI > 0 ? calculateGI(fPosition.xyz, worldNormal) : vec3(0.0);
-    vec3 color = ambient + Lo + gi * albedo;
+    vec3 color = ambient + Lo + kD * indirectDiffuse * albedo + kS * indirectSpecular;
 
     // HDR tonemapping
     color = color / (color + vec3(1.0));

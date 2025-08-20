@@ -37,57 +37,21 @@ image sphere-roughness textures/peeling-painted-metal_roughness.png
 
 
 
-# cubemap
-# cubemap textures/hdr/winter.hdr 
 
 
 
 group root root
-light one-light
-ambient 0 0 0
-diffuse 0 0 0
-specular 0 0 0
-position 0 10 30
-color 50 50 50
-end-light
-# assign-light one-light root
-
 light two-light
 ambient 0 0 0
 diffuse 0 0 0
 specular 0 0 0
-position 0 31 -3
+position 10.39 18 -3
 spot-direction 0 -1 0.28
-spot-angle 40
-color 1500 1500 1500
+spot-angle 30
+color 1000 1000 1000
 end-light
 assign-light two-light root
 
-srt ground-srt ground-srt 80 5 80 0 0 0 0 -25 0
-
-leaf ground-box ground-box instanceof box
-material mat-ground-box
-emission 0 0 0
-ambient 0 0 0
-diffuse 0 0 0
-specular 0 0 0
-shininess 0
-#PBR
-albedo 0.9 0.9 0.9
-metallic 0.2
-roughness 0.95
-ao 1
-end-material 
-
-assign-material ground-box mat-ground-box 
-
-assign-texture ground-box ground-base
-assign-normal ground-box ground-normal
-assign-metallic ground-box ground-metallic
-assign-roughness ground-box ground-roughness
-assign-ao ground-box ground-ao
-add-child ground-box ground-srt
-# add-child ground-srt root
 srt helmet-srt helmet-srt 10 10 10 0 0 0 -10 0 0
 
 leaf helmet-leaf helmet-leaf instanceof helmet
@@ -139,14 +103,7 @@ assign-ao monkey-leaf sphere-ao
 add-child monkey-leaf monkey-srt
 add-child monkey-srt root
 group walls walls
-
-srt wall-back wall-back 80 80 5 90 0 0 0 -20 0
-
-srt wall-right wall-right 80 80 5 90 0 0 0 -20 0
-
-srt wall-bottom wall-bottom 80 80 5 90 0 0 0 -20 0
-
-srt wall-left wall-left 80 80 5 90 0 0 0 -20 0
+srt wall-left wall-left 5 80 45 90 0 0 -40 0 0
 
 leaf wall-left-leaf wall-left-leaf instanceof box
 material mat-wall-left-leaf
@@ -171,9 +128,7 @@ assign-roughness wall-left-leaf metalFloor-roughness
 assign-ao wall-left-leaf metalFloor-ao
 add-child wall-left-leaf wall-left
 add-child wall-left walls
-
-
-
+srt wall-bottom wall-bottom 80 80 5 90 0 0 0 -20 0
 
 leaf wall-bottom-leaf wall-bottom-leaf instanceof box
 material mat-wall-bottom-leaf
@@ -198,6 +153,7 @@ assign-roughness wall-bottom-leaf metalFloor-roughness
 assign-ao wall-bottom-leaf metalFloor-ao
 add-child wall-bottom-leaf wall-bottom
 add-child wall-bottom walls
+srt wall-right wall-right 5 45 80 0 0 0 40 0 0
 
 leaf wall-right-leaf wall-right-leaf instanceof box
 material mat-wall-right-leaf
@@ -222,6 +178,7 @@ assign-roughness wall-right-leaf metalFloor-roughness
 assign-ao wall-right-leaf metalFloor-ao
 add-child wall-right-leaf wall-right
 add-child wall-right walls
+srt wall-back wall-back 80 45 5 0 0 0 0 0 -40
 
 leaf wall-back-leaf wall-back-leaf instanceof box
 material mat-wall-back-leaf
