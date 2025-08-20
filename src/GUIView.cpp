@@ -71,6 +71,11 @@ void GUIView::init(Callbacks *callbacks, map<string, util::PolygonMesh<VertexAtt
 
 }
 
+void GUIView::toggleMoveLight()
+{
+    boolMoveLight = !boolMoveLight;
+}
+
 void GUIView::computeTangents(util::PolygonMesh<VertexAttrib> &tmesh)
 {
     View::computeTangents(tmesh);
@@ -116,6 +121,9 @@ void GUIView::display(sgraph::IScenegraph *scenegraph)
     // Draw GUI here
     if(showGui)
         ImGUIView(scenegraph);
+
+    if(boolMoveLight)
+        moveLight();
     
     glFlush();
     glfwSwapBuffers(window);
@@ -574,14 +582,6 @@ void GUIView::showPopups()
                 ImGui::InputText("Node name", childNodeName, 32);
                 ImGui::InputText("Object instance", objectInstanceName, 32);
 
-                // float albedoFloat3f[3] = {leafAlbedo.x, leafAlbedo.y, leafAlbedo.z};
-                // if(ImGui::DragFloat3("Albedo", albedoFloat3f, 0.01f, 0.0f, 1.0f))
-                // {
-                //     leafAlbedo.x = albedoFloat3f[0];
-                //     leafAlbedo.y = albedoFloat3f[1];
-                //     leafAlbedo.z = albedoFloat3f[2];
-                // }
-
                 ImVec4 colorAlbedo = ImVec4(leafAlbedo.x, leafAlbedo.y, leafAlbedo.z, 1.0f);
                 if(ImGui::ColorEdit3("albedo", (float*)&colorAlbedo))
                 {
@@ -705,6 +705,27 @@ void GUIView::closeWindow()
 void GUIView::initScenegraphNodes(sgraph::IScenegraph *scenegraph)
 {
     View::initScenegraphNodes(scenegraph);
+
+    // save root node for light movement.
+    auto nodes = scenegraph->getNodes();
+    if(nodes->find("root") != nodes->end())
+    {
+        cout<<"Found root for light!: "<<endl;
+        lightNode = dynamic_cast<sgraph::GroupNode*>((*nodes)["root"]);
+    }
+}
+
+void GUIView::moveLight()
+{
+    vector<util::Light>* lights = lightNode->getLights();
+    if((*lights).size() > 0)
+    {
+        float time = glfwGetTime();
+        glm::vec4 currentPos = (*lights)[0].getPosition();
+        float xLoc = tanh(2 * cos(time * 2)) * 15;
+        (*lights)[0].setPosition(xLoc, currentPos.y, currentPos.z);
+    }
+
 }
 
 void GUIView::rotatePropeller(string nodeName, float time)

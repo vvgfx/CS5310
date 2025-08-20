@@ -31,6 +31,7 @@ public:
     void changeCameraType(int type) override;
     void initLights(sgraph::IScenegraph *scenegraph) override;
     void switchShaders() override;
+    void toggleMoveLight();
 
     void pipelineCallbacks(int key);
 
@@ -52,11 +53,12 @@ public:
     // cubemap stuff here
     void loadCubeMaps(vector<util::TextureImage*>& cubeMap);
     
-    protected: 
+protected: 
     void resetPopupVars();
     void initLightShaderVars() override;
     void rotate() override;
     void computeTangents(util::PolygonMesh<VertexAttrib>& mesh) override;
+    void moveLight();    
     sgraph::SGNodeVisitor* GuiVisitor;
     sgraph::SGNodeVisitor* NodeRenderer;
 
@@ -86,6 +88,7 @@ public:
     char texPath[100];
     bool loadTexture;
 
+
     bool showGui = true;
 
     bool loadModel;
@@ -104,6 +107,10 @@ public:
     // save scenegraph
     char saveFileName[200];
     bool showSaveScenePopup;
+
+    // light movement
+    sgraph::SGNode* lightNode;
+    bool boolMoveLight = false;
 };
 
 #endif

@@ -134,6 +134,9 @@ void GUIController::onkey(int key, int scancode, int action, int mods)
             case GLFW_KEY_1:
                     reinterpret_cast<GUIView*>(view)->pipelineCallbacks(key);
                 break;
+            case GLFW_KEY_2:
+                    reinterpret_cast<GUIView*>(view)->toggleMoveLight();
+                break;
         }
     }
     else if(action == GLFW_RELEASE)
