@@ -8,10 +8,10 @@ It has the following features:
 - Pipelines - multiple swappable pipelines, with different feature sets for each pipeline.
 - Multithreaded job-system - a job system that runs on parallel threads. Currently used for asset loading, UI and other updates,etc.
 - Double-buffered command queue - A system where scenegraph updates are added to a queue and processed before the start of the frame. This is used along with jobs to implement asset loading and other heavy tasks
-- Double-buffered Tasks - A system where you can load models and textures in parallel, then transfer to GPU memory in the main thread (this is because openGL is inherently single threaded, so running parallel gl commands on parallel threads will interweave them.)
+- Double-buffered Tasks - A system where you can load models and textures in parallel threads, then transfer to GPU memory in the main thread (this is because openGL is inherently single threaded, so running parallel gl commands on parallel threads will interweave them.)
 - Cubemaps - Skyboxes using cubemaps with HDRI maps.
 - IBL - Image Based lighting
-- VXGI - Voxel Cone Traced Global Illumination for real-time indirect lighting and soft shadows.
+- VXGI - Voxel Cone Traced Global Illumination for real-time indirect lighting (both specular and diffuse) and soft shadows.
 
 
 
@@ -20,7 +20,19 @@ Each pipeline contains different features I've implemented on top of the base so
 - Normal maps - Support for normal maps using bump-mapping.
 - PBR - Physically Based Rendering
 
+Project overview:
+
+This is NOT a class diagram, but something that can help if you want to go through the code.
+
+![image](screenshots/structure.png)
+
+The project follows MVC pattern, and uses a number of modular interfaces for different features like piplines, camera systems, controllers, jobs and tasks.
+
+It also uses the visitor pattern for the scenegraph, which made it easy to implement features like GUI views, Bounding volume hierarchies, and even an Entity-Component System.
+
 ### Screenshots:
+
+![image](screenshots/VXGI_HQ.gif)
 
 ![image](screenshots/specular-ibl.png)
 
@@ -35,7 +47,6 @@ Each pipeline contains different features I've implemented on top of the base so
 - Spatial / Temporal upscaling
 - Mesh simplification / decimation
 - GPU Frustum culling
-- Global Illumination
 - MCP server
 
 (This is not exhaustive)
@@ -45,10 +56,13 @@ Each pipeline contains different features I've implemented on top of the base so
 - OpenGL 4.6+
 - C++ compiler (g++)
 - Make utility
-- The GI pipeline is currently only supported by NVidia GPUs - this is because it requires an extension in OpenGL for floating point image atomic writes that is available only on Nvidia GPUs
+- The GI pipeline is currently only supported by NVidia GPUs - this is because it requires an extension in OpenGL for floating point image atomic writes that is available only on Nvidia GPUs. There are alternative methods for other GPUs, but since I only have an NVidia GPU, adding additional support is not the highest priority right now.
 
 
-### Author's blog post
+### Author's blog posts
+
+https://vv-22.github.io/IBL-VXGI
+
 https://vv-22.github.io/rendering-with-opengl
 
 
@@ -58,8 +72,9 @@ https://vv-22.github.io/rendering-with-opengl
 - https://ogldev.org/www/tutorial40/tutorial40.html  - Used this reference for shadow volumes.
 - https://freestylized.com , https://freepbr.com/ - PBR textures. 
 - https://learnopengl.com/ - Multiple references for PBR, Image based lighting, GPU Frustum culling, etc.
-- https://wickedengine.net/2017/08/voxel-based-global-illumination/ , https://github.com/BoyBaykiller/IDKEngine - Global Illumination.
-
+- https://wickedengine.net/2017/08/voxel-based-global-illumination/ - Global Illumination
+- https://github.com/BoyBaykiller/IDKEngine - VXGI Implementation in openGL
+- https://research.nvidia.com/sites/default/files/publications/GIVoxels-pg2011-authors.pdf - VXGI NVIDIA paper.
 
 
 ### Acknowledgements:
