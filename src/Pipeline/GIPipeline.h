@@ -416,6 +416,10 @@ namespace pipeline
             giStatus *= -1; 
             cout<<"key 1 received in pipeline, giStatus : "<<giStatus<<endl;
         }
+        else if(key == GLFW_KEY_3)
+        {
+            debugVoxels = !debugVoxels;
+        }
     }
 }
 
