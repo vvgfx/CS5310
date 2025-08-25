@@ -317,16 +317,18 @@ void main()
 
         // vx occlusion
         float visibility = 1.0;
-        if(useGI > 0)
-        {
-            vec3 lightDir = normalize(light[i].position.xyz - fPosition.xyz);
-            float lightDist = distance(light[i].position.xyz, fPosition.xyz);
-            visibility = traceOcclusion(
-                fPosition.xyz + wNormal * (2.0 / voxelResolution),
-                lightDir,
-                lightDist
-            );
-        }
+
+        // Use shadow maps/ volumes for shadows. This is giving poor results.
+        // if(useGI > 0)
+        // {
+        //     vec3 lightDir = normalize(light[i].position.xyz - fPosition.xyz);
+        //     float lightDist = distance(light[i].position.xyz, fPosition.xyz);
+        //     visibility = traceOcclusion(
+        //         fPosition.xyz + wNormal * (2.0 / voxelResolution),
+        //         lightDir,
+        //         lightDist
+        //     );
+        // }
 
 
         Lo += (kD * albedo / PI + specular) * radiance * nDotL * spotAttenuation * visibility;

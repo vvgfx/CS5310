@@ -72,8 +72,10 @@ void main()
         Lo += lightContribution;
     }
 
-    vec3 ambient = vec3(0.03f) * albedo;
-    vec3 color = ambient + Lo;
+    // vec3 ambient = vec3(0.03f) * albedo;
+    // vec3 color = ambient + Lo;
+
+    vec3 color = Lo;
 
     // convert to voxel space here!
     ivec3 voxelPos = worldToVoxelSpace(fPosition.xyz);
