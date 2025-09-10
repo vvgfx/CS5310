@@ -56,7 +56,7 @@ It also uses the visitor pattern for the scenegraph, which made it easy to imple
 
 ### Requirements:
 
-- OpenGL 4.6+
+- OpenGL 4.5+
 - C++ compiler (g++)
 - Make utility
 - The GI pipeline is currently only supported by NVidia GPUs - this is because it requires an extension in OpenGL for floating point image atomic writes that is available only on Nvidia GPUs. There are alternative methods for other GPUs, but since I only have an NVidia GPU, adding additional support is not the highest priority right now.
