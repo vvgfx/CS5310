@@ -1,5 +1,17 @@
 ## This Repo contains a rendering engine.
 
+### Screenshots:
+
+![image](screenshots/specular-ibl.png)
+
+![image](screenshots/VXGI_HQ.gif)
+
+![image](screenshots/screenshot-close.png)
+
+![image](screenshots/screenshot-menu.png)
+
+### Features:
+
 It has the following features:
 - Text parser - 3d worlds can be built by creating a text file and passing it as an argument to the program. Sample text files are provided in the scenegraphmodels folder
 - Hierarchial scenegraphs - Tree representation of the 3d world. This is by parsing text files. These files can be passed as an argument to the program.
@@ -19,6 +31,7 @@ Each pipeline contains different features I've implemented on top of the base so
 - Shadow volumes - Each object casts shadows. This is done by stencil shadow volumes with blending between different light sources.
 - Normal maps - Support for normal maps using bump-mapping.
 - PBR - Physically Based Rendering
+- VXGI - Voxel Cone Traced Global Illumination
 
 Project overview:
 
@@ -29,16 +42,6 @@ This is NOT a class diagram, but something that can help if you want to go throu
 The project follows MVC pattern, and uses a number of modular interfaces for different features like piplines, camera systems, controllers, jobs and tasks.
 
 It also uses the visitor pattern for the scenegraph, which made it easy to implement features like GUI views, Bounding volume hierarchies, and even an Entity-Component System.
-
-### Screenshots:
-
-![image](screenshots/VXGI_HQ.gif)
-
-![image](screenshots/specular-ibl.png)
-
-![image](screenshots/screenshot-close.png)
-
-![image](screenshots/screenshot-menu.png)
 
 ### To-do list:
 
@@ -61,9 +64,9 @@ It also uses the visitor pattern for the scenegraph, which made it easy to imple
 
 ### Author's blog posts
 
-https://vv-22.github.io/IBL-VXGI
+https://vvgfx.github.io/IBL-VXGI
 
-https://vv-22.github.io/rendering-with-opengl
+https://vvgfx.github.io/rendering-with-opengl
 
 
 
