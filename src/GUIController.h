@@ -6,6 +6,7 @@
 #include "Controller.h"
 #include "GUICallbacks.h"
 #include "sgraph/Jobs/IJob.h"
+#include "thread_pool.h"
 
 class GUIController : public Controller, public GUICallbacks
 {
@@ -36,6 +37,8 @@ public:
 protected:
 
     bool wFlag, sFlag, aFlag, dFlag;
+
+    ThreadPool threadPool;
 };
 
 #endif

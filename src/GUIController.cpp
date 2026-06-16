@@ -7,6 +7,7 @@
 #include "sgraph/LeafNode.h"
 #include "sgraph/ScaleTransform.h"
 #include "ObjImporter.h"
+#include "thread_pool.h"
 using namespace sgraph;
 #include <iostream>
 #include <thread>
@@ -28,7 +29,7 @@ using namespace std;
 
 
 GUIController::GUIController(Model* m,View* v, string textfile) :
-    Controller(m,v, textfile) {
+    Controller(m,v, textfile), threadPool(4) {
         wFlag = sFlag = aFlag = dFlag = false;
 }
 
@@ -211,12 +212,10 @@ void GUIController::receiveJob(job::IJob* job)
 {
     cout<<"received job in controller"<<endl;
     // job->execute(model);
-    thread t([this, job]()
-    {
+    threadPool.enqueue([this, job]() {
         job->execute(model);
         delete job;
     });
-    t.detach();
     
 }
 
