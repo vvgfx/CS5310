@@ -21,7 +21,7 @@ class ThreadPool
 {
     public:
         // constructor
-        ThreadPool(std::size_t);
+        explicit ThreadPool(std::size_t);
 
         //destructor
         ~ThreadPool();
