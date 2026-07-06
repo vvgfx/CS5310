@@ -1,7 +1,7 @@
 #version 460
 
-// AMD-compatible voxelization: pack color into uint, use standard imageAtomicMax.
-// Replaces NVIDIA-specific GL_NV_gpu_shader5 / GL_NV_shader_atomic_fp16_vector.
+// Atomic voxelization into 3 r32ui via floatBitsToUint (positive floats compare
+// monotonically as uints). R is also a "written this frame" breadcrumb.
 
 in passThroughData {
     vec4 worldPos;
@@ -13,7 +13,7 @@ struct LightProperties
 {
     vec4 position;
     vec3 color;
-    vec3 spotDirection;   
+    vec3 spotDirection;
     float spotAngleCosine;
 };
 
@@ -21,7 +21,9 @@ uniform int numLights;
 const int MAXLIGHTS = 10;
 uniform LightProperties light[MAXLIGHTS];
 
-layout(binding = 0, r32ui) restrict uniform uimage3D ImgResult;
+layout(binding = 0, r32ui) restrict uniform uimage3D ImgResultR;
+layout(binding = 1, r32ui) restrict uniform uimage3D ImgResultG;
+layout(binding = 2, r32ui) restrict uniform uimage3D ImgResultB;
 
 uniform sampler2D albedoMap;
 
@@ -29,8 +31,6 @@ uniform vec4 gridMin;
 uniform vec4 gridMax;
 
 ivec3 worldToVoxelSpace(vec3 worldPos);
-uint packColorToUint(vec3 color);
-
 
 void main()
 {
@@ -47,7 +47,7 @@ void main()
     for(int i = 0; i < numLights; i++)
     {
          if (light[i].position.w!=0)
-            lightVec = normalize(light[i].position.xyz - fPosition.xyz); 
+            lightVec = normalize(light[i].position.xyz - fPosition.xyz);
         else
             lightVec = normalize(-light[i].position.xyz);
 
@@ -70,32 +70,20 @@ void main()
         Lo += lightContribution;
     }
 
-    vec3 color = Lo;
+    vec3 color = max(Lo, vec3(0.0));
 
-    // convert to voxel space here!
     ivec3 voxelPos = worldToVoxelSpace(fPosition.xyz);
-    uint packedColor = packColorToUint(color);
-    imageAtomicMax(ImgResult, voxelPos, packedColor);
+
+    // Breadcrumb: written voxels have R >= 1 even if lighting is zero.
+    const uint breadcrumb = 1u;
+    imageAtomicMax(ImgResultR, voxelPos, max(floatBitsToUint(color.r), breadcrumb));
+    imageAtomicMax(ImgResultG, voxelPos, floatBitsToUint(color.g));
+    imageAtomicMax(ImgResultB, voxelPos, floatBitsToUint(color.b));
 }
 
 ivec3 worldToVoxelSpace(vec3 worldPos)
 {
     vec3 uvw = (worldPos - gridMin.xyz) / (gridMax.xyz - gridMin.xyz);
-    ivec3 voxelPos = ivec3(uvw * imageSize(ImgResult));
+    ivec3 voxelPos = ivec3(uvw * imageSize(ImgResultR));
     return voxelPos;
-}
-
-// Pack color into a uint for atomic comparison.
-// Luminance is placed in the MSB so that imageAtomicMax naturally
-// selects the brightest contributing fragment.
-// Layout: [luminance:8 | blue:8 | green:8 | red:8]
-uint packColorToUint(vec3 color)
-{
-    color = clamp(color, 0.0, 1.0);
-    float luminance = dot(color, vec3(0.2126, 0.7152, 0.0722));
-    uint r = uint(color.r * 255.0);
-    uint g = uint(color.g * 255.0);
-    uint b = uint(color.b * 255.0);
-    uint l = uint(luminance * 255.0);
-    return (l << 24u) | (b << 16u) | (g << 8u) | r;
 }

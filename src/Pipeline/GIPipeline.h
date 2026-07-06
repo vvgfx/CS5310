@@ -41,7 +41,7 @@ namespace pipeline
         inline void addMesh(string objectName, util::PolygonMesh<VertexAttrib>& mesh);
         inline void drawFrame(sgraph::IScenegraph *scenegraph, glm::mat4 &viewMat);
         inline void initLights(sgraph::IScenegraph *scenegraph);
-        inline void initShaderVars();
+        inline void refreshLightLocations();
         inline void sendLightDetails(bool voxel);
         inline void clearVoxelImage();
         inline void createMipmap();
@@ -51,9 +51,10 @@ namespace pipeline
     private:
         util::ShaderProgram shaderProgram;
         util::ShaderGeoProgram voxelProgram;
-        util::ShaderProgram voxelDebugProgram;
+        util::ShaderGeoProgram voxelDebugProgram;
         util::ComputeProgram mipmapProgram;
         util::ComputeProgram resolveProgram;
+        util::ComputeProgram clearProgram;
         util::ShaderProgram depthProgram;
         util::ShaderLocationsVault shaderLocations;
         util::ShaderLocationsVault voxelShaderLocations;
@@ -71,16 +72,25 @@ namespace pipeline
         std::map<string, sgraph::TransformNode *> cachedNodes;
         vector<LightLocation> voxelLightLocations;
         vector<LightLocation> lightLocations;
+        size_t cachedLightCount = 0;
         bool initialized = false, nvidiaGPU = false;
         int frames, voxelResolution;
         double time;
-        unsigned int voxelImage, voxelAtomicImage, voxelFBO;
+        // voxelAtomicR/G/B: FP32 lighting per channel via floatBitsToUint; R is the breadcrumb.
+        unsigned int voxelImage, voxelAtomicR, voxelAtomicG, voxelAtomicB, voxelFBO;
+        // Attributeless VAO for the voxel debug draw (core profile needs one bound).
+        unsigned int debugVAO = 0;
         map<string, string> shaderVarsToVertexAttribs;
 
         int giStatus = 1;
 
 
         bool debugVoxels = false;
+
+    public:
+        float debugAlphaThreshold = 0.01f;
+        bool  isDebugVoxels() const { return debugVoxels; }
+    private:
     };
 
     void GIPipeline::init(map<string, util::PolygonMesh<VertexAttrib>>& meshes, glm::mat4 &proj, map<string, unsigned int>& texMap)
@@ -94,7 +104,8 @@ namespace pipeline
         voxelProgram.disable();
 
         voxelDebugProgram.createProgram("shaders/VXGI/voxelize/debug.vert",
-                                        "shaders/VXGI/voxelize/debug.frag");
+                                        "shaders/VXGI/voxelize/debug.frag",
+                                        "shaders/VXGI/voxelize/debug.geom");
         voxelDebugProgram.enable();
         voxelDebugShaderLocations = voxelDebugProgram.getAllShaderVariables();
         voxelDebugProgram.disable();
@@ -114,6 +125,7 @@ namespace pipeline
         mipmapProgram.disable();
 
         resolveProgram.createProgram("shaders/VXGI/voxelize/voxelResolve.comp");
+        clearProgram.createProgram("shaders/VXGI/voxelize/clear.comp");
 
         depthProgram.createProgram(string("shaders/shadow/depth.vert"),
                                    string("shaders/shadow/depth.frag"));
@@ -149,23 +161,33 @@ namespace pipeline
         voxelResolution = 256;
         glGenTextures(1, &voxelImage);
         glBindTexture(GL_TEXTURE_3D, voxelImage);
-        // glTexImage3D(GL_TEXTURE_3D,  0, GL_RGBA16F, voxelResolution, voxelResolution, voxelResolution, 0, GL_RGBA, GL_HALF_FLOAT, nullptr); // allocates empty memory
 
         int mipLevels = 1 + floor(log2(voxelResolution)); // no. of mips required to reach 1x1x1
         glTexStorage3D(GL_TEXTURE_3D, mipLevels, GL_RGBA16F, voxelResolution, voxelResolution, voxelResolution);
-        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR); // use this when generating mipmaps
-        // glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+        glTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_MAX_ANISOTROPY, 16.0f);
+        {
+            const GLfloat zero[4] = {0.0f, 0.0f, 0.0f, 0.0f};
+            for (int lvl = 0; lvl < mipLevels; ++lvl)
+                glClearTexImage(voxelImage, lvl, GL_RGBA, GL_FLOAT, zero);
+        }
 
-        // r32ui 3D texture for atomic voxelization (single mip level)
-        glGenTextures(1, &voxelAtomicImage);
-        glBindTexture(GL_TEXTURE_3D, voxelAtomicImage);
-        glTexStorage3D(GL_TEXTURE_3D, 1, GL_R32UI, voxelResolution, voxelResolution, voxelResolution);
-        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        // FP32 per channel; imageAtomicMax on floatBitsToUint. R is the breadcrumb.
+        unsigned int *atomics[3] = { &voxelAtomicR, &voxelAtomicG, &voxelAtomicB };
+        const GLuint zeroU = 0u;
+        for (int i = 0; i < 3; ++i)
+        {
+            glGenTextures(1, atomics[i]);
+            glBindTexture(GL_TEXTURE_3D, *atomics[i]);
+            glTexStorage3D(GL_TEXTURE_3D, 1, GL_R32UI, voxelResolution, voxelResolution, voxelResolution);
+            glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glClearTexImage(*atomics[i], 0, GL_RED_INTEGER, GL_UNSIGNED_INT, &zeroU);
+        }
 
         // empty framebuffer for voxelization
         glGenFramebuffers(1, &voxelFBO);
@@ -174,6 +196,8 @@ namespace pipeline
         glFramebufferParameteri(GL_FRAMEBUFFER, GL_FRAMEBUFFER_DEFAULT_HEIGHT, voxelResolution);
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+        glGenVertexArrays(1, &debugVAO);
 
         initialized = true;
     }
@@ -199,7 +223,7 @@ namespace pipeline
 
         modelview.push(glm::mat4(1.0f)); // world coordinate space.
         initLights(scenegraph);
-        initShaderVars();
+        refreshLightLocations();
         modelview.pop();
 
         // save the viewport dimensions to revert.
@@ -209,34 +233,42 @@ namespace pipeline
         // voxel pass
         {
             clearVoxelImage();
+
             glBindFramebuffer(GL_FRAMEBUFFER, voxelFBO);
             glViewport(0, 0, voxelResolution, voxelResolution);
             glDisable(GL_DEPTH_TEST);
             glDisable(GL_CULL_FACE);
             glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-            
+
             voxelProgram.enable();
             sendLightDetails(true);
-            glBindImageTexture(0, voxelAtomicImage, 0, GL_TRUE, 0, GL_READ_WRITE, GL_R32UI);
+            glBindImageTexture(0, voxelAtomicR, 0, GL_TRUE, 0, GL_READ_WRITE, GL_R32UI);
+            glBindImageTexture(1, voxelAtomicG, 0, GL_TRUE, 0, GL_READ_WRITE, GL_R32UI);
+            glBindImageTexture(2, voxelAtomicB, 0, GL_TRUE, 0, GL_READ_WRITE, GL_R32UI);
             glUniform4fv(voxelShaderLocations.getLocation("gridMin"), 1, glm::value_ptr(gridMin));
             glUniform4fv(voxelShaderLocations.getLocation("gridMax"), 1, glm::value_ptr(gridMax));
             scenegraph->getRoot()->accept(voxelRenderer);
             voxelProgram.disable();
 
-            // resolve: unpack r32ui atomic voxels into rgba16f for cone tracing
-            glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+            // merge 3 r32ui intermediates into the sampleable rgba16f
+            glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT | GL_TEXTURE_FETCH_BARRIER_BIT);
             resolveProgram.enable();
-            glBindImageTexture(0, voxelAtomicImage, 0, GL_TRUE, 0, GL_READ_ONLY, GL_R32UI);
-            glBindImageTexture(1, voxelImage, 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_RGBA16F);
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_3D, voxelAtomicR);
+            glActiveTexture(GL_TEXTURE1);
+            glBindTexture(GL_TEXTURE_3D, voxelAtomicG);
+            glActiveTexture(GL_TEXTURE2);
+            glBindTexture(GL_TEXTURE_3D, voxelAtomicB);
+            glBindImageTexture(0, voxelImage, 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_RGBA16F);
             {
                 int groups = (voxelResolution + 3) / 4;
                 glDispatchCompute(groups, groups, groups);
             }
             resolveProgram.disable();
 
-            glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT | 
+            glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT |
                    GL_TEXTURE_FETCH_BARRIER_BIT);
-            
+
             // mipmap
             glBindTexture(GL_TEXTURE_3D, voxelImage);
             createMipmap();
@@ -259,25 +291,27 @@ namespace pipeline
         // use 3d image to lookup in rendering pass for indirect lighting.
         if(debugVoxels)
         {
-            depthPass(scenegraph, viewMat);
+            // Wicked-style cube visualization: one point per voxel, GS emits a cube.
             voxelDebugProgram.enable();
-            glDepthMask(GL_FALSE);
-            glDepthFunc(GL_LEQUAL);
-            glEnable(GL_POLYGON_OFFSET_FILL);
-            glPolygonOffset(-0.1f, -0.1f);
-            glUniformMatrix4fv(voxelDebugShaderLocations.getLocation("view"), 1, GL_FALSE, glm::value_ptr(viewMat)); // view transformation
+            glDisable(GL_CULL_FACE);
+
+            glUniformMatrix4fv(voxelDebugShaderLocations.getLocation("view"), 1, GL_FALSE, glm::value_ptr(viewMat));
             glUniformMatrix4fv(voxelDebugShaderLocations.getLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_3D, voxelImage);
-            glUniform1i(voxelDebugShaderLocations.getLocation("voxelTexture"),  0);
             glUniform4fv(voxelDebugShaderLocations.getLocation("gridMin"), 1, glm::value_ptr(gridMin));
             glUniform4fv(voxelDebugShaderLocations.getLocation("gridMax"), 1, glm::value_ptr(gridMax));
+            glUniform1f(voxelDebugShaderLocations.getLocation("voxelResolution"), voxelResolution);
+            glUniform1f(voxelDebugShaderLocations.getLocation("alphaThreshold"), debugAlphaThreshold);
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_3D, voxelImage);
+            glUniform1i(voxelDebugShaderLocations.getLocation("voxelTexture"), 0);
 
-            scenegraph->getRoot()->accept(voxelDebugRenderer);
-            glDepthMask(GL_TRUE);
-            glDisable(GL_POLYGON_OFFSET_FILL);
+            glBindVertexArray(debugVAO);
+            const int voxelCount = voxelResolution * voxelResolution * voxelResolution;
+            glDrawArrays(GL_POINTS, 0, voxelCount);
+            glBindVertexArray(0);
+
+            glEnable(GL_CULL_FACE);
             voxelDebugProgram.disable();
-            
         }
         else
         {
@@ -313,7 +347,6 @@ namespace pipeline
             if(cubeMapLoaded)
                 drawCubeMap(viewMat);
             modelview.pop();
-            glFlush();
             shaderProgram.disable();
         }
     }
@@ -333,10 +366,20 @@ namespace pipeline
     }
 
 
-    void GIPipeline::clearVoxelImage() 
+    void GIPipeline::clearVoxelImage()
     {
-        static const GLuint clearVal = 0u;
-        glClearTexImage(voxelAtomicImage, 0, GL_RED_INTEGER, GL_UNSIGNED_INT, &clearVal);
+        // Breadcrumb clear: skip voxels the r32ui R says weren't written last frame.
+        clearProgram.enable();
+        glBindImageTexture(0, voxelAtomicR, 0, GL_TRUE, 0, GL_READ_WRITE, GL_R32UI);
+        glBindImageTexture(1, voxelAtomicG, 0, GL_TRUE, 0, GL_READ_WRITE, GL_R32UI);
+        glBindImageTexture(2, voxelAtomicB, 0, GL_TRUE, 0, GL_READ_WRITE, GL_R32UI);
+        glBindImageTexture(3, voxelImage,   0, GL_TRUE, 0, GL_READ_WRITE, GL_RGBA16F);
+        {
+            int groups = (voxelResolution + 3) / 4;
+            glDispatchCompute(groups, groups, groups);
+        }
+        clearProgram.disable();
+        glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
     }
 
     void GIPipeline::createMipmap()
@@ -405,41 +448,56 @@ namespace pipeline
         }
     }
 
-    void GIPipeline::initShaderVars()
+    void GIPipeline::refreshLightLocations()
     {
+        // Locations depend only on light count; skip work when it hasn't changed.
+        if (lights.size() == cachedLightCount && !lightLocations.empty())
+            return;
+
         lightLocations.clear();
         voxelLightLocations.clear();
-        for (int i = 0; i < lights.size(); i++)
+        for (size_t i = 0; i < lights.size(); i++)
         {
             stringstream name;
-            
-            LightLocation ll;
             name << "light[" << i << "]";
-            ll.position = shaderLocations.getLocation(name.str() + "" + ".position");
+
+            LightLocation ll;
+            ll.position = shaderLocations.getLocation(name.str() + ".position");
             ll.color = shaderLocations.getLocation(name.str() + ".color");
             ll.spotDirection = shaderLocations.getLocation(name.str() + ".spotDirection");
             ll.spotAngle = shaderLocations.getLocation(name.str() + ".spotAngleCosine");
             lightLocations.push_back(ll);
 
             LightLocation vll;
-            vll.position = voxelShaderLocations.getLocation(name.str() + "" + ".position");
+            vll.position = voxelShaderLocations.getLocation(name.str() + ".position");
             vll.color = voxelShaderLocations.getLocation(name.str() + ".color");
             vll.spotDirection = voxelShaderLocations.getLocation(name.str() + ".spotDirection");
             vll.spotAngle = voxelShaderLocations.getLocation(name.str() + ".spotAngleCosine");
             voxelLightLocations.push_back(vll);
         }
+        cachedLightCount = lights.size();
     }
 
     void GIPipeline::keyCallback(int key)
     {
         if(key == GLFW_KEY_1)
         {
-            giStatus *= -1; 
+            giStatus *= -1;
             cout<<"key 1 received in pipeline, giStatus : "<<giStatus<<endl;
         }
         else if(key == GLFW_KEY_3)
         {
             debugVoxels = !debugVoxels;
+        }
+        else if(key == GLFW_KEY_4)
+        {
+            debugAlphaThreshold = min(debugAlphaThreshold * 2.0f, 1.0f);
+            cout<<"debug alpha threshold: "<<debugAlphaThreshold<<endl;
+        }
+        else if(key == GLFW_KEY_5)
+        {
+            debugAlphaThreshold = max(debugAlphaThreshold * 0.5f, 1e-4f);
+            cout<<"debug alpha threshold: "<<debugAlphaThreshold<<endl;
         }
     }
 }

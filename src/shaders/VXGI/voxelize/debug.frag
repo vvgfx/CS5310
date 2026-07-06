@@ -1,31 +1,17 @@
 #version 460 core
 
-in vec4 worldPos;
-out vec4 fColor;
+// Directional face shading so cube faces read as distinct surfaces.
 
-uniform sampler3D voxelTexture;
-uniform vec4 gridMin;
-uniform vec4 gridMax;
+in VoxelFrag {
+    vec3 color;
+    vec3 normal;
+} fs_in;
+
+out vec4 fColor;
 
 void main()
 {
-    // convert world to uvw - to use in voxelTexture sampling.
-    vec3 uvw = (worldPos.xyz - gridMin.xyz) / ( gridMax.xyz - gridMin.xyz);
-
-    // should not be required, the scene is less than the max voxel size.
-    if (any(lessThan(uvw, vec3(0))) || any(greaterThan(uvw, vec3(1)))) {
-        fColor = vec4(1, 0, 0, 1); 
-        return;
-    }
-
-    // fColor = vec4(0,1,0,1);
-    // return;
-
-    vec4 voxel = texture(voxelTexture, uvw);
-
-    fColor = vec4(voxel.rgb, 1.0); // had multiplied by 5 earlier!
-
-    // if (voxel.a > 0.001) 
-    //     fColor = mix(fColor, vec4(0, 1, 0, 1), 0.3);  // Tint green
-    //     // fColor = vec4(0,1,1,1);
+    vec3 lightDir = normalize(vec3(0.5, 1.0, 0.3));
+    float shade = 0.55 + 0.45 * max(0.0, dot(fs_in.normal, lightDir));
+    fColor = vec4(fs_in.color * shade, 1.0);
 }

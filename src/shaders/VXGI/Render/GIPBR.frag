@@ -92,16 +92,20 @@ vec3 FresnelSchlick(float cosTheta, vec3 F0)
 // VXGI Methods here.
 
 const float CONE_SPREAD = 0.577; // tan(30) for 60 cone
-const int NUM_CONES = 6;
+const int NUM_CONES = 4;
 const float MAX_TRACE_DISTANCE = 50.0;
-const vec3 CONE_DIRECTIONS[6] = vec3[](
-    vec3( 0.0,  1.0,  0.0),
-    vec3( 0.866,  0.5,  0.0),
-    vec3( 0.267,  0.5,  0.823),
-    vec3(-0.700,  0.5,  0.509),
-    vec3(-0.700,  0.5, -0.509),
-    vec3( 0.267,  0.5, -0.823)
+// One straight up + three at 60° tilt, evenly spaced 120° apart.
+const vec3 CONE_DIRECTIONS[4] = vec3[](
+    vec3( 0.000,  1.0,  0.000),
+    vec3( 0.866,  0.5,  0.000),
+    vec3(-0.433,  0.5,  0.750),
+    vec3(-0.433,  0.5, -0.750)
 );
+// Non-zero floor: mirrors would otherwise march voxel-by-voxel to MAX_TRACE_DISTANCE.
+const float MIN_SPEC_TAN_HALF_ANGLE = 0.05;
+// Mirrors don't gather diffuse; near-diffuse doesn't reflect.
+const float SKIP_DIFFUSE_METALLIC = 0.9;
+const float SKIP_SPECULAR_ROUGHNESS = 0.9;
 
 vec3 worldToUVW(vec3 worldPos) 
 {
@@ -206,16 +210,16 @@ float traceOcclusion(vec3 origin, vec3 lightDir, float maxDist)
 vec3 traceReflection(vec3 origin, vec3 normal, vec3 viewDir, float roughness)
 {
     vec3 reflectDir = reflect(-viewDir, normal);
-    
-    // Wider cone for rougher surfaces
-    float tanHalfAngle = mix(0.0, CONE_SPREAD, roughness);
-    
+
+    // Wider cone for rougher surfaces.
+    float tanHalfAngle = mix(MIN_SPEC_TAN_HALF_ANGLE, CONE_SPREAD, roughness);
+
     vec4 result = traceCone(
         origin + normal * (2.0 / voxelResolution),
         reflectDir,
         tanHalfAngle
     );
-    
+
     return result.rgb;
 }
 
@@ -341,8 +345,10 @@ void main()
     vec3 indirectSpecular = vec3(0.0);
     if(useGI > 0)
     {
-        indirectDiffuse = calculateGI(fPosition.xyz, wNormal);      // Once
-        indirectSpecular = traceReflection(fPosition.xyz, wNormal, viewVec, roughness);         // Once
+        if (metallic < SKIP_DIFFUSE_METALLIC)
+            indirectDiffuse = calculateGI(fPosition.xyz, wNormal);
+        if (roughness < SKIP_SPECULAR_ROUGHNESS)
+            indirectSpecular = traceReflection(fPosition.xyz, wNormal, viewVec, roughness);
     }
     
     F = FresnelSchlick(max(dot(worldNormal, viewVec), 0.0), F0);
