@@ -45,6 +45,12 @@ uniform vec4 gridMax;
 uniform float voxelResolution;
 uniform int useGI;
 
+// Shadow mapping: one depth map per light, packed as layers of a 2D array,
+// plus the world->light-clip matrix used to render each layer.
+uniform sampler2DArray shadowMap;
+uniform mat4 lightSpaceMatrix[MAXLIGHTS];
+uniform int useShadows;
+
 out vec4 fColor;
 
 // ----------------------------------------------------------------------------
@@ -223,6 +229,36 @@ vec3 traceReflection(vec3 origin, vec3 normal, vec3 viewDir, float roughness)
     return result.rgb;
 }
 
+// Returns visibility in [0,1] for light `idx` at the given world position.
+// 1.0 = fully lit, 0.0 = fully shadowed. Uses 3x3 PCF and a slope-scaled bias.
+float shadowVisibility(int idx, vec3 worldPos, vec3 N, vec3 L)
+{
+    vec4 fragPosLightSpace = lightSpaceMatrix[idx] * vec4(worldPos, 1.0);
+    // perspective divide -> NDC -> [0,1] texture space.
+    vec3 proj = fragPosLightSpace.xyz / fragPosLightSpace.w;
+    proj = proj * 0.5 + 0.5;
+
+    // Outside the light frustum: treat as lit.
+    if (proj.z > 1.0)
+        return 1.0;
+    if (proj.x < 0.0 || proj.x > 1.0 || proj.y < 0.0 || proj.y > 1.0)
+        return 1.0;
+
+    float bias = max(0.0025 * (1.0 - dot(normalize(N), normalize(L))), 0.0004);
+
+    vec2 texelSize = 1.0 / vec2(textureSize(shadowMap, 0).xy);
+    float visible = 0.0;
+    for (int x = -1; x <= 1; ++x)
+    {
+        for (int y = -1; y <= 1; ++y)
+        {
+            float closest = texture(shadowMap, vec3(proj.xy + vec2(x, y) * texelSize, float(idx))).r;
+            visible += (proj.z - bias > closest) ? 0.0 : 1.0;
+        }
+    }
+    return visible / 9.0;
+}
+
 
 void main()
 {
@@ -319,20 +355,10 @@ void main()
 
         nDotL = max(dot(tangentNormal, tangentLightvec), 0.0f);
 
-        // vx occlusion
+        // Shadow-map visibility (0 = shadowed, 1 = lit) for this light.
         float visibility = 1.0;
-
-        // Use shadow maps/ volumes for shadows. This is giving poor results.
-        // if(useGI > 0)
-        // {
-        //     vec3 lightDir = normalize(light[i].position.xyz - fPosition.xyz);
-        //     float lightDist = distance(light[i].position.xyz, fPosition.xyz);
-        //     visibility = traceOcclusion(
-        //         fPosition.xyz + wNormal * (2.0 / voxelResolution),
-        //         lightDir,
-        //         lightDist
-        //     );
-        // }
+        if (useShadows > 0)
+            visibility = shadowVisibility(i, fPosition.xyz, worldNormal, lightVec);
 
 
         Lo += (kD * albedo / PI + specular) * radiance * nDotL * spotAttenuation * visibility;

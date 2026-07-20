@@ -46,6 +46,7 @@ namespace pipeline
         inline void clearVoxelImage();
         inline void createMipmap();
         inline void depthPass(sgraph::IScenegraph *scenegraph, glm::mat4 &viewMat);
+        inline void shadowPass(sgraph::IScenegraph *scenegraph, glm::vec4 &gridMin, glm::vec4 &gridMax);
         inline void keyCallback(int key);
 
     private:
@@ -81,6 +82,14 @@ namespace pipeline
         // Attributeless VAO for the voxel debug draw (core profile needs one bound).
         unsigned int debugVAO = 0;
         map<string, string> shaderVarsToVertexAttribs;
+
+        // Shadow mapping: one depth map per light packed as layers of a 2D array
+        // texture, rendered from each light's point of view with the depth program.
+        enum { MAX_SHADOW_LIGHTS = 10 }; // must match MAXLIGHTS in GIPBR.frag
+        unsigned int shadowFBO = 0, shadowMapArray = 0;
+        int shadowResolution = 2048;
+        vector<glm::mat4> lightSpaceMatrices;
+        int shadowStatus = 1;
 
         int giStatus = 1;
 
@@ -199,6 +208,28 @@ namespace pipeline
 
         glGenVertexArrays(1, &debugVAO);
 
+        // shadow maps: a depth-only 2D array texture, one layer per light.
+        glGenTextures(1, &shadowMapArray);
+        glBindTexture(GL_TEXTURE_2D_ARRAY, shadowMapArray);
+        glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_DEPTH_COMPONENT24,
+                     shadowResolution, shadowResolution, MAX_SHADOW_LIGHTS,
+                     0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+        {
+            // Border of 1.0 (max depth) means samples outside the map read as lit.
+            const GLfloat border[4] = {1.0f, 1.0f, 1.0f, 1.0f};
+            glTexParameterfv(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_BORDER_COLOR, border);
+        }
+
+        glGenFramebuffers(1, &shadowFBO);
+        glBindFramebuffer(GL_FRAMEBUFFER, shadowFBO);
+        glDrawBuffer(GL_NONE); // depth only, no color attachment.
+        glReadBuffer(GL_NONE);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
         initialized = true;
     }
 
@@ -315,8 +346,10 @@ namespace pipeline
         }
         else
         {
+            // render each light's depth map for shadow mapping.
+            shadowPass(scenegraph, gridMin, gridMax);
 
-            // depth pass first.
+            // camera-space depth prepass (early-z) next.
             depthPass(scenegraph, viewMat);
 
             glDepthMask(GL_FALSE);
@@ -337,6 +370,21 @@ namespace pipeline
             glUniform4fv(shaderLocations.getLocation("gridMax"), 1, glm::value_ptr(gridMax));
             glUniform1f(shaderLocations.getLocation("voxelResolution"), voxelResolution);
             glUniform1i(shaderLocations.getLocation("useGI"), giStatus);
+
+            // shadow maps: bind the depth array and upload the per-light matrices.
+            glActiveTexture(GL_TEXTURE11);
+            glBindTexture(GL_TEXTURE_2D_ARRAY, shadowMapArray);
+            glUniform1i(shaderLocations.getLocation("shadowMap"), 11);
+            glUniform1i(shaderLocations.getLocation("useShadows"), shadowStatus > 0 ? 1 : 0);
+            if (!lightSpaceMatrices.empty())
+            {
+                int loc = shaderLocations.getLocation("lightSpaceMatrix[0]");
+                if (loc < 0)
+                    loc = shaderLocations.getLocation("lightSpaceMatrix");
+                glUniformMatrix4fv(loc, (GLsizei)lightSpaceMatrices.size(), GL_FALSE,
+                                   glm::value_ptr(lightSpaceMatrices[0]));
+            }
+
             sendLightDetails(false);
 
             scenegraph->getRoot()->accept(renderer);
@@ -363,6 +411,86 @@ namespace pipeline
         modelview.pop();
         depthProgram.disable();
         glDrawBuffer(GL_BACK); // reset state.
+    }
+
+    // Renders one depth map per light (from the light's point of view) into the
+    // layers of shadowMapArray, and records the world->light-clip matrix for each.
+    // Reuses the depth program/renderer already used by the camera-space prepass.
+    void GIPipeline::shadowPass(sgraph::IScenegraph *scenegraph, glm::vec4 &gridMin, glm::vec4 &gridMax)
+    {
+        lightSpaceMatrices.clear();
+
+        int lightCount = min((int)lights.size(), (int)MAX_SHADOW_LIGHTS);
+        if (lightCount == 0)
+            return;
+
+        glm::vec3 center = 0.5f * (glm::vec3(gridMin) + glm::vec3(gridMax));
+        float radius = 0.5f * glm::length(glm::vec3(gridMax) - glm::vec3(gridMin));
+
+        // save state to restore for the following passes.
+        GLint prevViewport[4];
+        glGetIntegerv(GL_VIEWPORT, prevViewport);
+
+        glBindFramebuffer(GL_FRAMEBUFFER, shadowFBO);
+        glViewport(0, 0, shadowResolution, shadowResolution);
+        glEnable(GL_DEPTH_TEST);
+        // Front-face culling during the shadow pass reduces peter-panning/acne.
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_FRONT);
+
+        depthProgram.enable();
+
+        for (int i = 0; i < lightCount; i++)
+        {
+            // world-space position/direction, mirroring sendLightDetails().
+            glm::vec4 pos = lightTransformations[i] * lights[i].getPosition();
+            glm::vec4 spotDir = lightTransformations[i] * lights[i].getSpotDirection();
+
+            glm::mat4 lightProjection, lightView;
+
+            if (pos.w == 0.0f)
+            {
+                // directional light: pos.xyz is the direction of travel.
+                glm::vec3 dir = glm::normalize(glm::vec3(pos));
+                glm::vec3 eye = center - dir * radius;
+                glm::vec3 up = (abs(dir.y) > 0.999f) ? glm::vec3(0, 0, 1) : glm::vec3(0, 1, 0);
+                lightView = glm::lookAt(eye, center, up);
+                lightProjection = glm::ortho(-radius, radius, -radius, radius, 0.01f, 2.0f * radius);
+            }
+            else
+            {
+                // positional/spot light: perspective from the light toward its aim.
+                glm::vec3 eye = glm::vec3(pos);
+                glm::vec3 aim = glm::vec3(spotDir);
+                if (glm::length(aim) < 1e-4f)
+                    aim = center - eye; // point light with no spot direction: aim at scene.
+                aim = glm::normalize(aim);
+
+                float cutoff = lights[i].getSpotCutoff();
+                float fov = (cutoff > 1.0f && cutoff < 89.0f) ? (2.0f * cutoff) : 90.0f;
+                glm::vec3 up = (abs(aim.y) > 0.999f) ? glm::vec3(0, 0, 1) : glm::vec3(0, 1, 0);
+                lightView = glm::lookAt(eye, eye + aim, up);
+                lightProjection = glm::perspective(glm::radians(fov), 1.0f, 0.1f, 4.0f * radius);
+            }
+
+            glm::mat4 lightSpace = lightProjection * lightView;
+            lightSpaceMatrices.push_back(lightSpace);
+
+            glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, shadowMapArray, 0, i);
+            glClear(GL_DEPTH_BUFFER_BIT);
+
+            glUniformMatrix4fv(depthShaderLocations.getLocation("projection"), 1, GL_FALSE, glm::value_ptr(lightProjection));
+            modelview.push(lightView);
+            scenegraph->getRoot()->accept(depthRenderer);
+            modelview.pop();
+        }
+
+        depthProgram.disable();
+
+        // restore state for the camera-space passes.
+        glCullFace(GL_BACK);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glViewport(prevViewport[0], prevViewport[1], prevViewport[2], prevViewport[3]);
     }
 
 
@@ -484,6 +612,11 @@ namespace pipeline
         {
             giStatus *= -1;
             cout<<"key 1 received in pipeline, giStatus : "<<giStatus<<endl;
+        }
+        else if(key == GLFW_KEY_2)
+        {
+            shadowStatus *= -1;
+            cout<<"key 2 received in pipeline, shadowStatus : "<<shadowStatus<<endl;
         }
         else if(key == GLFW_KEY_3)
         {
